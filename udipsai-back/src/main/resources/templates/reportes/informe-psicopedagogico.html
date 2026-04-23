@@ -6,268 +6,342 @@
   <style>
     @page {
       size: A4;
-      margin: 22mm 16mm 20mm 16mm;
+      margin: 31mm 16mm 20mm 16mm;
+
+      @top-center {
+        content: element(page-header);
+      }
+
+      @bottom-center {
+        content: element(page-footer);
+      }
     }
 
     body {
       font-family: Arial, Helvetica, sans-serif;
-      color: #111827;
-      font-size: 12px;
-      line-height: 1.45;
+      font-size: 10pt;
+      color: #000;
+      line-height: 1.08;
+      margin: 0;
+      padding: 0;
     }
 
-    .header-table,
-    .info-table,
-    .firmas-table,
-    .prof-table {
+    .page-header {
+      position: running(page-header);
+      width: 100%;
+    }
+
+    .header-table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
+      border: 1px solid #000;
     }
 
     .header-table td {
-      border: 1px solid #111;
-      padding: 4px 6px;
       vertical-align: middle;
+      padding: 0;
+    }
+
+    .header-logo {
+      width: 24%;
+      text-align: center;
+      padding: 4px 6px !important;
+      height: 50px;
+      border-right: 1px solid #000;
     }
 
     .header-title {
+      width: 48%;
       text-align: center;
-      font-weight: bold;
-      font-size: 16px;
-      letter-spacing: 0.5px;
+      font-size: 11pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0 6px !important;
+      line-height: 1.02;
+      border-right: 1px solid #000;
     }
 
     .header-meta {
-      width: 22%;
-      font-size: 11px;
+      width: 28%;
+      padding: 4px 6px !important;
+      font-size: 8.3pt;
+      line-height: 1.05;
+    }
+
+    .logo {
+      width: 128px;
+      max-width: 128px;
+      height: auto;
+      display: inline-block;
+    }
+
+    .meta-row {
+      margin: 0 0 2px 0;
+      white-space: nowrap;
+    }
+
+    .meta-label {
+      font-weight: 700;
+      display: inline-block;
+      min-width: 52px;
+    }
+
+    .page-number::after {
+      content: counter(page) " de " counter(pages);
+    }
+
+    .page-footer {
+      position: running(page-footer);
+      width: 100%;
+      text-align: center;
+    }
+
+    .footer-link {
+      display: block;
+      width: 100%;
+      text-decoration: none;
+    }
+
+    .footer-img {
+      width: 728px;
+      height: 57px;
+      display: block;
+    }
+
+.documento {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 2mm;
+  padding: 2mm 2mm 2mm 2mm;
+  border: 1px solid #000;
+}
+
+    .section {
+      margin-top: 5px;
     }
 
     .section-title {
-      font-weight: bold;
-      margin: 14px 0 6px;
-      font-size: 13px;
+      font-size: 10.5pt;
+      font-weight: 700;
       text-transform: uppercase;
+      margin: 0 0 2px 0;
+      line-height: 1.02;
+      text-decoration: underline;
+      page-break-after: avoid;
+      break-after: avoid;
     }
 
-    .content-box {
-      text-align: justify;
+    .texto,
+    .datos,
+    .profesionales,
+    .firmas {
       white-space: pre-line;
-      margin-bottom: 8px;
+      text-align: justify;
     }
 
-    .info-table td {
-      padding: 4px 6px;
-      vertical-align: top;
+    .datos p,
+    .texto p,
+    .profesionales p,
+    .firmas p {
+      margin: 0 0 1px 0;
     }
 
     .label {
-      font-weight: bold;
-      width: 28%;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+      min-width: 250px;
     }
 
-    .prof-table th,
-    .prof-table td {
-      border: 1px solid #111;
-      padding: 6px;
-      text-align: left;
-      vertical-align: top;
+    .label-small {
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+      min-width: 250px;
     }
 
-    .prof-table th {
-      background: #f3f4f6;
-      font-weight: bold;
+    .area-subtitle {
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 2px 0 1px 0;
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    .area-block {
+      margin-bottom: 5px;
+    }
+
+    .profesionales {
+      margin-top: 1px;
+    }
+
+    .prof-group {
+      margin-bottom: 5px;
+    }
+
+    .profesionales .label {
+      min-width: 180px;
     }
 
     .coordinadora {
-      margin-top: 22px;
       text-align: center;
-      font-weight: bold;
+      font-weight: 700;
+      margin-top: 5px;
+      margin-bottom: 0;
     }
 
     .cargo {
       text-align: center;
-      margin-top: 4px;
-      font-weight: bold;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0;
     }
 
-    .firmas-table {
-      margin-top: 28px;
-    }
-
-    .firmas-table td {
-      padding-top: 18px;
-      vertical-align: top;
-    }
-
-    .linea {
-      display: inline-block;
-      min-width: 320px;
-      border-bottom: 1px solid #111;
-      height: 18px;
-      vertical-align: middle;
-    }
-
-    .small-line {
-      display: inline-block;
-      min-width: 160px;
-      border-bottom: 1px solid #111;
-      height: 18px;
-      vertical-align: middle;
-    }
-
-    .subarea {
-      font-weight: bold;
+    .firmas {
       margin-top: 8px;
-      margin-bottom: 4px;
+    }
+
+    .firmas p {
+      margin: 0 0 4px 0;
     }
   </style>
 </head>
 <body>
 
-  <table class="header-table">
-    <tr>
-      <td class="header-title">INFORME PSICOPEDAGÓGICO</td>
-      <td class="header-meta">
-        <div><strong>CÓDIGO:</strong> F – VS – 65</div>
-        <div><strong>VERSIÓN:</strong> 01</div>
-        <div><strong>FECHA:</strong> 2022-12-12</div>
-      </td>
-    </tr>
-  </table>
-
-  <div class="section-title">1. Datos de identificación</div>
-
-  <table class="info-table">
-    <tr>
-      <td class="label">Nombres y apellidos:</td>
-      <td th:text="${pacienteNombre}"></td>
-    </tr>
-    <tr>
-      <td class="label">Fecha de nacimiento:</td>
-      <td th:text="${pacienteFechaNacTexto}"></td>
-    </tr>
-    <tr>
-      <td class="label">Edad:</td>
-      <td th:text="${pacienteEdad}"></td>
-    </tr>
-    <tr>
-      <td class="label">Representante:</td>
-      <td th:text="${informe.representante}"></td>
-    </tr>
-    <tr>
-      <td class="label">Parentesco:</td>
-      <td th:text="${informe.parentesco}"></td>
-    </tr>
-    <tr>
-      <td class="label">Teléfono de contacto:</td>
-      <td th:text="${pacienteTelefono}"></td>
-    </tr>
-    <tr>
-      <td class="label">Institución educativa:</td>
-      <td th:text="${pacienteInstitucion}"></td>
-    </tr>
-    <tr>
-      <td class="label">Nivel educativo:</td>
-      <td th:text="${pacienteNivel}"></td>
-    </tr>
-    <tr>
-      <td class="label">Año que cursa:</td>
-      <td th:text="${pacienteAnio}"></td>
-    </tr>
-    <tr>
-      <td class="label">Fecha de evaluación:</td>
-      <td th:text="${fechasEvaluacionTexto}"></td>
-    </tr>
-    <tr>
-      <td class="label">Fecha de elaboración de informe:</td>
-      <td th:text="${fechaElaboracion}"></td>
-    </tr>
-    <tr>
-      <td class="label">Fecha de lectura del informe:</td>
-      <td th:text="${fechaLectura}"></td>
-    </tr>
-    <tr>
-      <td class="label">N° de ficha:</td>
-      <td th:text="${informe.numeroFicha}"></td>
-    </tr>
-  </table>
-
-  <div class="section-title">2. Motivo de consulta</div>
-  <div class="content-box" th:text="${informe.motivoConsulta}"></div>
-
-  <div class="section-title">3. Historia escolar</div>
-  <div class="content-box" th:text="${informe.historiaEscolar}"></div>
-
-  <div class="section-title">4. Psicobiografía</div>
-  <div class="content-box" th:text="${informe.psicobiografia}"></div>
-
-  <div class="section-title">5. Observación en la consulta</div>
-  <div class="content-box" th:text="${informe.observacionConsulta}"></div>
-
-  <div class="section-title">6. Reactivos aplicados y resultados</div>
-
-  <div class="subarea" th:text="${informe.areaPsicologiaEducativa} ?: 'Psicología Educativa'"></div>
-  <div class="content-box" th:text="${informe.reactivosPsicologiaEducativa}"></div>
-
-  <div class="subarea" th:text="${informe.areaPsicologiaClinica} ?: 'Psicología Clínica'"></div>
-  <div class="content-box" th:text="${informe.reactivosPsicologiaClinica}"></div>
-
-  <div class="section-title">7. Conclusiones</div>
-  <div class="content-box" th:text="${informe.conclusiones}"></div>
-
-  <div class="section-title">8. Recomendaciones para la institución educativa</div>
-  <div class="content-box" th:text="${informe.recomendacionesInstitucion}"></div>
-
-  <div class="section-title">9. Recomendaciones para representante o familiares</div>
-  <div class="content-box" th:text="${informe.recomendacionesRepresentante}"></div>
-
-  <div class="section-title">10. Profesionales responsables</div>
-
-  <table class="prof-table">
-    <thead>
+  <div class="page-header">
+    <table class="header-table">
       <tr>
-        <th>Área</th>
-        <th>Evaluado por</th>
-        <th>Profesional responsable</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td th:text="${informe.areaPsicologiaEducativa} ?: 'Psicología Educativa'"></td>
-        <td th:text="${informe.evaluadorPsicologiaEducativa}"></td>
-        <td th:text="${informe.profesionalPsicologiaEducativa}"></td>
-      </tr>
-      <tr>
-        <td th:text="${informe.areaPsicologiaClinica} ?: 'Psicología Clínica'"></td>
-        <td th:text="${informe.evaluadorPsicologiaClinica}"></td>
-        <td th:text="${informe.profesionalPsicologiaClinica}"></td>
-      </tr>
-    </tbody>
-  </table>
+        <td class="header-logo">
+          <img
+            th:if="${logoUcacueBase64 != null and !#strings.isEmpty(logoUcacueBase64)}"
+            th:src="${logoUcacueBase64}"
+            alt="Logo UCACUE"
+            class="logo"
+          />
+        </td>
 
-  <div class="coordinadora" th:text="${informe.coordinadora}"></div>
-  <div class="cargo">COORDINADORA DE LA UDIPSAI</div>
+        <td class="header-title">
+          INFORME PSICOPEDAGÓGICO
+        </td>
 
-  <table class="firmas-table">
-    <tr>
-      <td>
-        Fecha de entrega:
-        <span class="linea"></span>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        Nombre y firma del representante:
-        <span class="linea"></span>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        CI:
-        <span class="small-line"></span>
-      </td>
-    </tr>
-  </table>
+        <td class="header-meta">
+          <div class="meta-row"><span class="meta-label">CÓDIGO:</span> F – VS – 65</div>
+          <div class="meta-row"><span class="meta-label">VERSION:</span> 01</div>
+          <div class="meta-row"><span class="meta-label">FECHA:</span> 2022-12-12</div>
+          <div class="meta-row"><span class="meta-label">Página</span> <span class="page-number"></span></div>
+        </td>
+      </tr>
+    </table>
+  </div>
 
+  <div class="page-footer">
+    <a href="https://www.ucacue.edu.ec" class="footer-link">
+      <img
+        th:if="${footerUcacueBase64 != null and !#strings.isEmpty(footerUcacueBase64)}"
+        th:src="${footerUcacueBase64}"
+        alt="Pie UCACUE"
+        class="footer-img"
+      />
+    </a>
+  </div>
+
+  <div class="documento">
+    <div class="section">
+      <div class="section-title">1. DATOS DE IDENTIFICACIÓN:</div>
+      <div class="datos">
+        <p><span class="label">NOMBRES Y APELLIDOS:</span><span th:text="${pacienteNombre}"></span></p>
+        <p><span class="label">FECHA DE NACIMIENTO:</span><span th:text="${pacienteFechaNacTexto}"></span></p>
+        <p><span class="label">EDAD:</span><span th:text="${pacienteEdad}"></span></p>
+        <p><span class="label">REPRESENTANTE:</span><span th:text="${informe.representante}"></span></p>
+        <p><span class="label">PARENTESCO:</span><span th:text="${informe.parentesco}"></span></p>
+        <p><span class="label">TELÉFONO DE CONTACTO:</span><span th:text="${pacienteTelefono}"></span></p>
+        <p><span class="label">INSTITUCIÓN EDUCATIVA:</span><span th:text="${pacienteInstitucion}"></span></p>
+        <p><span class="label">NIVEL EDUCATIVO:</span><span th:text="${pacienteNivel}"></span></p>
+        <p><span class="label">AÑO QUE CURSA:</span><span th:text="${pacienteAnio}"></span></p>
+        <p><span class="label">FECHA DE EVALUACIÓN:</span><span th:text="${fechasEvaluacionTexto}"></span></p>
+        <p><span class="label">FECHA DE ELABORACIÓN DE INFORME:</span><span th:text="${fechaElaboracion}"></span></p>
+        <p><span class="label">FECHA DE LECTURA DEL INFORME:</span><span th:text="${fechaLectura}"></span></p>
+        <p><span class="label">Nº DE FICHA:</span><span th:text="${informe.numeroFicha}"></span></p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">2. MOTIVO DE CONSULTA:</div>
+      <div class="texto" th:text="${informe.motivoConsulta}"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">3. HISTORIA ESCOLAR:</div>
+      <div class="texto" th:text="${informe.historiaEscolar}"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">4. PSICOBIOGRAFÍA:</div>
+      <div class="texto" th:text="${informe.psicobiografia}"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">5. OBSERVACIÓN EN LA CONSULTA:</div>
+      <div class="texto" th:text="${informe.observacionConsulta}"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">6. REACTIVOS APLICADOS Y RESULTADOS:</div>
+      <div class="texto">
+        <div class="area-block">
+          <div class="area-subtitle" th:text="${informe.areaPsicologiaEducativa} ?: 'PSICOLOGÍA EDUCATIVA'"></div>
+          <div th:text="${informe.reactivosPsicologiaEducativa}"></div>
+        </div>
+
+        <div class="area-block">
+          <div class="area-subtitle" th:text="${informe.areaPsicologiaClinica} ?: 'PSICOLOGÍA CLÍNICA'"></div>
+          <div th:text="${informe.reactivosPsicologiaClinica}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">7. CONCLUSIONES:</div>
+      <div class="texto" th:text="${informe.conclusiones}"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">8. RECOMENDACIONES PARA LA INSTITUCIÓN EDUCATIVA:</div>
+      <div class="texto" th:text="${informe.recomendacionesInstitucion}"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">9. RECOMENDACIONES PARA REPRESENTANTE O FAMILIARES:</div>
+      <div class="texto" th:text="${informe.recomendacionesRepresentante}"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">10. PROFESIONALES RESPONSABLES:</div>
+      <div class="profesionales">
+        <div class="prof-group">
+          <p><span class="label-small">ÁREA:</span><span th:text="${informe.areaPsicologiaEducativa} ?: 'Psicología Educativa'"></span></p>
+          <p><span class="label-small">EVALUADO POR:</span><span th:text="${informe.evaluadorPsicologiaEducativa}"></span></p>
+          <p><span class="label-small">PROFESIONAL RESPONSABLE:</span><span th:text="${informe.profesionalPsicologiaEducativa}"></span></p>
+        </div>
+
+        <div class="prof-group">
+          <p><span class="label-small">ÁREA:</span><span th:text="${informe.areaPsicologiaClinica} ?: 'Psicología Clínica'"></span></p>
+          <p><span class="label-small">EVALUADO POR:</span><span th:text="${informe.evaluadorPsicologiaClinica}"></span></p>
+          <p><span class="label-small">PROFESIONAL RESPONSABLE:</span><span th:text="${informe.profesionalPsicologiaClinica}"></span></p>
+        </div>
+
+        <p class="coordinadora" th:text="${informe.coordinadora}"></p>
+        <p class="cargo">COORDINADORA DE LA UDIPSAI</p>
+      </div>
+    </div>
+
+    <div class="firmas">
+      <p>Fecha de entrega: ………………………………………………………………………</p>
+      <p>Nombre y Firma del representante: ……………………………………………………</p>
+      <p>CI:……………………</p>
+    </div>
+  </div>
 </body>
 </html>
