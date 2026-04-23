@@ -1,15 +1,10 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// ListaInformes.tsx
-// Muestra la lista de informes de un paciente con el botón "Descargar PDF".
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  getInformesPorPaciente,
-  descargarInformePdf,
-  InformeDTO,
-} from "../../../services/informes";
+import { useNavigate, useParams } from "react-router";
+import { toast } from "react-toastify";
+import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
+import PageMeta from "../../../components/common/PageMeta";
+import Button from "../../../components/ui/button/Button";
+import { informesService, InformeDTO } from "../../../services/informes";
 
 export default function ListaInformes() {
   const { pacienteId } = useParams<{ pacienteId: string }>();
@@ -21,109 +16,159 @@ export default function ListaInformes() {
 
   useEffect(() => {
     if (!pacienteId) return;
-    getInformesPorPaciente(Number(pacienteId))
-      .then((res) => setInformes(res.data))
-      .catch(console.error)
+    informesService
+      .listarPorPaciente(Number(pacienteId))
+      .then(setInformes)
+      .catch(() => toast.error("Error al cargar los informes"))
       .finally(() => setCargando(false));
   }, [pacienteId]);
 
   const handleDescargar = async (informe: InformeDTO) => {
     setDescargando(informe.id);
     try {
-      await descargarInformePdf(informe.id, informe.paciente.nombresApellidos);
+      await informesService.descargarPdf(
+        informe.id,
+        informe.paciente.nombresApellidos
+      );
+      toast.success("PDF descargado correctamente");
     } catch {
-      alert("No se pudo descargar el PDF. Intente nuevamente.");
+      toast.error("No se pudo generar el PDF");
     } finally {
       setDescargando(null);
     }
   };
 
-  if (cargando) {
-    return <p style={{ padding: "24px" }}>Cargando informes...</p>;
-  }
+  const handleEliminar = async (id: number) => {
+    if (!confirm("¿Está seguro de eliminar este informe?")) return;
+    try {
+      await informesService.eliminar(id);
+      setInformes((prev) => prev.filter((i) => i.id !== id));
+      toast.success("Informe eliminado");
+    } catch {
+      toast.error("Error al eliminar el informe");
+    }
+  };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h2 style={{ fontSize: "20px", fontWeight: 500, margin: 0 }}>
-          Informes psicopedagógicos
-        </h2>
-        {/* Botón para crear un informe nuevo */}
-        <button
-          onClick={() => navigate(`/fichas/informes/nuevo/${pacienteId}`)}
-          style={{
-            padding: "8px 18px",
-            background: "#c0392b",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "13px",
-            cursor: "pointer",
-          }}
-        >
-          + Nuevo informe
-        </button>
-      </div>
+    <>
+      <PageMeta
+        title="Informes Psicopedagógicos | Udipsai"
+        description="Listado de informes psicopedagógicos"
+      />
+      <PageBreadcrumb
+        pageTitle="Informes Psicopedagógicos"
+        items={[
+          { label: "Inicio", path: "/" },
+          { label: "Fichas", path: "/fichas" },
+          { label: "Informes Psicopedagógicos" },
+        ]}
+      />
 
-      {informes.length === 0 ? (
-        <p style={{ color: "#888" }}>Este paciente no tiene informes registrados aún.</p>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-          <thead>
-            <tr style={{ background: "#f5f5f5" }}>
-              <th style={th}>N° Ficha</th>
-              <th style={th}>Paciente</th>
-              <th style={th}>Fecha de elaboración</th>
-              <th style={th}>Fecha de lectura</th>
-              <th style={th}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {informes.map((inf) => (
-              <tr key={inf.id} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={td}>{inf.numeroFicha || "—"}</td>
-                <td style={td}>{inf.paciente.nombresApellidos}</td>
-                <td style={td}>{inf.fechaElaboracionInforme || "—"}</td>
-                <td style={td}>{inf.fechaLecturaInforme || "—"}</td>
-                <td style={td}>
-                  {/* ── BOTÓN DESCARGAR PDF ── */}
-                  <button
-                    onClick={() => handleDescargar(inf)}
-                    disabled={descargando === inf.id}
-                    style={{
-                      padding: "5px 12px",
-                      background: "#2980b9",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      cursor: descargando === inf.id ? "not-allowed" : "pointer",
-                      opacity: descargando === inf.id ? 0.6 : 1,
-                      marginRight: "6px",
-                    }}
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+        {/* Encabezado */}
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+            Informes psicopedagógicos
+          </h2>
+          <Button
+            onClick={() =>
+              navigate(`/fichas/informes/nuevo/${pacienteId}`)
+            }
+          >
+            + Nuevo informe
+          </Button>
+        </div>
+
+        {/* Tabla */}
+        {cargando ? (
+          <p className="text-center text-gray-500 py-8">Cargando...</p>
+        ) : informes.length === 0 ? (
+          <div className="py-12 text-center text-gray-400">
+            <p className="text-lg font-medium">Sin informes registrados</p>
+            <p className="mt-1 text-sm">
+              Haz clic en "Nuevo informe" para crear el primero
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    N° Ficha
+                  </th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    Paciente
+                  </th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    Fecha elaboración
+                  </th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    Fecha lectura
+                  </th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {informes.map((inf) => (
+                  <tr
+                    key={inf.id}
+                    className="border-b border-gray-100 dark:border-gray-800 last:border-0"
                   >
-                    {descargando === inf.id ? "Generando..." : "Descargar PDF"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+                    <td className="py-3 text-gray-700 dark:text-gray-300">
+                      {inf.numeroFicha || "—"}
+                    </td>
+                    <td className="py-3 text-gray-700 dark:text-gray-300">
+                      {inf.paciente.nombresApellidos}
+                    </td>
+                    <td className="py-3 text-gray-700 dark:text-gray-300">
+                      {inf.fechaElaboracionInforme || "—"}
+                    </td>
+                    <td className="py-3 text-gray-700 dark:text-gray-300">
+                      {inf.fechaLecturaInforme || "—"}
+                    </td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-2">
+                        {/* Descargar PDF */}
+                        <button
+                          onClick={() => handleDescargar(inf)}
+                          disabled={descargando === inf.id}
+                          title="Descargar PDF"
+                          className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-50 dark:bg-blue-900/20 dark:text-blue-400"
+                        >
+                          {descargando === inf.id
+                            ? "Generando..."
+                            : "Descargar PDF"}
+                        </button>
+                        {/* Editar */}
+                        <button
+                          onClick={() =>
+                            navigate(`/fichas/informes/editar/${inf.id}`)
+                          }
+                          title="Editar"
+                          className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
+                        >
+                          ✏️
+                        </button>
+                        {/* Eliminar */}
+                        <button
+                          onClick={() => handleEliminar(inf.id)}
+                          title="Eliminar"
+                          className="rounded-lg border border-red-200 p-1.5 text-red-500 hover:bg-red-50 dark:border-red-900 dark:text-red-400"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
-
-// Estilos de tabla reutilizables
-const th: React.CSSProperties = {
-  padding: "10px 12px",
-  textAlign: "left",
-  fontWeight: 500,
-  color: "#555",
-  fontSize: "12px",
-  borderBottom: "2px solid #ddd",
-};
-const td: React.CSSProperties = {
-  padding: "10px 12px",
-  verticalAlign: "middle",
-};

@@ -7,7 +7,6 @@ import Tests from "../pages/Repositorio/Tests";
 import Wais from "../pages/Repositorio/Wais";
 import SubirRecursos from "../pages/Repositorio/SubirRecursos";
 
-// Lazy-loaded components (los que ya existían)
 const Home = lazy(() => import("../pages/Dashboard/Home"));
 const ListaPacientes = lazy(() => import("../pages/Pacientes/ListaPacientes"));
 const NuevosPacientes = lazy(() => import("../pages/Pacientes/NuevosPacientes"));
@@ -35,9 +34,10 @@ const WaisEvaluacion = lazy(() => import("../pages/Fichas/Wais/Wais"));
 const NuevaHistoriaClinica = lazy(() => import("../pages/Fichas/HistoriaClinica/NuevaHistoriaClinica"));
 const EditarHistoriaClinica = lazy(() => import("../pages/Fichas/HistoriaClinica/EditarHistoriaClinica"));
 
-// ── NUEVO: importar las páginas de informes ──────────────────────────────────
+// ── Módulo de informes psicopedagógicos ──────────────────────────────────────
+const SelectorPacienteInformes = lazy(() => import("../pages/Fichas/Informes/SelectorPacienteInformes"));
 const ListaInformes = lazy(() => import("../pages/Fichas/Informes/ListaInformes"));
-const NuevoInforme  = lazy(() => import("../pages/Fichas/Informes/NuevoInforme"));
+const NuevoInforme = lazy(() => import("../pages/Fichas/Informes/NuevoInforme"));
 
 const protectedRoute = (permission: string, element: ReactNode, children?: RouteObject[]): RouteObject => ({
   element: <PermissionRoute requiredPermission={permission} />,
@@ -90,7 +90,7 @@ export const privateRouteObjects: RouteObject[] = [
   { path: "sedes", ...protectedRoute("PERM_SEDES", <ListaSedes />) },
   { path: "especialidades", ...protectedRoute("PERM_ESPECIALIDADES", <ListaEspecialidades />) },
 
-  // Fichas (todas: fichas clínicas + informes)
+  // Fichas (todas bajo el mismo path "fichas")
   {
     path: "fichas",
     element: <PermissionRoute requiredPermission="PERM_PACIENTES" />,
@@ -111,10 +111,11 @@ export const privateRouteObjects: RouteObject[] = [
       { path: "psicologia-educativa/nuevo", ...protectedRoute("PERM_PSICOLOGIA_EDUCATIVA_CREAR", <NuevaPsicologiaEducativa />) },
       { path: "psicologia-educativa/editar/:id", ...protectedRoute("PERM_PSICOLOGIA_EDUCATIVA_EDITAR", <EditarPsicologiaEducativa />) },
 
-      // ── NUEVO: rutas de informes psicopedagógicos ──────────────────────────
-      // /fichas/informes/5  → lista los informes del paciente con id=5
+      // Informes: /fichas/informes → selector de paciente
+      { path: "informes", ...protectedRoute("PERM_PACIENTES", <SelectorPacienteInformes />) },
+      // /fichas/informes/5 → lista de informes del paciente 5
       { path: "informes/:pacienteId", ...protectedRoute("PERM_PACIENTES", <ListaInformes />) },
-      // /fichas/informes/nuevo/5  → formulario para crear informe del paciente 5
+      // /fichas/informes/nuevo/5 → formulario nuevo informe
       { path: "informes/nuevo/:pacienteId", ...protectedRoute("PERM_PACIENTES", <NuevoInforme />) },
     ]
   },

@@ -1,14 +1,12 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// NuevoInforme.tsx
-// Página con el formulario para que el psicólogo ingrese los datos del informe.
-// Al guardar, llama al backend. Desde la lista se puede descargar el PDF.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { crearInforme, InformeRequest } from "../../../services/informes";
+import { useNavigate, useParams } from "react-router";
+import { toast } from "react-toastify";
+import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
+import PageMeta from "../../../components/common/PageMeta";
+import ComponentCard from "../../../components/common/ComponentCard";
+import Button from "../../../components/ui/button/Button";
+import { informesService, InformeRequest } from "../../../services/informes";
 
-// Valor inicial vacío del formulario
 const estadoInicial: Omit<InformeRequest, "pacienteId"> = {
   numeroFicha: "",
   representante: "",
@@ -35,15 +33,12 @@ const estadoInicial: Omit<InformeRequest, "pacienteId"> = {
 };
 
 export default function NuevoInforme() {
-  // Lee el pacienteId de la URL: /fichas/informes/nuevo?pacienteId=5
   const { pacienteId } = useParams<{ pacienteId: string }>();
   const navigate = useNavigate();
 
   const [form, setForm] = useState(estadoInicial);
   const [guardando, setGuardando] = useState(false);
-  const [error, setError] = useState("");
 
-  // Actualiza el estado cuando el usuario escribe en cualquier campo
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -51,20 +46,26 @@ export default function NuevoInforme() {
   };
 
   const handleGuardar = async () => {
-    if (!pacienteId) return;
+    if (!pacienteId) {
+      toast.error("No se encontró el ID del paciente");
+      return;
+    }
     setGuardando(true);
-    setError("");
     try {
-      await crearInforme({ ...form, pacienteId: Number(pacienteId) });
-      navigate(-1); // vuelve a la pantalla anterior
-    } catch {
-      setError("Error al guardar el informe. Intente nuevamente.");
+      await informesService.crear({ ...form, pacienteId: Number(pacienteId) });
+      toast.success("Informe guardado correctamente");
+      navigate(`/fichas/informes/${pacienteId}`);
+    } catch (error) {
+      const mensaje =
+        error instanceof Error ? error.message : "Error al guardar el informe";
+      toast.error(mensaje);
     } finally {
       setGuardando(false);
     }
   };
 
-  // Componente auxiliar para campos de texto corto
+  // ── Componentes auxiliares ──────────────────────────────────────────────────
+
   const Campo = ({
     label,
     name,
@@ -74,8 +75,8 @@ export default function NuevoInforme() {
     name: keyof typeof estadoInicial;
     type?: string;
   }) => (
-    <div style={{ marginBottom: "12px" }}>
-      <label style={{ display: "block", fontWeight: 500, marginBottom: "4px", fontSize: "13px" }}>
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
       </label>
       <input
@@ -83,172 +84,128 @@ export default function NuevoInforme() {
         name={name}
         value={form[name] as string}
         onChange={handleChange}
-        style={{
-          width: "100%",
-          padding: "8px 10px",
-          border: "1px solid #ddd",
-          borderRadius: "6px",
-          fontSize: "13px",
-          boxSizing: "border-box",
-        }}
+        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
       />
     </div>
   );
 
-  // Componente auxiliar para áreas de texto grandes
   const AreaTexto = ({
     label,
     name,
     filas = 4,
   }: {
-    label: string;
+    label?: string;
     name: keyof typeof estadoInicial;
     filas?: number;
   }) => (
-    <div style={{ marginBottom: "16px" }}>
-      <label style={{ display: "block", fontWeight: 500, marginBottom: "4px", fontSize: "13px" }}>
-        {label}
-      </label>
+    <div>
+      {label && (
+        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          {label}
+        </label>
+      )}
       <textarea
         name={name}
         value={form[name] as string}
         onChange={handleChange}
         rows={filas}
-        style={{
-          width: "100%",
-          padding: "8px 10px",
-          border: "1px solid #ddd",
-          borderRadius: "6px",
-          fontSize: "13px",
-          boxSizing: "border-box",
-          resize: "vertical",
-          fontFamily: "inherit",
-        }}
+        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+        style={{ resize: "vertical", fontFamily: "inherit" }}
       />
     </div>
   );
 
+  // ── Render ──────────────────────────────────────────────────────────────────
+
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "24px" }}>
+    <>
+      <PageMeta
+        title="Nuevo Informe Psicopedagógico | Udipsai"
+        description="Crear un nuevo informe psicopedagógico"
+      />
+      <PageBreadcrumb
+        pageTitle="Nuevo Informe Psicopedagógico"
+        items={[
+          { label: "Inicio", path: "/" },
+          { label: "Fichas", path: "/fichas" },
+          { label: "Informes", path: `/fichas/informes/${pacienteId}` },
+          { label: "Nuevo informe" },
+        ]}
+      />
 
-      <h2 style={{ fontSize: "20px", fontWeight: 500, marginBottom: "24px" }}>
-        Nuevo informe psicopedagógico
-      </h2>
+      <div className="space-y-5">
 
-      {error && (
-        <div style={{ background: "#fce8e8", color: "#c0392b", padding: "10px", borderRadius: "6px", marginBottom: "16px" }}>
-          {error}
+        <ComponentCard title="1. Datos de identificación">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Campo label="N° de ficha" name="numeroFicha" />
+            <Campo label="Representante" name="representante" />
+            <Campo label="Parentesco" name="parentesco" />
+            <Campo label="Fechas de evaluación" name="fechasEvaluacion" />
+            <Campo label="Fecha de elaboración del informe" name="fechaElaboracionInforme" type="date" />
+            <Campo label="Fecha de lectura del informe" name="fechaLecturaInforme" type="date" />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard title="2. Motivo de consulta">
+          <AreaTexto name="motivoConsulta" filas={4} />
+        </ComponentCard>
+
+        <ComponentCard title="3. Historia escolar">
+          <AreaTexto name="historiaEscolar" filas={4} />
+        </ComponentCard>
+
+        <ComponentCard title="4. Psicobiografía">
+          <AreaTexto name="psicobiografia" filas={5} />
+        </ComponentCard>
+
+        <ComponentCard title="5. Observación en la consulta">
+          <AreaTexto name="observacionConsulta" filas={5} />
+        </ComponentCard>
+
+        <ComponentCard title="6. Reactivos aplicados y resultados">
+          <div className="space-y-4">
+            <AreaTexto label="Psicología Educativa" name="reactivosPsicologiaEducativa" filas={5} />
+            <AreaTexto label="Psicología Clínica" name="reactivosPsicologiaClinica" filas={5} />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard title="7. Conclusiones">
+          <AreaTexto name="conclusiones" filas={4} />
+        </ComponentCard>
+
+        <ComponentCard title="8. Recomendaciones para la institución educativa">
+          <AreaTexto name="recomendacionesInstitucion" filas={6} />
+        </ComponentCard>
+
+        <ComponentCard title="9. Recomendaciones para el representante o familiares">
+          <AreaTexto name="recomendacionesRepresentante" filas={5} />
+        </ComponentCard>
+
+        <ComponentCard title="10. Profesionales responsables">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Campo label="Evaluador (Psicología Educativa)" name="evaluadorPsicologiaEducativa" />
+            <Campo label="Profesional responsable (Psicología Educativa)" name="profesionalPsicologiaEducativa" />
+            <Campo label="Evaluador (Psicología Clínica)" name="evaluadorPsicologiaClinica" />
+            <Campo label="Profesional responsable (Psicología Clínica)" name="profesionalPsicologiaClinica" />
+            <div className="sm:col-span-2">
+              <Campo label="Coordinadora de la UDIPSAI" name="coordinadora" />
+            </div>
+          </div>
+        </ComponentCard>
+
+        <div className="flex items-center gap-3">
+          <Button onClick={handleGuardar} disabled={guardando}>
+            {guardando ? "Guardando..." : "Guardar informe"}
+          </Button>
+          <button
+            onClick={() => navigate(`/fichas/informes/${pacienteId}`)}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400"
+          >
+            Cancelar
+          </button>
         </div>
-      )}
 
-      {/* ── SECCIÓN 1: Datos de identificación ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px" }}>
-        1. Datos de identificación
-      </h3>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-        <Campo label="N° de ficha" name="numeroFicha" />
-        <Campo label="Representante" name="representante" />
-        <Campo label="Parentesco" name="parentesco" />
-        <Campo label="Teléfono de contacto (ya está en el paciente)" name="representante" />
-        <Campo label="Fechas de evaluación" name="fechasEvaluacion" />
-        <Campo label="Fecha de elaboración del informe" name="fechaElaboracionInforme" type="date" />
-        <Campo label="Fecha de lectura del informe" name="fechaLecturaInforme" type="date" />
       </div>
-
-      {/* ── SECCIÓN 2 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "20px" }}>
-        2. Motivo de consulta
-      </h3>
-      <AreaTexto label="" name="motivoConsulta" filas={4} />
-
-      {/* ── SECCIÓN 3 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        3. Historia escolar
-      </h3>
-      <AreaTexto label="" name="historiaEscolar" filas={4} />
-
-      {/* ── SECCIÓN 4 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        4. Psicobiografía
-      </h3>
-      <AreaTexto label="" name="psicobiografia" filas={5} />
-
-      {/* ── SECCIÓN 5 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        5. Observación en la consulta
-      </h3>
-      <AreaTexto label="" name="observacionConsulta" filas={5} />
-
-      {/* ── SECCIÓN 6 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        6. Reactivos aplicados y resultados
-      </h3>
-      <AreaTexto label="Psicología Educativa" name="reactivosPsicologiaEducativa" filas={5} />
-      <AreaTexto label="Psicología Clínica" name="reactivosPsicologiaClinica" filas={5} />
-
-      {/* ── SECCIÓN 7 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        7. Conclusiones
-      </h3>
-      <AreaTexto label="" name="conclusiones" filas={4} />
-
-      {/* ── SECCIÓN 8 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        8. Recomendaciones para la institución educativa
-      </h3>
-      <AreaTexto label="" name="recomendacionesInstitucion" filas={6} />
-
-      {/* ── SECCIÓN 9 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        9. Recomendaciones para el representante
-      </h3>
-      <AreaTexto label="" name="recomendacionesRepresentante" filas={5} />
-
-      {/* ── SECCIÓN 10 ── */}
-      <h3 style={{ fontSize: "14px", color: "#c0392b", borderBottom: "2px solid #c0392b", paddingBottom: "4px", marginBottom: "16px", marginTop: "4px" }}>
-        10. Profesionales responsables
-      </h3>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-        <Campo label="Evaluador (Psicología Educativa)" name="evaluadorPsicologiaEducativa" />
-        <Campo label="Profesional responsable (Psicología Educativa)" name="profesionalPsicologiaEducativa" />
-        <Campo label="Evaluador (Psicología Clínica)" name="evaluadorPsicologiaClinica" />
-        <Campo label="Profesional responsable (Psicología Clínica)" name="profesionalPsicologiaClinica" />
-      </div>
-      <Campo label="Coordinadora de la UDIPSAI" name="coordinadora" />
-
-      {/* ── BOTONES ── */}
-      <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-        <button
-          onClick={handleGuardar}
-          disabled={guardando}
-          style={{
-            padding: "10px 24px",
-            background: "#c0392b",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "14px",
-            cursor: guardando ? "not-allowed" : "pointer",
-            opacity: guardando ? 0.7 : 1,
-          }}
-        >
-          {guardando ? "Guardando..." : "Guardar informe"}
-        </button>
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            padding: "10px 24px",
-            background: "transparent",
-            color: "#555",
-            border: "1px solid #ddd",
-            borderRadius: "6px",
-            fontSize: "14px",
-            cursor: "pointer",
-          }}
-        >
-          Cancelar
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
