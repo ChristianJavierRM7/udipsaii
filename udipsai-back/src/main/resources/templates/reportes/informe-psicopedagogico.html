@@ -132,20 +132,20 @@
       break-after: avoid;
     }
 
-    .texto,
-    .datos,
-    .profesionales,
-    .firmas {
-      white-space: pre-line;
-      text-align: justify;
-    }
+.texto {
+  white-space: pre-wrap;
+  text-align: justify;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
 
-    .datos p,
-    .texto p,
-    .profesionales p,
-    .firmas p {
-      margin: 0 0 1px 0;
-    }
+.datos,
+.profesionales,
+.firmas {
+  white-space: pre-line;
+  text-align: justify;
+}
 
     .label {
       font-weight: 700;
