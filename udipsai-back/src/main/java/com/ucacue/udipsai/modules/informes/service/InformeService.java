@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InformeService {
 
+    private static final String COORDINADORA_DEFAULT = "Lcda. Gabriela Jara S., Mgtr.";
+
     @Autowired
     private InformeRepository repository;
 
@@ -33,58 +36,59 @@ public class InformeService {
     @Autowired
     private PdfService pdfService;
 
-    // ── Listar todos ─────────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<InformeDTO> listarInformes() {
         return repository.findByActivo(true)
-                .stream().map(this::toDTO).collect(Collectors.toList());
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
-    // ── Listar por paciente ───────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<InformeDTO> listarInformesPorPaciente(Integer pacienteId) {
         return repository.findByPacienteIdAndActivo(pacienteId, true)
-                .stream().map(this::toDTO).collect(Collectors.toList());
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
-    // ── Obtener uno ───────────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public InformeDTO obtenerPorId(Integer id) {
-        return toDTO(repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Informe no encontrado: " + id)));
+        return toDTO(
+                repository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Informe no encontrado: " + id))
+        );
     }
 
-    // ── Crear ─────────────────────────────────────────────────────────────────
     @Transactional
     public InformeDTO crearInforme(InformeRequest r) {
         Paciente paciente = pacienteRepository.findById(r.getPacienteId())
                 .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+
         InformePsicopedagogico e = new InformePsicopedagogico();
         e.setPaciente(paciente);
         mapToEntity(r, e);
+
         return toDTO(repository.save(e));
     }
 
-    // ── Actualizar ────────────────────────────────────────────────────────────
     @Transactional
     public InformeDTO actualizarInforme(Integer id, InformeRequest r) {
         InformePsicopedagogico e = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Informe no encontrado: " + id));
+
         mapToEntity(r, e);
         return toDTO(repository.save(e));
     }
 
-    // ── Eliminar (lógico) ─────────────────────────────────────────────────────
     @Transactional
     public void eliminarInforme(Integer id) {
-        repository.findById(id).ifPresent(i -> { i.setActivo(false); repository.save(i); });
+        repository.findById(id).ifPresent(i -> {
+            i.setActivo(false);
+            repository.save(i);
+        });
     }
 
-    // ── Generar PDF ───────────────────────────────────────────────────────────
-    // IMPORTANTE: usamos @Transactional para que la sesión JPA esté abierta
-    // mientras Thymeleaf accede a las relaciones LAZY (institucionEducativa).
-    // Además pasamos los datos como strings simples para evitar cualquier
-    // acceso lazy dentro del template.
     @Transactional(readOnly = true)
     public byte[] generarPdf(Integer id) throws Exception {
         log.info("Generando PDF informe ID={}", id);
@@ -94,42 +98,43 @@ public class InformeService {
 
         Paciente p = informe.getPaciente();
 
-        // Resolvemos todos los datos como strings DENTRO de la transacción
-        // así ningún acceso lazy puede fallar fuera de sesión
         String nombreInstitucion = "";
         try {
             nombreInstitucion = (p.getInstitucionEducativa() != null)
-                    ? p.getInstitucionEducativa().getNombre() : "";
+                    ? p.getInstitucionEducativa().getNombre()
+                    : "";
         } catch (Exception ex) {
             log.warn("No se pudo cargar institución educativa: {}", ex.getMessage());
         }
 
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern(
-                "dd 'de' MMMM 'de' yyyy", new Locale("es", "EC"));
+                "dd 'de' MMMM 'de' yyyy",
+                new Locale("es", "EC")
+        );
 
         Map<String, Object> datos = new HashMap<>();
 
-        // Datos del paciente como strings simples (sin objetos JPA en el template)
-        datos.put("pacienteNombre",       p.getNombresApellidos() != null ? p.getNombresApellidos() : "");
-        datos.put("pacienteFechaNac",     p.getFechaNacimiento() != null ? p.getFechaNacimiento().toString() : "");
-        datos.put("pacienteEdad",         p.getFechaNacimiento() != null ? p.getEdad() + " años" : "N/A");
-        datos.put("pacienteTelefono",     p.getNumeroCelular() != null ? p.getNumeroCelular()
-                                        : (p.getNumeroTelefono() != null ? p.getNumeroTelefono() : ""));
-        datos.put("pacienteInstitucion",  nombreInstitucion);
-        datos.put("pacienteNivel",        p.getNivelEducativo() != null ? p.getNivelEducativo() : "");
-        datos.put("pacienteAnio",         p.getAnioEducacion() != null ? p.getAnioEducacion() : "");
+        datos.put("pacienteNombre", safe(p.getNombresApellidos()));
+        datos.put("pacienteFechaNacTexto", p.getFechaNacimiento() != null ? p.getFechaNacimiento().format(fmt) : "");
+        datos.put("pacienteEdad", p.getFechaNacimiento() != null ? p.getEdad() + " años" : "");
+        datos.put("pacienteTelefono", safe(
+                p.getNumeroCelular() != null ? p.getNumeroCelular() : p.getNumeroTelefono()
+        ));
+        datos.put("pacienteInstitucion", safe(nombreInstitucion));
+        datos.put("pacienteNivel", safe(p.getNivelEducativo()));
+        datos.put("pacienteAnio", safe(p.getAnioEducacion()));
 
-        // Datos del informe
         datos.put("informe", informe);
+        datos.put("fechasEvaluacionTexto", formatearFechaFlexible(informe.getFechasEvaluacion(), fmt));
         datos.put("fechaElaboracion", informe.getFechaElaboracionInforme() != null
-                ? informe.getFechaElaboracionInforme().format(fmt) : "");
+                ? informe.getFechaElaboracionInforme().format(fmt)
+                : "");
         datos.put("fechaLectura", informe.getFechaLecturaInforme() != null
-                ? informe.getFechaLecturaInforme().format(fmt) : "");
+                ? informe.getFechaLecturaInforme().format(fmt)
+                : "");
 
         return pdfService.generatePdfFromHtml("reportes/informe-psicopedagogico", datos);
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void mapToEntity(InformeRequest r, InformePsicopedagogico e) {
         e.setNumeroFicha(r.getNumeroFicha());
@@ -153,18 +158,25 @@ public class InformeService {
         e.setAreaPsicologiaClinica(r.getAreaPsicologiaClinica());
         e.setEvaluadorPsicologiaClinica(r.getEvaluadorPsicologiaClinica());
         e.setProfesionalPsicologiaClinica(r.getProfesionalPsicologiaClinica());
-        e.setCoordinadora(r.getCoordinadora());
+        e.setCoordinadora(
+                r.getCoordinadora() == null || r.getCoordinadora().isBlank()
+                        ? COORDINADORA_DEFAULT
+                        : r.getCoordinadora().trim()
+        );
     }
 
     private InformeDTO toDTO(InformePsicopedagogico i) {
         InformeDTO dto = new InformeDTO();
         dto.setId(i.getId());
+
         if (i.getPaciente() != null) {
             dto.setPaciente(new PacienteFichaDTO(
                     i.getPaciente().getId(),
                     i.getPaciente().getNombresApellidos(),
-                    i.getPaciente().getCedula()));
+                    i.getPaciente().getCedula()
+            ));
         }
+
         dto.setNumeroFicha(i.getNumeroFicha());
         dto.setRepresentante(i.getRepresentante());
         dto.setParentesco(i.getParentesco());
@@ -186,9 +198,31 @@ public class InformeService {
         dto.setAreaPsicologiaClinica(i.getAreaPsicologiaClinica());
         dto.setEvaluadorPsicologiaClinica(i.getEvaluadorPsicologiaClinica());
         dto.setProfesionalPsicologiaClinica(i.getProfesionalPsicologiaClinica());
-        dto.setCoordinadora(i.getCoordinadora());
+        dto.setCoordinadora(
+                i.getCoordinadora() == null || i.getCoordinadora().isBlank()
+                        ? COORDINADORA_DEFAULT
+                        : i.getCoordinadora()
+        );
         dto.setActivo(i.getActivo());
         dto.setFechaCreacion(i.getFechaCreacion());
+
         return dto;
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String formatearFechaFlexible(String value, DateTimeFormatter fmt) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+
+        try {
+            LocalDate fecha = LocalDate.parse(value);
+            return fecha.format(fmt);
+        } catch (Exception ex) {
+            return value;
+        }
     }
 }

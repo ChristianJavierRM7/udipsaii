@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
@@ -6,26 +6,30 @@ import PageMeta from "../../../components/common/PageMeta";
 import ComponentCard from "../../../components/common/ComponentCard";
 import Button from "../../../components/ui/button/Button";
 import { informesService, InformeRequest } from "../../../services/informes";
+import {
+  especialistasService,
+  EspecialistaDTO,
+} from "../../../services/especialistas";
 
-// =============================================================================
-// COMPONENTES AUXILIARES — definidos FUERA de NuevoInforme
-//
-// Regla React fundamental: nunca definas componentes dentro de otro componente.
-// Si lo haces, React crea una nueva "clase" de componente en cada render,
-// desmonta el anterior y monta uno nuevo → el input pierde el foco con cada tecla.
-// =============================================================================
-
-type FormState = Omit<InformeRequest, "pacienteId">;
+type FormState = Omit<InformeRequest, "pacienteId"> & {
+  parentescoOtro: string;
+};
 
 interface CampoProps {
   label: string;
   name: keyof FormState;
   type?: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
 }
 
-function Campo({ label, name, type = "text", value, onChange }: CampoProps) {
+function Campo({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+}: CampoProps) {
   return (
     <div>
       <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -33,12 +37,47 @@ function Campo({ label, name, type = "text", value, onChange }: CampoProps) {
       </label>
       <input
         type={type}
-        name={name}
+        name={String(name)}
         value={value}
         onChange={onChange}
-        autoComplete="off"
-        className="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 dark:border-gray-700 dark:text-white/90"
       />
+    </div>
+  );
+}
+
+interface SelectProps {
+  label: string;
+  name: keyof FormState;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  options: { value: string; label: string }[];
+}
+
+function SelectCampo({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+}: SelectProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </label>
+      <select
+        name={String(name)}
+        value={value}
+        onChange={onChange}
+        className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 dark:border-gray-700 dark:text-white/90"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value} className="text-black">
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -48,10 +87,16 @@ interface AreaTextoProps {
   name: keyof FormState;
   filas?: number;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-function AreaTexto({ label, name, filas = 4, value, onChange }: AreaTextoProps) {
+function AreaTexto({
+  label,
+  name,
+  filas = 4,
+  value,
+  onChange,
+}: AreaTextoProps) {
   return (
     <div>
       {label && (
@@ -60,25 +105,135 @@ function AreaTexto({ label, name, filas = 4, value, onChange }: AreaTextoProps) 
         </label>
       )}
       <textarea
-        name={name}
+        name={String(name)}
+        rows={filas}
         value={value}
         onChange={onChange}
-        rows={filas}
-        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-        style={{ resize: "vertical" }}
+        className="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-3 text-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 dark:border-gray-700 dark:text-white/90"
       />
     </div>
   );
 }
 
-// =============================================================================
-// ESTADO INICIAL
-// =============================================================================
+interface BuscadorEspecialistaProps {
+  label: string;
+  value: string;
+  options: EspecialistaDTO[];
+  onSelect: (nombre: string) => void;
+}
+
+function normalizar(texto?: string) {
+  return (texto ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function BuscadorEspecialista({
+  label,
+  value,
+  options,
+  onSelect,
+}: BuscadorEspecialistaProps) {
+  const [abierto, setAbierto] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!wrapperRef.current?.contains(event.target as Node)) {
+        setAbierto(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filtrados = useMemo(() => {
+    const criterio = normalizar(value);
+    return options
+      .filter((esp) => {
+        if (!criterio) return true;
+        return (
+          normalizar(esp.nombresApellidos).includes(criterio) ||
+          normalizar(esp.cedula).includes(criterio)
+        );
+      })
+      .slice(0, 8);
+  }, [options, value]);
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </label>
+
+      <input
+        type="text"
+        value={value}
+        onFocus={() => setAbierto(true)}
+        onChange={(e) => {
+          onSelect(e.target.value);
+          setAbierto(true);
+        }}
+        placeholder="Buscar por nombre o cédula"
+        className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 dark:border-gray-700 dark:text-white/90"
+      />
+
+      {abierto && (
+        <div className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+          {filtrados.length > 0 ? (
+            filtrados.map((esp) => (
+              <button
+                type="button"
+                key={esp.id}
+                onClick={() => {
+                  onSelect(esp.nombresApellidos);
+                  setAbierto(false);
+                }}
+                className="block w-full border-b border-gray-100 px-4 py-2 text-left text-sm hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800"
+              >
+                <span className="block font-medium text-gray-800 dark:text-white/90">
+                  {esp.nombresApellidos}
+                </span>
+                <span className="block text-xs text-gray-500 dark:text-gray-400">
+                  {esp.cedula} — {esp.especialidad?.area ?? "Sin especialidad"}
+                </span>
+              </button>
+            ))
+          ) : (
+            <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+              No se encontraron especialistas
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const COORDINADORA_DEFAULT = "Lcda. Gabriela Jara S., Mgtr.";
+
+const PARENTESCOS = [
+  { value: "", label: "Seleccione" },
+  { value: "Padre", label: "Padre" },
+  { value: "Madre", label: "Madre" },
+  { value: "Abuelo", label: "Abuelo" },
+  { value: "Abuela", label: "Abuela" },
+  { value: "Tío", label: "Tío" },
+  { value: "Tía", label: "Tía" },
+  { value: "Hermano", label: "Hermano" },
+  { value: "Hermana", label: "Hermana" },
+  { value: "Tutor legal", label: "Tutor legal" },
+  { value: "Otro", label: "Otro (especificar)" },
+];
 
 const ESTADO_INICIAL: FormState = {
   numeroFicha: "",
   representante: "",
   parentesco: "",
+  parentescoOtro: "",
   fechasEvaluacion: "",
   fechaElaboracionInforme: "",
   fechaLecturaInforme: "",
@@ -97,36 +252,82 @@ const ESTADO_INICIAL: FormState = {
   areaPsicologiaClinica: "Psicología Clínica",
   evaluadorPsicologiaClinica: "",
   profesionalPsicologiaClinica: "",
-  coordinadora: "",
+  coordinadora: COORDINADORA_DEFAULT,
 };
-
-// =============================================================================
-// COMPONENTE PRINCIPAL
-// =============================================================================
 
 export default function NuevoInforme() {
   const { pacienteId } = useParams<{ pacienteId: string }>();
   const navigate = useNavigate();
+
   const [form, setForm] = useState<FormState>(ESTADO_INICIAL);
   const [guardando, setGuardando] = useState(false);
+  const [especialistas, setEspecialistas] = useState<EspecialistaDTO[]>([]);
 
-  // Un solo handler para inputs
-  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    especialistasService
+      .listarParaInformes()
+      .then(setEspecialistas)
+      .catch(() =>
+        toast.error("No se pudieron cargar los especialistas para el informe")
+      );
+  }, []);
+
+  const especialistasEducativa = useMemo(
+    () =>
+      especialistas.filter(
+        (esp) => normalizar(esp.especialidad?.area) === "psicologia educativa"
+      ),
+    [especialistas]
+  );
+
+  const especialistasClinica = useMemo(
+    () =>
+      especialistas.filter(
+        (esp) => normalizar(esp.especialidad?.area) === "psicologia clinica"
+      ),
+    [especialistas]
+  );
+
+  const onInput = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "parentesco" && value !== "Otro" ? { parentescoOtro: "" } : {}),
+    }));
   };
 
-  // Un solo handler para textareas
-  const onTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onTextarea = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const guardar = async () => {
-    if (!pacienteId) { toast.error("Falta el ID del paciente"); return; }
+    if (!pacienteId) {
+      toast.error("Falta el ID del paciente");
+      return;
+    }
+
+    const parentescoFinal =
+      form.parentesco === "Otro"
+        ? form.parentescoOtro.trim()
+        : form.parentesco.trim();
+
+    if (!parentescoFinal) {
+      toast.error("Debe seleccionar o especificar el parentesco");
+      return;
+    }
+
     setGuardando(true);
+
     try {
-      await informesService.crear({ ...form, pacienteId: Number(pacienteId) });
+      const payload: InformeRequest = {
+        ...form,
+        pacienteId: Number(pacienteId),
+        parentesco: parentescoFinal,
+      };
+
+      await informesService.crear(payload);
       toast.success("Informe guardado correctamente");
       navigate(`/fichas/informes/${pacienteId}`);
     } catch (error) {
@@ -138,7 +339,11 @@ export default function NuevoInforme() {
 
   return (
     <>
-      <PageMeta title="Nuevo Informe Psicopedagógico | Udipsai" description="Crear informe psicopedagógico" />
+      <PageMeta
+        title="Nuevo Informe Psicopedagógico | Udipsai"
+        description="Crear informe psicopedagógico"
+      />
+
       <PageBreadcrumb
         pageTitle="Nuevo Informe Psicopedagógico"
         items={[
@@ -150,73 +355,203 @@ export default function NuevoInforme() {
       />
 
       <div className="space-y-5">
-
-        {/* 1. Datos de identificación */}
         <ComponentCard title="1. Datos de identificación">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Campo label="N° de ficha"               name="numeroFicha"               value={form.numeroFicha}               onChange={onInput} />
-            <Campo label="Representante"              name="representante"              value={form.representante}              onChange={onInput} />
-            <Campo label="Parentesco"                 name="parentesco"                 value={form.parentesco}                 onChange={onInput} />
-            <Campo label="Fechas de evaluación"       name="fechasEvaluacion"           value={form.fechasEvaluacion}           onChange={onInput} />
-            <Campo label="Fecha elaboración informe"  name="fechaElaboracionInforme"    type="date" value={form.fechaElaboracionInforme}  onChange={onInput} />
-            <Campo label="Fecha lectura informe"      name="fechaLecturaInforme"        type="date" value={form.fechaLecturaInforme}      onChange={onInput} />
+            <Campo
+              label="N° de ficha"
+              name="numeroFicha"
+              value={form.numeroFicha}
+              onChange={onInput}
+            />
+
+            <Campo
+              label="Representante"
+              name="representante"
+              value={form.representante}
+              onChange={onInput}
+            />
+
+            <SelectCampo
+              label="Parentesco"
+              name="parentesco"
+              value={form.parentesco}
+              onChange={onInput}
+              options={PARENTESCOS}
+            />
+
+            {form.parentesco === "Otro" && (
+              <Campo
+                label="Especifique parentesco"
+                name="parentescoOtro"
+                value={form.parentescoOtro}
+                onChange={onInput}
+              />
+            )}
+
+            <Campo
+              label="Fecha de evaluación"
+              name="fechasEvaluacion"
+              type="date"
+              value={form.fechasEvaluacion}
+              onChange={onInput}
+            />
+
+            <Campo
+              label="Fecha elaboración informe"
+              name="fechaElaboracionInforme"
+              type="date"
+              value={form.fechaElaboracionInforme}
+              onChange={onInput}
+            />
+
+            <Campo
+              label="Fecha lectura informe"
+              name="fechaLecturaInforme"
+              type="date"
+              value={form.fechaLecturaInforme}
+              onChange={onInput}
+            />
           </div>
         </ComponentCard>
 
-        {/* 2 - 9: secciones narrativas */}
         <ComponentCard title="2. Motivo de consulta">
-          <AreaTexto name="motivoConsulta" value={form.motivoConsulta} onChange={onTextarea} filas={4} />
+          <AreaTexto
+            name="motivoConsulta"
+            value={form.motivoConsulta}
+            onChange={onTextarea}
+            filas={4}
+          />
         </ComponentCard>
 
         <ComponentCard title="3. Historia escolar">
-          <AreaTexto name="historiaEscolar" value={form.historiaEscolar} onChange={onTextarea} filas={4} />
+          <AreaTexto
+            name="historiaEscolar"
+            value={form.historiaEscolar}
+            onChange={onTextarea}
+            filas={4}
+          />
         </ComponentCard>
 
         <ComponentCard title="4. Psicobiografía">
-          <AreaTexto name="psicobiografia" value={form.psicobiografia} onChange={onTextarea} filas={5} />
+          <AreaTexto
+            name="psicobiografia"
+            value={form.psicobiografia}
+            onChange={onTextarea}
+            filas={5}
+          />
         </ComponentCard>
 
         <ComponentCard title="5. Observación en la consulta">
-          <AreaTexto name="observacionConsulta" value={form.observacionConsulta} onChange={onTextarea} filas={5} />
+          <AreaTexto
+            name="observacionConsulta"
+            value={form.observacionConsulta}
+            onChange={onTextarea}
+            filas={5}
+          />
         </ComponentCard>
 
         <ComponentCard title="6. Reactivos aplicados y resultados">
           <div className="space-y-4">
-            <AreaTexto label="Psicología Educativa" name="reactivosPsicologiaEducativa" value={form.reactivosPsicologiaEducativa} onChange={onTextarea} filas={5} />
-            <AreaTexto label="Psicología Clínica"   name="reactivosPsicologiaClinica"   value={form.reactivosPsicologiaClinica}   onChange={onTextarea} filas={5} />
+            <AreaTexto
+              label="Psicología Educativa"
+              name="reactivosPsicologiaEducativa"
+              value={form.reactivosPsicologiaEducativa}
+              onChange={onTextarea}
+              filas={5}
+            />
+            <AreaTexto
+              label="Psicología Clínica"
+              name="reactivosPsicologiaClinica"
+              value={form.reactivosPsicologiaClinica}
+              onChange={onTextarea}
+              filas={5}
+            />
           </div>
         </ComponentCard>
 
         <ComponentCard title="7. Conclusiones">
-          <AreaTexto name="conclusiones" value={form.conclusiones} onChange={onTextarea} filas={4} />
+          <AreaTexto
+            name="conclusiones"
+            value={form.conclusiones}
+            onChange={onTextarea}
+            filas={4}
+          />
         </ComponentCard>
 
         <ComponentCard title="8. Recomendaciones para la institución educativa">
-          <AreaTexto name="recomendacionesInstitucion" value={form.recomendacionesInstitucion} onChange={onTextarea} filas={6} />
+          <AreaTexto
+            name="recomendacionesInstitucion"
+            value={form.recomendacionesInstitucion}
+            onChange={onTextarea}
+            filas={6}
+          />
         </ComponentCard>
 
         <ComponentCard title="9. Recomendaciones para el representante o familiares">
-          <AreaTexto name="recomendacionesRepresentante" value={form.recomendacionesRepresentante} onChange={onTextarea} filas={5} />
+          <AreaTexto
+            name="recomendacionesRepresentante"
+            value={form.recomendacionesRepresentante}
+            onChange={onTextarea}
+            filas={5}
+          />
         </ComponentCard>
 
-        {/* 10. Profesionales */}
         <ComponentCard title="10. Profesionales responsables">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Campo label="Evaluador — Psicología Educativa"             name="evaluadorPsicologiaEducativa"    value={form.evaluadorPsicologiaEducativa}    onChange={onInput} />
-            <Campo label="Profesional responsable — Psicología Educativa" name="profesionalPsicologiaEducativa" value={form.profesionalPsicologiaEducativa} onChange={onInput} />
-            <Campo label="Evaluador — Psicología Clínica"               name="evaluadorPsicologiaClinica"      value={form.evaluadorPsicologiaClinica}      onChange={onInput} />
-            <Campo label="Profesional responsable — Psicología Clínica" name="profesionalPsicologiaClinica"   value={form.profesionalPsicologiaClinica}   onChange={onInput} />
+            <Campo
+              label="Evaluador — Psicología Educativa"
+              name="evaluadorPsicologiaEducativa"
+              value={form.evaluadorPsicologiaEducativa}
+              onChange={onInput}
+            />
+
+            <BuscadorEspecialista
+              label="Profesional responsable — Psicología Educativa"
+              value={form.profesionalPsicologiaEducativa}
+              options={especialistasEducativa}
+              onSelect={(nombre) =>
+                setForm((prev) => ({
+                  ...prev,
+                  profesionalPsicologiaEducativa: nombre,
+                }))
+              }
+            />
+
+            <Campo
+              label="Evaluador — Psicología Clínica"
+              name="evaluadorPsicologiaClinica"
+              value={form.evaluadorPsicologiaClinica}
+              onChange={onInput}
+            />
+
+            <BuscadorEspecialista
+              label="Profesional responsable — Psicología Clínica"
+              value={form.profesionalPsicologiaClinica}
+              options={especialistasClinica}
+              onSelect={(nombre) =>
+                setForm((prev) => ({
+                  ...prev,
+                  profesionalPsicologiaClinica: nombre,
+                }))
+              }
+            />
+
             <div className="sm:col-span-2">
-              <Campo label="Coordinadora de la UDIPSAI" name="coordinadora" value={form.coordinadora} onChange={onInput} />
+              <Campo
+                label="Coordinadora de la UDIPSAI"
+                name="coordinadora"
+                value={form.coordinadora}
+                onChange={onInput}
+              />
             </div>
           </div>
         </ComponentCard>
 
-        {/* Botones */}
         <div className="flex items-center gap-3 pb-6">
           <Button onClick={guardar} disabled={guardando}>
             {guardando ? "Guardando..." : "Guardar informe"}
           </Button>
+
           <button
             onClick={() => navigate(`/fichas/informes/${pacienteId}`)}
             className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
@@ -224,7 +559,6 @@ export default function NuevoInforme() {
             Cancelar
           </button>
         </div>
-
       </div>
     </>
   );
