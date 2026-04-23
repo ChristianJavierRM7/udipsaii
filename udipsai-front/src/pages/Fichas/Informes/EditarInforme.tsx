@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
@@ -7,13 +7,7 @@ import ComponentCard from "../../../components/common/ComponentCard";
 import Button from "../../../components/ui/button/Button";
 import { informesService, InformeRequest } from "../../../services/informes";
 
-// =============================================================================
-// COMPONENTES AUXILIARES — definidos FUERA de NuevoInforme
-//
-// Regla React fundamental: nunca definas componentes dentro de otro componente.
-// Si lo haces, React crea una nueva "clase" de componente en cada render,
-// desmonta el anterior y monta uno nuevo → el input pierde el foco con cada tecla.
-// =============================================================================
+// ── Componentes auxiliares (FUERA del componente principal) ───────────────────
 
 type FormState = Omit<InformeRequest, "pacienteId">;
 
@@ -71,99 +65,125 @@ function AreaTexto({ label, name, filas = 4, value, onChange }: AreaTextoProps) 
   );
 }
 
-// =============================================================================
-// ESTADO INICIAL
-// =============================================================================
+// ── Estado inicial vacío ──────────────────────────────────────────────────────
 
-const ESTADO_INICIAL: FormState = {
-  numeroFicha: "",
-  representante: "",
-  parentesco: "",
-  fechasEvaluacion: "",
-  fechaElaboracionInforme: "",
-  fechaLecturaInforme: "",
-  motivoConsulta: "",
-  historiaEscolar: "",
-  psicobiografia: "",
-  observacionConsulta: "",
-  reactivosPsicologiaEducativa: "",
-  reactivosPsicologiaClinica: "",
-  conclusiones: "",
-  recomendacionesInstitucion: "",
-  recomendacionesRepresentante: "",
-  areaPsicologiaEducativa: "Psicología Educativa",
-  evaluadorPsicologiaEducativa: "",
-  profesionalPsicologiaEducativa: "",
-  areaPsicologiaClinica: "Psicología Clínica",
-  evaluadorPsicologiaClinica: "",
-  profesionalPsicologiaClinica: "",
-  coordinadora: "",
+const VACIO: FormState = {
+  numeroFicha: "", representante: "", parentesco: "", fechasEvaluacion: "",
+  fechaElaboracionInforme: "", fechaLecturaInforme: "", motivoConsulta: "",
+  historiaEscolar: "", psicobiografia: "", observacionConsulta: "",
+  reactivosPsicologiaEducativa: "", reactivosPsicologiaClinica: "",
+  conclusiones: "", recomendacionesInstitucion: "", recomendacionesRepresentante: "",
+  areaPsicologiaEducativa: "Psicología Educativa", evaluadorPsicologiaEducativa: "",
+  profesionalPsicologiaEducativa: "", areaPsicologiaClinica: "Psicología Clínica",
+  evaluadorPsicologiaClinica: "", profesionalPsicologiaClinica: "", coordinadora: "",
 };
 
-// =============================================================================
-// COMPONENTE PRINCIPAL
-// =============================================================================
+// ── Componente principal ──────────────────────────────────────────────────────
 
-export default function NuevoInforme() {
-  const { pacienteId } = useParams<{ pacienteId: string }>();
+export default function EditarInforme() {
+  // El id del informe viene en la URL: /fichas/informes/editar/5
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [form, setForm] = useState<FormState>(ESTADO_INICIAL);
+
+  const [form, setForm] = useState<FormState>(VACIO);
+  const [pacienteId, setPacienteId] = useState<number | null>(null);
+  const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
-  // Un solo handler para inputs
+  // Cargar los datos del informe existente al montar
+  useEffect(() => {
+    if (!id) return;
+    informesService
+      .obtener(Number(id))
+      .then((inf) => {
+        setPacienteId(inf.paciente?.id ?? null);
+        setForm({
+          numeroFicha:                   inf.numeroFicha ?? "",
+          representante:                 inf.representante ?? "",
+          parentesco:                    inf.parentesco ?? "",
+          fechasEvaluacion:              inf.fechasEvaluacion ?? "",
+          fechaElaboracionInforme:       inf.fechaElaboracionInforme ?? "",
+          fechaLecturaInforme:           inf.fechaLecturaInforme ?? "",
+          motivoConsulta:                inf.motivoConsulta ?? "",
+          historiaEscolar:               inf.historiaEscolar ?? "",
+          psicobiografia:                inf.psicobiografia ?? "",
+          observacionConsulta:           inf.observacionConsulta ?? "",
+          reactivosPsicologiaEducativa:  inf.reactivosPsicologiaEducativa ?? "",
+          reactivosPsicologiaClinica:    inf.reactivosPsicologiaClinica ?? "",
+          conclusiones:                  inf.conclusiones ?? "",
+          recomendacionesInstitucion:    inf.recomendacionesInstitucion ?? "",
+          recomendacionesRepresentante:  inf.recomendacionesRepresentante ?? "",
+          areaPsicologiaEducativa:       inf.areaPsicologiaEducativa ?? "Psicología Educativa",
+          evaluadorPsicologiaEducativa:  inf.evaluadorPsicologiaEducativa ?? "",
+          profesionalPsicologiaEducativa:inf.profesionalPsicologiaEducativa ?? "",
+          areaPsicologiaClinica:         inf.areaPsicologiaClinica ?? "Psicología Clínica",
+          evaluadorPsicologiaClinica:    inf.evaluadorPsicologiaClinica ?? "",
+          profesionalPsicologiaClinica:  inf.profesionalPsicologiaClinica ?? "",
+          coordinadora:                  inf.coordinadora ?? "",
+        });
+      })
+      .catch(() => toast.error("No se pudo cargar el informe"))
+      .finally(() => setCargando(false));
+  }, [id]);
+
   const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Un solo handler para textareas
   const onTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const guardar = async () => {
-    if (!pacienteId) { toast.error("Falta el ID del paciente"); return; }
+    if (!id || !pacienteId) { toast.error("Datos incompletos"); return; }
     setGuardando(true);
     try {
-      await informesService.crear({ ...form, pacienteId: Number(pacienteId) });
-      toast.success("Informe guardado correctamente");
+      await informesService.actualizar(Number(id), { ...form, pacienteId });
+      toast.success("Informe actualizado correctamente");
       navigate(`/fichas/informes/${pacienteId}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error al guardar");
+      toast.error(error instanceof Error ? error.message : "Error al actualizar");
     } finally {
       setGuardando(false);
     }
   };
 
+  if (cargando) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-gray-400">Cargando informe...</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      <PageMeta title="Nuevo Informe Psicopedagógico | Udipsai" description="Crear informe psicopedagógico" />
+      <PageMeta title="Editar Informe Psicopedagógico | Udipsai" description="Editar informe psicopedagógico" />
       <PageBreadcrumb
-        pageTitle="Nuevo Informe Psicopedagógico"
+        pageTitle="Editar Informe Psicopedagógico"
         items={[
           { label: "Inicio", path: "/" },
           { label: "Fichas", path: "/fichas" },
           { label: "Informes", path: `/fichas/informes/${pacienteId}` },
-          { label: "Nuevo" },
+          { label: "Editar" },
         ]}
       />
 
       <div className="space-y-5">
 
-        {/* 1. Datos de identificación */}
         <ComponentCard title="1. Datos de identificación">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Campo label="N° de ficha"               name="numeroFicha"               value={form.numeroFicha}               onChange={onInput} />
-            <Campo label="Representante"              name="representante"              value={form.representante}              onChange={onInput} />
-            <Campo label="Parentesco"                 name="parentesco"                 value={form.parentesco}                 onChange={onInput} />
-            <Campo label="Fechas de evaluación"       name="fechasEvaluacion"           value={form.fechasEvaluacion}           onChange={onInput} />
-            <Campo label="Fecha elaboración informe"  name="fechaElaboracionInforme"    type="date" value={form.fechaElaboracionInforme}  onChange={onInput} />
-            <Campo label="Fecha lectura informe"      name="fechaLecturaInforme"        type="date" value={form.fechaLecturaInforme}      onChange={onInput} />
+            <Campo label="N° de ficha"              name="numeroFicha"            value={form.numeroFicha}            onChange={onInput} />
+            <Campo label="Representante"             name="representante"           value={form.representante}           onChange={onInput} />
+            <Campo label="Parentesco"                name="parentesco"              value={form.parentesco}              onChange={onInput} />
+            <Campo label="Fechas de evaluación"      name="fechasEvaluacion"        value={form.fechasEvaluacion}        onChange={onInput} />
+            <Campo label="Fecha elaboración informe" name="fechaElaboracionInforme" type="date" value={form.fechaElaboracionInforme} onChange={onInput} />
+            <Campo label="Fecha lectura informe"     name="fechaLecturaInforme"     type="date" value={form.fechaLecturaInforme}     onChange={onInput} />
           </div>
         </ComponentCard>
 
-        {/* 2 - 9: secciones narrativas */}
         <ComponentCard title="2. Motivo de consulta">
           <AreaTexto name="motivoConsulta" value={form.motivoConsulta} onChange={onTextarea} filas={4} />
         </ComponentCard>
@@ -199,23 +219,21 @@ export default function NuevoInforme() {
           <AreaTexto name="recomendacionesRepresentante" value={form.recomendacionesRepresentante} onChange={onTextarea} filas={5} />
         </ComponentCard>
 
-        {/* 10. Profesionales */}
         <ComponentCard title="10. Profesionales responsables">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Campo label="Evaluador — Psicología Educativa"             name="evaluadorPsicologiaEducativa"    value={form.evaluadorPsicologiaEducativa}    onChange={onInput} />
+            <Campo label="Evaluador — Psicología Educativa"              name="evaluadorPsicologiaEducativa"    value={form.evaluadorPsicologiaEducativa}    onChange={onInput} />
             <Campo label="Profesional responsable — Psicología Educativa" name="profesionalPsicologiaEducativa" value={form.profesionalPsicologiaEducativa} onChange={onInput} />
-            <Campo label="Evaluador — Psicología Clínica"               name="evaluadorPsicologiaClinica"      value={form.evaluadorPsicologiaClinica}      onChange={onInput} />
-            <Campo label="Profesional responsable — Psicología Clínica" name="profesionalPsicologiaClinica"   value={form.profesionalPsicologiaClinica}   onChange={onInput} />
+            <Campo label="Evaluador — Psicología Clínica"                name="evaluadorPsicologiaClinica"      value={form.evaluadorPsicologiaClinica}      onChange={onInput} />
+            <Campo label="Profesional responsable — Psicología Clínica"  name="profesionalPsicologiaClinica"   value={form.profesionalPsicologiaClinica}   onChange={onInput} />
             <div className="sm:col-span-2">
               <Campo label="Coordinadora de la UDIPSAI" name="coordinadora" value={form.coordinadora} onChange={onInput} />
             </div>
           </div>
         </ComponentCard>
 
-        {/* Botones */}
         <div className="flex items-center gap-3 pb-6">
           <Button onClick={guardar} disabled={guardando}>
-            {guardando ? "Guardando..." : "Guardar informe"}
+            {guardando ? "Guardando..." : "Guardar cambios"}
           </Button>
           <button
             onClick={() => navigate(`/fichas/informes/${pacienteId}`)}

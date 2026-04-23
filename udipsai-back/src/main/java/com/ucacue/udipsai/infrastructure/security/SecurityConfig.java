@@ -65,12 +65,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() 
                         .requestMatchers("/actuator/**").permitAll() 
-                        .requestMatchers("/api/informes/**").hasAnyAuthority(
-    "PERM_INFORMES",
-    "PERM_INFORMES_CREAR",
-    "PERM_INFORMES_EDITAR",
-    "PERM_INFORMES_ELIMINAR"
-)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() 
                         .anyRequest().authenticated()
                 );
@@ -86,7 +80,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("*")); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "access-token-udipsai"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(List.of("access-token-udipsai"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

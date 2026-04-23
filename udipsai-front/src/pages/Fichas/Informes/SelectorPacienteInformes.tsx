@@ -6,6 +6,9 @@ import PageMeta from "../../../components/common/PageMeta";
 import ComponentCard from "../../../components/common/ComponentCard";
 import { pacientesService } from "../../../services/pacientes";
 
+// listarActivos devuelve PageResponse<T> → usamos .content para el array
+// Pedimos size=1000 para traer todos los pacientes activos sin paginar
+
 interface PacienteResumen {
   id: number;
   nombresApellidos: string;
@@ -20,12 +23,13 @@ export default function SelectorPacienteInformes() {
 
   useEffect(() => {
     pacientesService
-      .listarActivos()
-.then((response) => setPacientes(response.content || []))      .catch(() => toast.error("Error al cargar pacientes"))
+      .listarActivos(0, 1000)
+      .then((page) => setPacientes(page.content || []))
+      .catch(() => toast.error("Error al cargar pacientes"))
       .finally(() => setCargando(false));
   }, []);
 
-  const pacientesFiltrados = pacientes.filter(
+  const filtrados = pacientes.filter(
     (p) =>
       p.nombresApellidos.toLowerCase().includes(filtro.toLowerCase()) ||
       p.cedula.includes(filtro)
@@ -33,10 +37,7 @@ export default function SelectorPacienteInformes() {
 
   return (
     <>
-      <PageMeta
-        title="Informes Psicopedagógicos | Udipsai"
-        description="Selecciona un paciente para ver sus informes"
-      />
+      <PageMeta title="Informes Psicopedagógicos | Udipsai" description="Selecciona un paciente" />
       <PageBreadcrumb
         pageTitle="Informes Psicopedagógicos"
         items={[
@@ -53,36 +54,29 @@ export default function SelectorPacienteInformes() {
             placeholder="Buscar por nombre o cédula..."
             value={filtro}
             onChange={(e) => setFiltro(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
           />
         </div>
 
         {cargando ? (
           <p className="py-8 text-center text-gray-400">Cargando pacientes...</p>
-        ) : pacientesFiltrados.length === 0 ? (
-          <p className="py-8 text-center text-gray-400">
-            No se encontraron pacientes
-          </p>
+        ) : filtrados.length === 0 ? (
+          <p className="py-8 text-center text-gray-400">No se encontraron pacientes</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="pb-3 text-left font-medium text-gray-500">Nombre</th>
-                  <th className="pb-3 text-left font-medium text-gray-500">Cédula</th>
-                  <th className="pb-3 text-left font-medium text-gray-500">Acción</th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">Nombre</th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">Cédula</th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">Acción</th>
                 </tr>
               </thead>
               <tbody>
-                {pacientesFiltrados.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b border-gray-100 last:border-0 dark:border-gray-800"
-                  >
-                    <td className="py-3 text-gray-700 dark:text-gray-300">
-                      {p.nombresApellidos}
-                    </td>
-                    <td className="py-3 text-gray-500">{p.cedula}</td>
+                {filtrados.map((p) => (
+                  <tr key={p.id} className="border-b border-gray-100 last:border-0 dark:border-gray-800">
+                    <td className="py-3 text-gray-800 dark:text-gray-200">{p.nombresApellidos}</td>
+                    <td className="py-3 text-gray-500 dark:text-gray-400">{p.cedula}</td>
                     <td className="py-3">
                       <button
                         onClick={() => navigate(`/fichas/informes/${p.id}`)}
