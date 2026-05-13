@@ -140,6 +140,12 @@ function obtenerTexto(objeto: Record<string, unknown>, clave: string) {
   return typeof valor === "string" ? valor.trim() : "";
 }
 
+function cerrarOracion(texto: string) {
+  const limpio = texto.trim();
+  if (!limpio) return "";
+  return /[.!?]$/.test(limpio) ? limpio : `${limpio}.`;
+}
+
 const MESES = [
   "enero",
   "febrero",
@@ -320,6 +326,7 @@ function extraerDatosRepresentante(historia: unknown) {
     return {
       representante: "",
       parentesco: "",
+      motivoConsulta: "",
     };
   }
 
@@ -333,9 +340,14 @@ function extraerDatosRepresentante(historia: unknown) {
 
     const parentesco = obtenerTexto(informacionGeneral, "parentesco");
 
+    const motivoConsulta =
+      obtenerTexto(informacionGeneral, "motivoConsulta") ||
+      obtenerTexto(informacionGeneral, "motivoDeConsulta");
+
     return {
       representante,
       parentesco,
+      motivoConsulta,
     };
   }
 
@@ -345,6 +357,9 @@ function extraerDatosRepresentante(historia: unknown) {
       obtenerTexto(historia, "fuenteInformacion") ||
       obtenerTexto(historia, "representante"),
     parentesco: obtenerTexto(historia, "parentesco"),
+    motivoConsulta:
+      obtenerTexto(historia, "motivoConsulta") ||
+      obtenerTexto(historia, "motivoDeConsulta"),
   };
 }
 
@@ -373,6 +388,84 @@ function resolverParentescoParaFormulario(parentescoHistoria: string) {
     parentesco: "Otro",
     parentescoOtro: parentescoLimpio,
   };
+}
+
+function construirResumenHistoriaEscolar(fichaEducativa: unknown) {
+  if (!esObjeto(fichaEducativa)) return "";
+
+  const historiaEscolar = fichaEducativa.historiaEscolar;
+
+  if (!esObjeto(historiaEscolar)) return "";
+
+  const partes: string[] = [];
+
+  const asignaturasGustan = obtenerTexto(historiaEscolar, "asignaturasGustan");
+  const asignaturasDisgustan = obtenerTexto(
+    historiaEscolar,
+    "asignaturasDisgustan"
+  );
+  const relacionDocentes = obtenerTexto(historiaEscolar, "relacionDocentes");
+  const causaRelacionDocentes = obtenerTexto(
+    historiaEscolar,
+    "causaRelacionDocentes"
+  );
+  const causaGustaIrInstitucion = obtenerTexto(
+    historiaEscolar,
+    "causaGustaIrInstitucion"
+  );
+  const relacionConGrupo = obtenerTexto(historiaEscolar, "relacionConGrupo");
+  const causaRelacionConGrupo = obtenerTexto(
+    historiaEscolar,
+    "causaRelacionConGrupo"
+  );
+
+  if (asignaturasGustan) {
+    partes.push(
+      cerrarOracion(`Asignaturas que le gustan: ${asignaturasGustan}`)
+    );
+  }
+
+  if (asignaturasDisgustan) {
+    partes.push(
+      cerrarOracion(`Asignaturas que no le gustan: ${asignaturasDisgustan}`)
+    );
+  }
+
+  if (relacionDocentes || causaRelacionDocentes) {
+    const textoRelacionDocentes = [
+      relacionDocentes ? `Relación con docentes: ${relacionDocentes}` : "",
+      causaRelacionDocentes ? `Causa: ${causaRelacionDocentes}` : "",
+    ]
+      .filter(Boolean)
+      .join(". ");
+
+    partes.push(cerrarOracion(textoRelacionDocentes));
+  }
+
+  if (typeof historiaEscolar.gustaIrInstitucion === "boolean") {
+    const textoGustaIr = historiaEscolar.gustaIrInstitucion
+      ? "Le gusta ir a la institución"
+      : "No le gusta ir a la institución";
+
+    const textoCompleto = causaGustaIrInstitucion
+      ? `${textoGustaIr}. Causa: ${causaGustaIrInstitucion}`
+      : textoGustaIr;
+
+    partes.push(cerrarOracion(textoCompleto));
+  }
+
+  if (relacionConGrupo || causaRelacionConGrupo) {
+    const textoRelacionGrupo = [
+      relacionConGrupo ? `Relación con el grupo: ${relacionConGrupo}` : "",
+      causaRelacionConGrupo ? `Causa: ${causaRelacionConGrupo}` : "",
+    ]
+      .filter(Boolean)
+      .join(". ");
+
+    partes.push(cerrarOracion(textoRelacionGrupo));
+  }
+
+  return partes.join("\n");
 }
 
 const ESTADO_INICIAL: FormState = {
@@ -427,10 +520,10 @@ export default function NuevoInforme() {
       try {
         const historia = await fichasService.obtenerHistoriaClinica(pacienteId);
 
-        const { representante, parentesco } =
+        const { representante, parentesco, motivoConsulta } =
           extraerDatosRepresentante(historia);
 
-        if (!representante && !parentesco) return;
+        if (!representante && !parentesco && !motivoConsulta) return;
 
         const parentescoFormulario =
           resolverParentescoParaFormulario(parentesco);
@@ -441,16 +534,45 @@ export default function NuevoInforme() {
           parentesco: prev.parentesco || parentescoFormulario.parentesco,
           parentescoOtro:
             prev.parentescoOtro || parentescoFormulario.parentescoOtro,
+          motivoConsulta: prev.motivoConsulta || motivoConsulta,
         }));
       } catch (error) {
         console.warn(
-          "No se pudo cargar la historia clínica para llenar representante y parentesco",
+          "No se pudo cargar la historia clínica para llenar datos del informe",
           error
         );
       }
     };
 
     cargarDatosDesdeHistoriaClinica();
+  }, [pacienteId]);
+
+  useEffect(() => {
+    if (!pacienteId) return;
+
+    const cargarHistoriaEscolarDesdePsicologiaEducativa = async () => {
+      try {
+        const psicologiaEducativa =
+          await fichasService.obtenerPsicologiaEducativa(pacienteId);
+
+        const resumenHistoriaEscolar =
+          construirResumenHistoriaEscolar(psicologiaEducativa);
+
+        if (!resumenHistoriaEscolar) return;
+
+        setForm((prev) => ({
+          ...prev,
+          historiaEscolar: prev.historiaEscolar || resumenHistoriaEscolar,
+        }));
+      } catch (error) {
+        console.warn(
+          "No se pudo cargar Psicología Educativa para llenar historia escolar",
+          error
+        );
+      }
+    };
+
+    cargarHistoriaEscolarDesdePsicologiaEducativa();
   }, [pacienteId]);
 
   const especialistasEducativa = useMemo(
@@ -495,7 +617,6 @@ export default function NuevoInforme() {
     }
 
     const nuevaLista = [...fechasEvaluacionLista, fechaEvaluacionTemporal].sort();
-
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -506,7 +627,6 @@ export default function NuevoInforme() {
 
   const eliminarFechaEvaluacion = (fecha: string) => {
     const nuevaLista = fechasEvaluacionLista.filter((f) => f !== fecha);
-
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -649,8 +769,7 @@ export default function NuevoInforme() {
               )}
 
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Vista previa para el informe:{" "}
-                {form.fechasEvaluacion || "Sin fechas agregadas"}
+                Vista previa para el informe: {form.fechasEvaluacion || "Sin fechas agregadas"}
               </p>
             </div>
 
