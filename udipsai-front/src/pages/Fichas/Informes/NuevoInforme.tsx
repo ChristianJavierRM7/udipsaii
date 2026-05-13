@@ -132,7 +132,7 @@ function normalizar(texto?: string) {
 }
 
 function esObjeto(valor: unknown): valor is Record<string, unknown> {
-  return typeof valor === "object" && valor !== null;
+  return typeof valor === "object" && valor !== null && !Array.isArray(valor);
 }
 
 function obtenerTexto(objeto: Record<string, unknown>, clave: string) {
@@ -144,6 +144,147 @@ function cerrarOracion(texto: string) {
   const limpio = texto.trim();
   if (!limpio) return "";
   return /[.!?]$/.test(limpio) ? limpio : `${limpio}.`;
+}
+
+function etiquetaDesdeClave(clave: string) {
+  const especiales: Record<string, string> = {
+    anamnesisFamiliar: "Anamnesis familiar",
+    anamnesisPersonal: "Anamnesis personal",
+    personal: "Anamnesis personal",
+    momentosEvolutivosEnElDesarrollo: "Momentos evolutivos en el desarrollo",
+    momentosEvolutivosDesarrollo: "Momentos evolutivos en el desarrollo",
+    habitosEnLaOralidad: "Hábitos en la oralidad",
+    inicioHorarioSueno: "Inicio horario de sueño",
+    finHorarioSueno: "Fin horario de sueño",
+    tipoHorarioSueno: "Tipo horario de sueño",
+    companiaEnSueno: "Compañía en el sueño",
+    hipersomnia: "Hipersomnia",
+    dificultadConciliarSueno: "Dificultad de conciliar el sueño",
+    dificultadDeConciliarElSueno: "Dificultad de conciliar el sueño",
+    despertarFrecuente: "Despertar frecuente",
+    despertarPrematuro: "Despertar prematuro",
+    sonambulismo: "Sonambulismo",
+    observacionesHabitosSueno: "Observaciones hábitos de sueño",
+    cuidadoPersonal: "Cuidado personal",
+    otrasConductasPreocupantes: "Otras conductas preocupantes",
+    observacionesConductasPreocupantes: "Observaciones conductas preocupantes",
+    sexoNacimiento: "Sexo de nacimiento",
+    orientacionSexual: "Orientación sexual",
+    gradoInformacion: "Grado de información",
+    actividadSexual: "Actividad sexual",
+    curiosidadSexual: "Curiosidad sexual",
+    masturbacion: "Masturbación",
+    promiscuidad: "Promiscuidad",
+    disfunciones: "Disfunciones",
+    erotismo: "Erotismo",
+    parafilias: "Parafilias",
+    observacionesAspectoPsicosexual: "Observaciones aspecto psicosexual",
+    observacionesGuiaObservacion: "Observaciones guía de observación",
+    relacionConGrupo: "Relación con el grupo",
+    causaRelacionConGrupo: "Causa de la relación con el grupo",
+    relacionDocentes: "Relación con docentes",
+    causaRelacionDocentes: "Causa de la relación con docentes",
+  };
+
+  if (especiales[clave]) return especiales[clave];
+
+  return clave
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (letra) => letra.toUpperCase())
+    .trim();
+}
+
+function textoValor(valor: unknown) {
+  if (typeof valor === "string") return valor.trim();
+  if (typeof valor === "number") return String(valor);
+  if (typeof valor === "boolean") return valor ? "Sí" : "";
+  return "";
+}
+
+function seccionDesdeRutas(
+  fuente: Record<string, unknown>,
+  rutas: string[]
+): Record<string, unknown> | null {
+  for (const ruta of rutas) {
+    const partes = ruta.split(".");
+    let actual: unknown = fuente;
+
+    for (const parte of partes) {
+      if (!esObjeto(actual)) {
+        actual = null;
+        break;
+      }
+
+      actual = actual[parte];
+    }
+
+    if (esObjeto(actual)) return actual;
+  }
+
+  return null;
+}
+
+function resumenObjetoPorCampos(
+  objeto: Record<string, unknown>,
+  campos: string[],
+  opciones?: {
+    soloVerdaderos?: boolean;
+    etiquetas?: Record<string, string>;
+  }
+) {
+  const valores: string[] = [];
+
+  campos.forEach((campo) => {
+    const valor = objeto[campo];
+
+    if (valor === undefined || valor === null || valor === "") return;
+
+    const etiqueta = opciones?.etiquetas?.[campo] ?? etiquetaDesdeClave(campo);
+
+    if (typeof valor === "boolean") {
+      if (valor) valores.push(etiqueta);
+      return;
+    }
+
+    if (opciones?.soloVerdaderos) return;
+
+    const texto = textoValor(valor);
+
+    if (texto) valores.push(`${etiqueta}: ${texto}`);
+  });
+
+  return valores;
+}
+
+function resumenGenericoDeObjeto(
+  objeto: Record<string, unknown>,
+  ignorarCampos: string[] = []
+) {
+  const ignorar = new Set(ignorarCampos);
+  const valores: string[] = [];
+
+  Object.entries(objeto).forEach(([clave, valor]) => {
+    if (ignorar.has(clave)) return;
+    if (clave.toLowerCase().includes("id")) return;
+    if (clave.toLowerCase().includes("paciente")) return;
+    if (clave.toLowerCase().includes("created")) return;
+    if (clave.toLowerCase().includes("updated")) return;
+
+    if (typeof valor === "boolean") {
+      if (valor) valores.push(etiquetaDesdeClave(clave));
+      return;
+    }
+
+    if (typeof valor === "string" || typeof valor === "number") {
+      const texto = textoValor(valor);
+      if (texto && texto !== "0") {
+        valores.push(`${etiquetaDesdeClave(clave)}: ${texto}`);
+      }
+      return;
+    }
+  });
+
+  return valores;
 }
 
 const MESES = [
@@ -468,6 +609,401 @@ function construirResumenHistoriaEscolar(fichaEducativa: unknown) {
   return partes.join("\n");
 }
 
+function construirResumenPsicobiografia(fichaClinica: unknown) {
+  if (!esObjeto(fichaClinica)) return "";
+
+  const bloques: string[] = [];
+
+  const agregarBloque = (titulo: string, lineas: string[]) => {
+    const lineasLimpias = lineas
+      .map((linea) => linea.trim())
+      .filter(Boolean);
+
+    if (lineasLimpias.length === 0) return;
+
+    bloques.push(`${titulo}\n${lineasLimpias.map((linea) => `- ${linea}`).join("\n")}`);
+  };
+
+  const valoresBooleanos = (
+    objeto: Record<string, unknown>,
+    campos: string[],
+    etiquetas?: Record<string, string>
+  ) =>
+    resumenObjetoPorCampos(objeto, campos, {
+      soloVerdaderos: true,
+      etiquetas,
+    });
+
+  const anamnesis = seccionDesdeRutas(fichaClinica, [
+    "anamnesis",
+    "historiaHabitos.anamnesis",
+    "historiaYHabitos.anamnesis",
+  ]);
+
+  if (anamnesis) {
+    const lineas: string[] = [];
+
+    const familiar =
+      obtenerTexto(anamnesis, "anamnesisFamiliar") ||
+      obtenerTexto(anamnesis, "familiar");
+    const personal =
+      obtenerTexto(anamnesis, "anamnesisPersonal") ||
+      obtenerTexto(anamnesis, "personal");
+    const momentos =
+      obtenerTexto(anamnesis, "momentosEvolutivosEnElDesarrollo") ||
+      obtenerTexto(anamnesis, "momentosEvolutivosDesarrollo");
+    const oralidad = obtenerTexto(anamnesis, "habitosEnLaOralidad");
+
+    if (familiar) lineas.push(`Anamnesis familiar: ${cerrarOracion(familiar)}`);
+    if (personal) lineas.push(`Anamnesis personal: ${cerrarOracion(personal)}`);
+    if (momentos) {
+      lineas.push(
+        `Momentos evolutivos en el desarrollo: ${cerrarOracion(momentos)}`
+      );
+    }
+    if (oralidad) lineas.push(`Hábitos en la oralidad: ${cerrarOracion(oralidad)}`);
+
+    agregarBloque("ANAMNESIS", lineas);
+  }
+
+  const sueno = seccionDesdeRutas(fichaClinica, [
+    "sueno",
+    "sueño",
+    "habitosSueno",
+    "historiaHabitos.sueno",
+    "historiaYHabitos.sueno",
+  ]);
+
+  if (sueno) {
+    const lineas: string[] = [];
+
+    const inicio = obtenerTexto(sueno, "inicioHorarioSueno");
+    const fin = obtenerTexto(sueno, "finHorarioSueno");
+    const tipo = obtenerTexto(sueno, "tipoHorarioSueno");
+    const compania = obtenerTexto(sueno, "companiaEnSueno");
+    const edad = obtenerTexto(sueno, "edad");
+    const observaciones = obtenerTexto(sueno, "observacionesHabitosSueno");
+
+    if (inicio || fin) {
+      lineas.push(
+        `Horario de sueño: ${inicio || "no registrado"} a ${fin || "no registrado"}.`
+      );
+    }
+
+    if (tipo) lineas.push(`Tipo de horario de sueño: ${tipo}.`);
+    if (compania) lineas.push(`Compañía en el sueño: ${compania}.`);
+    if (edad && edad !== "0") lineas.push(`Edad relacionada con hábitos de sueño: ${edad}.`);
+
+    const alteraciones = valoresBooleanos(sueno, [
+      "hipersomnia",
+      "dificultadConciliarSueno",
+      "dificultadDeConciliarElSueno",
+      "despertarFrecuente",
+      "despertarPrematuro",
+      "sonambulismo",
+    ]);
+
+    if (alteraciones.length > 0) {
+      lineas.push(`Alteraciones del sueño observadas: ${alteraciones.join(", ")}.`);
+    }
+
+    if (observaciones) lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
+
+    agregarBloque("SUEÑO", lineas);
+  }
+
+  const conducta = seccionDesdeRutas(fichaClinica, [
+    "conducta",
+    "conductas",
+    "historiaHabitos.conducta",
+    "historiaYHabitos.conducta",
+  ]);
+
+  if (conducta) {
+    const lineas: string[] = [];
+
+    const indicadores = valoresBooleanos(conducta, [
+      "temores",
+      "nerviosismo",
+      "egocentrismo",
+      "tics",
+      "mentira",
+      "destructividad",
+      "irritabilidad",
+      "regresiones",
+      "hurto",
+      "cuidadoPersonal",
+    ]);
+
+    const otras = obtenerTexto(conducta, "otrasConductasPreocupantes");
+    const observaciones = obtenerTexto(
+      conducta,
+      "observacionesConductasPreocupantes"
+    );
+
+    if (indicadores.length > 0) {
+      lineas.push(`Indicadores conductuales presentes: ${indicadores.join(", ")}.`);
+    }
+
+    if (otras) lineas.push(`Otras conductas preocupantes: ${cerrarOracion(otras)}`);
+    if (observaciones) lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
+
+    agregarBloque("CONDUCTA", lineas);
+  }
+
+  const sexualidad = seccionDesdeRutas(fichaClinica, [
+    "sexualidad",
+    "aspectoPsicosexual",
+    "historiaHabitos.sexualidad",
+    "historiaYHabitos.sexualidad",
+  ]);
+
+  if (sexualidad) {
+    const lineas: string[] = [];
+
+    const datosPsicosexuales = resumenObjetoPorCampos(sexualidad, [
+      "sexoNacimiento",
+      "genero",
+      "orientacionSexual",
+      "curiosidadSexual",
+      "gradoInformacion",
+      "actividadSexual",
+      "masturbacion",
+      "promiscuidad",
+      "disfunciones",
+      "erotismo",
+      "parafilias",
+    ]);
+
+    const observaciones = obtenerTexto(
+      sexualidad,
+      "observacionesAspectoPsicosexual"
+    );
+
+    if (datosPsicosexuales.length > 0) {
+      lineas.push(`Aspectos registrados: ${datosPsicosexuales.join(", ")}.`);
+    }
+
+    if (observaciones) lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
+
+    agregarBloque("SEXUALIDAD", lineas);
+  }
+
+  const lenguaje = seccionDesdeRutas(fichaClinica, [
+    "evaluacionLenguaje",
+    "evaluacionPsicologica.evaluacionLenguaje",
+    "evaluacionPsicologica.lenguaje",
+  ]);
+
+  if (lenguaje) {
+    const indicadores = valoresBooleanos(lenguaje, [
+      "palabrasRaras",
+      "lentoYTeatral",
+      "incoherente",
+      "perplejidad",
+      "obscenidad",
+      "afasiaAnomica",
+      "ensimismamiento",
+      "noDeseaHacerNada",
+      "apatia",
+      "logicoYClaro",
+      "pesimista",
+      "verborrea",
+      "suspicacia",
+      "disartria",
+      "afasiaGlobal",
+      "hayQueGuiarlo",
+      "haceCosasExtranas",
+      "humorVariable",
+      "vozMonotona",
+      "hiriente",
+      "abatimiento",
+      "enfado",
+      "afasiaExpresiva",
+      "ecolalia",
+      "molestoso",
+      "aislado",
+      "malHablado",
+      "charlatan",
+      "tension",
+      "preocupacion",
+      "afasiaReceptiva",
+      "palilalia",
+      "lento",
+      "participaEnGrupos",
+    ]);
+
+    agregarBloque(
+      "EVALUACIÓN DEL LENGUAJE",
+      indicadores.length > 0
+        ? [`Indicadores presentes: ${indicadores.join(", ")}.`]
+        : []
+    );
+  }
+
+  const afectiva = seccionDesdeRutas(fichaClinica, [
+    "evaluacionAfectiva",
+    "evaluacionPsicologica.evaluacionAfectiva",
+    "evaluacionPsicologica.afectiva",
+  ]);
+
+  if (afectiva) {
+    const indicadores = valoresBooleanos(afectiva, [
+      "altaSensibilidad",
+      "solidaridad",
+      "ansiedadSituacional",
+      "perdidaRecienteInteres",
+      "aplanamiento",
+      "tenacidad",
+      "disociacionIdeoAfectiva",
+      "agresividad",
+      "generosidad",
+      "timidez",
+      "desesperacion",
+      "ambivalencia",
+      "incontinencia",
+      "anhedonia",
+      "sumision",
+      "afectuoso",
+      "ansiedadExpectante",
+      "euforia",
+      "irritabilidad",
+      "sentimientosInadecuados",
+      "rabietas",
+      "angustia",
+      "depresion",
+      "indiferencia",
+      "labilidad",
+      "neotimia",
+    ]);
+
+    agregarBloque(
+      "EVALUACIÓN AFECTIVA",
+      indicadores.length > 0
+        ? [`Indicadores presentes: ${indicadores.join(", ")}.`]
+        : []
+    );
+  }
+
+  const cognitiva = seccionDesdeRutas(fichaClinica, [
+    "evaluacionCognitiva",
+    "evaluacionPsicologica.evaluacionCognitiva",
+    "evaluacionPsicologica.cognitiva",
+  ]);
+
+  if (cognitiva) {
+    const lineas: string[] = [];
+
+    const estadoConciencia = seccionDesdeRutas(cognitiva, ["estadoConciencia"]);
+    const atencion = seccionDesdeRutas(cognitiva, ["atencion"]);
+    const sensopercepcion = seccionDesdeRutas(cognitiva, [
+      "sensopercepcion",
+      "sensoPercepcion",
+    ]);
+    const memoria = seccionDesdeRutas(cognitiva, ["memoria"]);
+    const orientacion = seccionDesdeRutas(cognitiva, [
+      "orientacion",
+      "orientacionDesorientacion",
+    ]);
+
+    if (estadoConciencia) {
+      const valores = resumenGenericoDeObjeto(estadoConciencia);
+      if (valores.length > 0) {
+        lineas.push(`Estado de conciencia: ${valores.join(", ")}.`);
+      }
+    }
+
+    if (atencion) {
+      const valores = resumenGenericoDeObjeto(atencion);
+      if (valores.length > 0) lineas.push(`Atención: ${valores.join(", ")}.`);
+    }
+
+    if (sensopercepcion) {
+      const valores = resumenGenericoDeObjeto(sensopercepcion);
+      if (valores.length > 0) {
+        lineas.push(`Sensopercepción: ${valores.join(", ")}.`);
+      }
+    }
+
+    if (memoria) {
+      const valores = resumenGenericoDeObjeto(memoria);
+      if (valores.length > 0) lineas.push(`Memoria: ${valores.join(", ")}.`);
+    }
+
+    if (orientacion) {
+      const valores = resumenGenericoDeObjeto(orientacion);
+      if (valores.length > 0) {
+        lineas.push(`Orientación: ${valores.join(", ")}.`);
+      }
+    }
+
+    const valoresDirectos = resumenGenericoDeObjeto(cognitiva, [
+      "estadoConciencia",
+      "atencion",
+      "sensopercepcion",
+      "sensoPercepcion",
+      "memoria",
+      "orientacion",
+      "orientacionDesorientacion",
+    ]);
+
+    if (valoresDirectos.length > 0) {
+      lineas.push(`Otros indicadores cognitivos: ${valoresDirectos.join(", ")}.`);
+    }
+
+    agregarBloque("EVALUACIÓN COGNITIVA", lineas);
+  }
+
+  const pensamiento = seccionDesdeRutas(fichaClinica, [
+    "evaluacionPensamiento",
+    "evaluacionPsicologica.evaluacionPensamiento",
+    "evaluacionPsicologica.pensamiento",
+  ]);
+
+  if (pensamiento) {
+    const lineas: string[] = [];
+
+    const estructura = seccionDesdeRutas(pensamiento, ["estructuraPensamiento"]);
+    const curso = seccionDesdeRutas(pensamiento, ["cursoPensamiento"]);
+    const contenido = seccionDesdeRutas(pensamiento, ["contenidoPensamiento"]);
+
+    if (estructura) {
+      const valores = resumenGenericoDeObjeto(estructura);
+      if (valores.length > 0) {
+        lineas.push(`Estructura del pensamiento: ${valores.join(", ")}.`);
+      }
+    }
+
+    if (curso) {
+      const valores = resumenGenericoDeObjeto(curso);
+      if (valores.length > 0) {
+        lineas.push(`Curso del pensamiento: ${valores.join(", ")}.`);
+      }
+    }
+
+    if (contenido) {
+      const valores = resumenGenericoDeObjeto(contenido);
+      if (valores.length > 0) {
+        lineas.push(`Contenido del pensamiento: ${valores.join(", ")}.`);
+      }
+    }
+
+    const valoresDirectos = resumenGenericoDeObjeto(pensamiento, [
+      "estructuraPensamiento",
+      "cursoPensamiento",
+      "contenidoPensamiento",
+    ]);
+
+    if (valoresDirectos.length > 0) {
+      lineas.push(`Otros indicadores: ${valoresDirectos.join(", ")}.`);
+    }
+
+    agregarBloque("EVALUACIÓN DEL PENSAMIENTO", lineas);
+  }
+
+  return bloques.join("\n\n");
+}
+
 const ESTADO_INICIAL: FormState = {
   numeroFicha: "",
   representante: "",
@@ -575,6 +1111,34 @@ export default function NuevoInforme() {
     cargarHistoriaEscolarDesdePsicologiaEducativa();
   }, [pacienteId]);
 
+  useEffect(() => {
+    if (!pacienteId) return;
+
+    const cargarPsicobiografiaDesdePsicologiaClinica = async () => {
+      try {
+        const psicologiaClinica =
+          await fichasService.obtenerPsicologiaClinica(pacienteId);
+
+        const resumenPsicobiografia =
+          construirResumenPsicobiografia(psicologiaClinica);
+
+        if (!resumenPsicobiografia) return;
+
+        setForm((prev) => ({
+          ...prev,
+          psicobiografia: prev.psicobiografia || resumenPsicobiografia,
+        }));
+      } catch (error) {
+        console.warn(
+          "No se pudo cargar Psicología Clínica para llenar psicobiografía",
+          error
+        );
+      }
+    };
+
+    cargarPsicobiografiaDesdePsicologiaClinica();
+  }, [pacienteId]);
+
   const especialistasEducativa = useMemo(
     () =>
       especialistas.filter(
@@ -617,6 +1181,7 @@ export default function NuevoInforme() {
     }
 
     const nuevaLista = [...fechasEvaluacionLista, fechaEvaluacionTemporal].sort();
+
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -627,6 +1192,7 @@ export default function NuevoInforme() {
 
   const eliminarFechaEvaluacion = (fecha: string) => {
     const nuevaLista = fechasEvaluacionLista.filter((f) => f !== fecha);
+
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -769,7 +1335,8 @@ export default function NuevoInforme() {
               )}
 
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Vista previa para el informe: {form.fechasEvaluacion || "Sin fechas agregadas"}
+                Vista previa para el informe:{" "}
+                {form.fechasEvaluacion || "Sin fechas agregadas"}
               </p>
             </div>
 
