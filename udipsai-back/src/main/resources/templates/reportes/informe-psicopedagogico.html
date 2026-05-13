@@ -147,6 +147,14 @@
   text-align: justify;
 }
 
+    .valor-fechas-evaluacion {
+      display: inline;
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: normal;
+    }
+
     .label {
       font-weight: 700;
       text-transform: uppercase;
@@ -260,7 +268,7 @@
         <p><span class="label">INSTITUCIÓN EDUCATIVA:</span><span th:text="${pacienteInstitucion}"></span></p>
         <p><span class="label">NIVEL EDUCATIVO:</span><span th:text="${pacienteNivel}"></span></p>
         <p><span class="label">AÑO QUE CURSA:</span><span th:text="${pacienteAnio}"></span></p>
-        <p><span class="label">FECHA DE EVALUACIÓN:</span><span th:text="${fechasEvaluacionTexto}"></span></p>
+        <p><span class="label">FECHA DE EVALUACIÓN:</span><span class="valor-fechas-evaluacion" th:text="${fechasEvaluacionTexto}"></span></p>
         <p><span class="label">FECHA DE ELABORACIÓN DE INFORME:</span><span th:text="${fechaElaboracion}"></span></p>
         <p><span class="label">FECHA DE LECTURA DEL INFORME:</span><span th:text="${fechaLectura}"></span></p>
         <p><span class="label">Nº DE FICHA:</span><span th:text="${informe.numeroFicha}"></span></p>

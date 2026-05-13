@@ -130,6 +130,142 @@ function normalizar(texto?: string) {
     .trim();
 }
 
+const MESES = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
+];
+
+const MESES_A_NUMERO: Record<string, string> = {
+  enero: "01",
+  febrero: "02",
+  marzo: "03",
+  abril: "04",
+  mayo: "05",
+  junio: "06",
+  julio: "07",
+  agosto: "08",
+  septiembre: "09",
+  octubre: "10",
+  noviembre: "11",
+  diciembre: "12",
+};
+
+function unirConY(partes: string[]) {
+  if (partes.length === 0) return "";
+  if (partes.length === 1) return partes[0];
+  if (partes.length === 2) return `${partes[0]} y ${partes[1]}`;
+  return `${partes.slice(0, -1).join(", ")} y ${partes[partes.length - 1]}`;
+}
+
+function formatearFechaCorta(fechaIso: string) {
+  const [anio, mes, dia] = fechaIso.split("-");
+  if (!anio || !mes || !dia) return fechaIso;
+  return `${dia}/${mes}/${anio}`;
+}
+
+function formatearFechasEvaluacion(fechasIso: string[]) {
+  const fechasOrdenadas = Array.from(new Set(fechasIso))
+    .filter((fecha) => /^\d{4}-\d{2}-\d{2}$/.test(fecha))
+    .sort();
+
+  if (fechasOrdenadas.length === 0) return "";
+
+  const grupos = new Map<
+    string,
+    { anio: string; mesNumero: number; mesNombre: string; dias: string[] }
+  >();
+
+  fechasOrdenadas.forEach((fecha) => {
+    const [anio, mes, dia] = fecha.split("-");
+    const mesNumero = Number(mes);
+    const clave = `${anio}-${mes}`;
+
+    if (!grupos.has(clave)) {
+      grupos.set(clave, {
+        anio,
+        mesNumero,
+        mesNombre: MESES[mesNumero - 1] ?? mes,
+        dias: [],
+      });
+    }
+
+    grupos.get(clave)?.dias.push(dia);
+  });
+
+  const gruposOrdenados = Array.from(grupos.values()).sort((a, b) => {
+    if (a.anio !== b.anio) return Number(a.anio) - Number(b.anio);
+    return a.mesNumero - b.mesNumero;
+  });
+
+  const mismoAnio = gruposOrdenados.every(
+    (grupo) => grupo.anio === gruposOrdenados[0].anio
+  );
+
+  return gruposOrdenados
+    .map((grupo, index) => {
+      const dias = unirConY(grupo.dias);
+      const textoBase = `${dias} de ${grupo.mesNombre}`;
+      const debeMostrarAnio = !mismoAnio || index === gruposOrdenados.length - 1;
+      return debeMostrarAnio ? `${textoBase} de ${grupo.anio}` : textoBase;
+    })
+    .join(", ");
+}
+
+function convertirTextoAFechasISO(texto?: string) {
+  if (!texto) return [];
+
+  const resultado: string[] = [];
+  const textoNormalizado = normalizar(texto);
+  const anios = texto.match(/\d{4}/g) ?? [];
+  const anioPorDefecto = anios[anios.length - 1];
+
+  const fechasIsoDirectas = texto.match(/\d{4}-\d{2}-\d{2}/g) ?? [];
+  resultado.push(...fechasIsoDirectas);
+
+  const fechasSlash = texto.match(/\d{2}\/\d{2}\/\d{4}/g) ?? [];
+  fechasSlash.forEach((fecha) => {
+    const [dia, mes, anio] = fecha.split("/");
+    resultado.push(`${anio}-${mes}-${dia}`);
+  });
+
+  const patronFechasTexto =
+    /((?:\d{1,2})(?:\s*,\s*\d{1,2})*(?:\s+y\s*\d{1,2})?)\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\s+de\s+(\d{4}))?/gi;
+
+  let coincidencia: RegExpExecArray | null;
+
+  while ((coincidencia = patronFechasTexto.exec(textoNormalizado)) !== null) {
+    const diasTexto = coincidencia[1];
+    const mesTexto = coincidencia[2];
+    const anio = coincidencia[3] ?? anioPorDefecto;
+    const mes = MESES_A_NUMERO[mesTexto];
+
+    if (!anio || !mes) continue;
+
+    diasTexto
+      .replace(/\s+y\s+/g, ",")
+      .split(",")
+      .map((dia) => dia.trim())
+      .filter(Boolean)
+      .forEach((dia) => {
+        resultado.push(`${anio}-${mes}-${dia.padStart(2, "0")}`);
+      });
+  }
+
+  return Array.from(new Set(resultado))
+    .filter((fecha) => /^\d{4}-\d{2}-\d{2}$/.test(fecha))
+    .sort();
+}
+
 function BuscadorEspecialista({
   label,
   value,
@@ -264,6 +400,8 @@ export default function EditarInforme() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [especialistas, setEspecialistas] = useState<EspecialistaDTO[]>([]);
+  const [fechaEvaluacionTemporal, setFechaEvaluacionTemporal] = useState("");
+  const [fechasEvaluacionLista, setFechasEvaluacionLista] = useState<string[]>([]);
 
   useEffect(() => {
     especialistasService
@@ -301,7 +439,18 @@ export default function EditarInforme() {
           (p) => p.value && p.value === parentescoGuardado
         );
 
+        const fechasParseadas = convertirTextoAFechasISO(
+          inf.fechasEvaluacion ?? ""
+        );
+
+        const textoFechas =
+          fechasParseadas.length > 0
+            ? formatearFechasEvaluacion(fechasParseadas)
+            : inf.fechasEvaluacion ?? "";
+
         setPacienteId(inf.paciente?.id ?? null);
+        setFechasEvaluacionLista(fechasParseadas);
+
         setForm({
           numeroFicha: inf.numeroFicha ?? "",
           representante: inf.representante ?? "",
@@ -310,8 +459,9 @@ export default function EditarInforme() {
               ? parentescoGuardado
               : "Otro"
             : "",
-          parentescoOtro: parentescoGuardado && !parentescoEsLista ? parentescoGuardado : "",
-          fechasEvaluacion: inf.fechasEvaluacion ?? "",
+          parentescoOtro:
+            parentescoGuardado && !parentescoEsLista ? parentescoGuardado : "",
+          fechasEvaluacion: textoFechas,
           fechaElaboracionInforme: inf.fechaElaboracionInforme ?? "",
           fechaLecturaInforme: inf.fechaLecturaInforme ?? "",
           motivoConsulta: inf.motivoConsulta ?? "",
@@ -355,6 +505,37 @@ export default function EditarInforme() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const agregarFechaEvaluacion = () => {
+    if (!fechaEvaluacionTemporal) {
+      toast.error("Seleccione una fecha de evaluación");
+      return;
+    }
+
+    if (fechasEvaluacionLista.includes(fechaEvaluacionTemporal)) {
+      toast.error("Esa fecha ya fue agregada");
+      return;
+    }
+
+    const nuevaLista = [...fechasEvaluacionLista, fechaEvaluacionTemporal].sort();
+
+    setFechasEvaluacionLista(nuevaLista);
+    setForm((prev) => ({
+      ...prev,
+      fechasEvaluacion: formatearFechasEvaluacion(nuevaLista),
+    }));
+    setFechaEvaluacionTemporal("");
+  };
+
+  const eliminarFechaEvaluacion = (fecha: string) => {
+    const nuevaLista = fechasEvaluacionLista.filter((f) => f !== fecha);
+
+    setFechasEvaluacionLista(nuevaLista);
+    setForm((prev) => ({
+      ...prev,
+      fechasEvaluacion: formatearFechasEvaluacion(nuevaLista),
+    }));
+  };
+
   const guardar = async () => {
     if (!id || !pacienteId) {
       toast.error("Datos incompletos");
@@ -371,6 +552,16 @@ export default function EditarInforme() {
       return;
     }
 
+    const fechasFinales =
+      fechasEvaluacionLista.length > 0
+        ? formatearFechasEvaluacion(fechasEvaluacionLista)
+        : form.fechasEvaluacion.trim();
+
+    if (!fechasFinales) {
+      toast.error("Debe agregar al menos una fecha de evaluación");
+      return;
+    }
+
     setGuardando(true);
 
     try {
@@ -378,6 +569,7 @@ export default function EditarInforme() {
         ...form,
         pacienteId,
         parentesco: parentescoFinal,
+        fechasEvaluacion: fechasFinales,
       };
 
       await informesService.actualizar(Number(id), payload);
@@ -451,13 +643,53 @@ export default function EditarInforme() {
               />
             )}
 
-            <Campo
-              label="Fecha de evaluación"
-              name="fechasEvaluacion"
-              type="date"
-              value={form.fechasEvaluacion}
-              onChange={onInput}
-            />
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Fechas de evaluación
+              </label>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="date"
+                  value={fechaEvaluacionTemporal}
+                  onChange={(e) => setFechaEvaluacionTemporal(e.target.value)}
+                  className="dark:bg-dark-900 h-11 flex-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 dark:border-gray-700 dark:text-white/90"
+                />
+
+                <button
+                  type="button"
+                  onClick={agregarFechaEvaluacion}
+                  className="h-11 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                >
+                  Agregar fecha
+                </button>
+              </div>
+
+              {fechasEvaluacionLista.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {fechasEvaluacionLista.map((fecha) => (
+                    <div
+                      key={fecha}
+                      className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300"
+                    >
+                      <span>{formatearFechaCorta(fecha)}</span>
+                      <button
+                        type="button"
+                        onClick={() => eliminarFechaEvaluacion(fecha)}
+                        className="font-bold text-red-500 hover:text-red-700"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Vista previa para el informe:{" "}
+                {form.fechasEvaluacion || "Sin fechas agregadas"}
+              </p>
+            </div>
 
             <Campo
               label="Fecha elaboración informe"
