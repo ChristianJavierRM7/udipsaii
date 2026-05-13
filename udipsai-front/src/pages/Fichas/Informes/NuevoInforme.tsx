@@ -152,12 +152,6 @@ function unirConY(partes: string[]) {
   return `${partes.slice(0, -1).join(", ")} y ${partes[partes.length - 1]}`;
 }
 
-function formatearFechaCorta(fechaIso: string) {
-  const [anio, mes, dia] = fechaIso.split("-");
-  if (!anio || !mes || !dia) return fechaIso;
-  return `${dia}/${mes}/${anio}`;
-}
-
 function formatearFechasEvaluacion(fechasIso: string[]) {
   const fechasOrdenadas = Array.from(new Set(fechasIso))
     .filter((fecha) => /^\d{4}-\d{2}-\d{2}$/.test(fecha))
@@ -392,7 +386,6 @@ export default function NuevoInforme() {
     }
 
     const nuevaLista = [...fechasEvaluacionLista, fechaEvaluacionTemporal].sort();
-
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -403,7 +396,6 @@ export default function NuevoInforme() {
 
   const eliminarFechaEvaluacion = (fecha: string) => {
     const nuevaLista = fechasEvaluacionLista.filter((f) => f !== fecha);
-
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -519,7 +511,7 @@ export default function NuevoInforme() {
                 <button
                   type="button"
                   onClick={agregarFechaEvaluacion}
-                  className="h-11 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                  className="rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/20"
                 >
                   Agregar fecha
                 </button>
@@ -530,13 +522,13 @@ export default function NuevoInforme() {
                   {fechasEvaluacionLista.map((fecha) => (
                     <div
                       key={fecha}
-                      className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300"
+                      className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm dark:border-gray-700"
                     >
-                      <span>{formatearFechaCorta(fecha)}</span>
+                      <span>{fecha}</span>
                       <button
                         type="button"
                         onClick={() => eliminarFechaEvaluacion(fecha)}
-                        className="font-bold text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700"
                       >
                         ×
                       </button>
@@ -546,8 +538,7 @@ export default function NuevoInforme() {
               )}
 
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Vista previa para el informe:{" "}
-                {form.fechasEvaluacion || "Sin fechas agregadas"}
+                Vista previa para el informe: {form.fechasEvaluacion || "Sin fechas agregadas"}
               </p>
             </div>
 

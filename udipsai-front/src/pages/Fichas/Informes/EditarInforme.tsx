@@ -167,12 +167,6 @@ function unirConY(partes: string[]) {
   return `${partes.slice(0, -1).join(", ")} y ${partes[partes.length - 1]}`;
 }
 
-function formatearFechaCorta(fechaIso: string) {
-  const [anio, mes, dia] = fechaIso.split("-");
-  if (!anio || !mes || !dia) return fechaIso;
-  return `${dia}/${mes}/${anio}`;
-}
-
 function formatearFechasEvaluacion(fechasIso: string[]) {
   const fechasOrdenadas = Array.from(new Set(fechasIso))
     .filter((fecha) => /^\d{4}-\d{2}-\d{2}$/.test(fecha))
@@ -242,7 +236,6 @@ function convertirTextoAFechasISO(texto?: string) {
     /((?:\d{1,2})(?:\s*,\s*\d{1,2})*(?:\s+y\s*\d{1,2})?)\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\s+de\s+(\d{4}))?/gi;
 
   let coincidencia: RegExpExecArray | null;
-
   while ((coincidencia = patronFechasTexto.exec(textoNormalizado)) !== null) {
     const diasTexto = coincidencia[1];
     const mesTexto = coincidencia[2];
@@ -438,11 +431,7 @@ export default function EditarInforme() {
         const parentescoEsLista = PARENTESCOS.some(
           (p) => p.value && p.value === parentescoGuardado
         );
-
-        const fechasParseadas = convertirTextoAFechasISO(
-          inf.fechasEvaluacion ?? ""
-        );
-
+        const fechasParseadas = convertirTextoAFechasISO(inf.fechasEvaluacion ?? "");
         const textoFechas =
           fechasParseadas.length > 0
             ? formatearFechasEvaluacion(fechasParseadas)
@@ -450,7 +439,6 @@ export default function EditarInforme() {
 
         setPacienteId(inf.paciente?.id ?? null);
         setFechasEvaluacionLista(fechasParseadas);
-
         setForm({
           numeroFicha: inf.numeroFicha ?? "",
           representante: inf.representante ?? "",
@@ -517,7 +505,6 @@ export default function EditarInforme() {
     }
 
     const nuevaLista = [...fechasEvaluacionLista, fechaEvaluacionTemporal].sort();
-
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -528,7 +515,6 @@ export default function EditarInforme() {
 
   const eliminarFechaEvaluacion = (fecha: string) => {
     const nuevaLista = fechasEvaluacionLista.filter((f) => f !== fecha);
-
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -552,12 +538,7 @@ export default function EditarInforme() {
       return;
     }
 
-    const fechasFinales =
-      fechasEvaluacionLista.length > 0
-        ? formatearFechasEvaluacion(fechasEvaluacionLista)
-        : form.fechasEvaluacion.trim();
-
-    if (!fechasFinales) {
+    if (fechasEvaluacionLista.length === 0) {
       toast.error("Debe agregar al menos una fecha de evaluación");
       return;
     }
@@ -569,7 +550,7 @@ export default function EditarInforme() {
         ...form,
         pacienteId,
         parentesco: parentescoFinal,
-        fechasEvaluacion: fechasFinales,
+        fechasEvaluacion: formatearFechasEvaluacion(fechasEvaluacionLista),
       };
 
       await informesService.actualizar(Number(id), payload);
@@ -659,7 +640,7 @@ export default function EditarInforme() {
                 <button
                   type="button"
                   onClick={agregarFechaEvaluacion}
-                  className="h-11 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                  className="rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/20"
                 >
                   Agregar fecha
                 </button>
@@ -670,13 +651,13 @@ export default function EditarInforme() {
                   {fechasEvaluacionLista.map((fecha) => (
                     <div
                       key={fecha}
-                      className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300"
+                      className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm dark:border-gray-700"
                     >
-                      <span>{formatearFechaCorta(fecha)}</span>
+                      <span>{fecha}</span>
                       <button
                         type="button"
                         onClick={() => eliminarFechaEvaluacion(fecha)}
-                        className="font-bold text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700"
                       >
                         ×
                       </button>
@@ -686,8 +667,7 @@ export default function EditarInforme() {
               )}
 
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Vista previa para el informe:{" "}
-                {form.fechasEvaluacion || "Sin fechas agregadas"}
+                Vista previa para el informe: {form.fechasEvaluacion || "Sin fechas agregadas"}
               </p>
             </div>
 
