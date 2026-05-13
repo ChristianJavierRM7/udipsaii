@@ -6,6 +6,7 @@ import PageMeta from "../../../components/common/PageMeta";
 import ComponentCard from "../../../components/common/ComponentCard";
 import Button from "../../../components/ui/button/Button";
 import { informesService, InformeRequest } from "../../../services/informes";
+import { fichasService } from "../../../services/fichas";
 import {
   especialistasService,
   EspecialistaDTO,
@@ -130,6 +131,15 @@ function normalizar(texto?: string) {
     .trim();
 }
 
+function esObjeto(valor: unknown): valor is Record<string, unknown> {
+  return typeof valor === "object" && valor !== null;
+}
+
+function obtenerTexto(objeto: Record<string, unknown>, clave: string) {
+  const valor = objeto[clave];
+  return typeof valor === "string" ? valor.trim() : "";
+}
+
 const MESES = [
   "enero",
   "febrero",
@@ -150,6 +160,12 @@ function unirConY(partes: string[]) {
   if (partes.length === 1) return partes[0];
   if (partes.length === 2) return `${partes[0]} y ${partes[1]}`;
   return `${partes.slice(0, -1).join(", ")} y ${partes[partes.length - 1]}`;
+}
+
+function formatearFechaCorta(fechaIso: string) {
+  const [anio, mes, dia] = fechaIso.split("-");
+  if (!anio || !mes || !dia) return fechaIso;
+  return `${dia}/${mes}/${anio}`;
 }
 
 function formatearFechasEvaluacion(fechasIso: string[]) {
@@ -299,6 +315,66 @@ const PARENTESCOS = [
   { value: "Otro", label: "Otro (especificar)" },
 ];
 
+function extraerDatosRepresentante(historia: unknown) {
+  if (!esObjeto(historia)) {
+    return {
+      representante: "",
+      parentesco: "",
+    };
+  }
+
+  const informacionGeneral = historia.informacionGeneral;
+
+  if (esObjeto(informacionGeneral)) {
+    const representante =
+      obtenerTexto(informacionGeneral, "fuenteDeInformacion") ||
+      obtenerTexto(informacionGeneral, "fuenteInformacion") ||
+      obtenerTexto(informacionGeneral, "representante");
+
+    const parentesco = obtenerTexto(informacionGeneral, "parentesco");
+
+    return {
+      representante,
+      parentesco,
+    };
+  }
+
+  return {
+    representante:
+      obtenerTexto(historia, "fuenteDeInformacion") ||
+      obtenerTexto(historia, "fuenteInformacion") ||
+      obtenerTexto(historia, "representante"),
+    parentesco: obtenerTexto(historia, "parentesco"),
+  };
+}
+
+function resolverParentescoParaFormulario(parentescoHistoria: string) {
+  const parentescoLimpio = parentescoHistoria.trim();
+
+  if (!parentescoLimpio) {
+    return {
+      parentesco: "",
+      parentescoOtro: "",
+    };
+  }
+
+  const opcionEncontrada = PARENTESCOS.find(
+    (opcion) => normalizar(opcion.value) === normalizar(parentescoLimpio)
+  );
+
+  if (opcionEncontrada) {
+    return {
+      parentesco: opcionEncontrada.value,
+      parentescoOtro: "",
+    };
+  }
+
+  return {
+    parentesco: "Otro",
+    parentescoOtro: parentescoLimpio,
+  };
+}
+
 const ESTADO_INICIAL: FormState = {
   numeroFicha: "",
   representante: "",
@@ -344,6 +420,39 @@ export default function NuevoInforme() {
       );
   }, []);
 
+  useEffect(() => {
+    if (!pacienteId) return;
+
+    const cargarDatosDesdeHistoriaClinica = async () => {
+      try {
+        const historia = await fichasService.obtenerHistoriaClinica(pacienteId);
+
+        const { representante, parentesco } =
+          extraerDatosRepresentante(historia);
+
+        if (!representante && !parentesco) return;
+
+        const parentescoFormulario =
+          resolverParentescoParaFormulario(parentesco);
+
+        setForm((prev) => ({
+          ...prev,
+          representante: prev.representante || representante,
+          parentesco: prev.parentesco || parentescoFormulario.parentesco,
+          parentescoOtro:
+            prev.parentescoOtro || parentescoFormulario.parentescoOtro,
+        }));
+      } catch (error) {
+        console.warn(
+          "No se pudo cargar la historia clínica para llenar representante y parentesco",
+          error
+        );
+      }
+    };
+
+    cargarDatosDesdeHistoriaClinica();
+  }, [pacienteId]);
+
   const especialistasEducativa = useMemo(
     () =>
       especialistas.filter(
@@ -386,6 +495,7 @@ export default function NuevoInforme() {
     }
 
     const nuevaLista = [...fechasEvaluacionLista, fechaEvaluacionTemporal].sort();
+
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -396,6 +506,7 @@ export default function NuevoInforme() {
 
   const eliminarFechaEvaluacion = (fecha: string) => {
     const nuevaLista = fechasEvaluacionLista.filter((f) => f !== fecha);
+
     setFechasEvaluacionLista(nuevaLista);
     setForm((prev) => ({
       ...prev,
@@ -511,7 +622,7 @@ export default function NuevoInforme() {
                 <button
                   type="button"
                   onClick={agregarFechaEvaluacion}
-                  className="rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                  className="h-11 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/20"
                 >
                   Agregar fecha
                 </button>
@@ -522,13 +633,13 @@ export default function NuevoInforme() {
                   {fechasEvaluacionLista.map((fecha) => (
                     <div
                       key={fecha}
-                      className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm dark:border-gray-700"
+                      className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300"
                     >
-                      <span>{fecha}</span>
+                      <span>{formatearFechaCorta(fecha)}</span>
                       <button
                         type="button"
                         onClick={() => eliminarFechaEvaluacion(fecha)}
-                        className="text-red-500 hover:text-red-700"
+                        className="font-bold text-red-500 hover:text-red-700"
                       >
                         ×
                       </button>
@@ -538,7 +649,8 @@ export default function NuevoInforme() {
               )}
 
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Vista previa para el informe: {form.fechasEvaluacion || "Sin fechas agregadas"}
+                Vista previa para el informe:{" "}
+                {form.fechasEvaluacion || "Sin fechas agregadas"}
               </p>
             </div>
 
