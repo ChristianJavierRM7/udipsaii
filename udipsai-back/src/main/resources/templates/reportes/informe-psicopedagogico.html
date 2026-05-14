@@ -3,39 +3,142 @@
 <head>
   <meta charset="UTF-8" />
   <title>Informe Psicopedagógico</title>
+
   <style>
     @page {
       size: A4;
-      margin: 31mm 16mm 20mm 16mm;
+      margin: 10mm 14mm 30mm 14mm;
+    }
 
-      @top-center {
-        content: element(page-header);
-      }
-
-      @bottom-center {
-        content: element(page-footer);
-      }
+    * {
+      box-sizing: border-box;
     }
 
     body {
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: "Times New Roman", Times, serif;
       font-size: 10pt;
       color: #000;
-      line-height: 1.08;
+      line-height: 1.12;
       margin: 0;
       padding: 0;
+      background: #fff;
     }
 
-    .page-header {
-      position: running(page-header);
+    /* =======================
+       MARCO GENERAL
+       Una sola estructura contiene encabezado, contenido y pie.
+       ======================= */
+    .main-wrapper {
       width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      -fs-table-paginate: paginate;
+    }
+
+    .main-wrapper thead {
+      display: table-header-group;
+    }
+
+    .main-wrapper tbody {
+      display: table-row-group;
+    }
+
+    .main-wrapper tfoot {
+      display: none;
+    }
+
+    .header-cell {
+      padding: 0;
+      margin: 0;
+      vertical-align: top;
+    }
+
+    .content-cell {
+      padding: 0 6mm 14mm 6mm;
+      margin: 0;
+      vertical-align: top;
+      border-left: none;
+      border-right: none;
+    }
+
+    .section-row:first-child .content-cell {
+      padding-top: 4mm;
+    }
+
+    .section-row:last-child .content-cell {
+      padding-bottom: 4mm;
+    }
+
+    .footer-cell {
+      padding: 0;
+      margin: 0;
+      vertical-align: bottom;
+    }
+
+
+    /* =======================
+       MARCO FIJO DE CADA PÁGINA
+       Dibuja los bordes aunque el contenido sea corto.
+       ======================= */
+    .page-frame-left,
+    .page-frame-right,
+    .page-frame-top,
+    .page-frame-bottom {
+      position: fixed;
+      background: #000;
+      z-index: 999;
+      font-size: 0;
+      line-height: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    .page-frame-left {
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0.25mm;
+    }
+
+    .page-frame-right {
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 0.25mm;
+    }
+
+    .page-frame-top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 0.25mm;
+    }
+
+    .page-frame-bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0.25mm;
+    }
+
+
+    /* =======================
+       ENCABEZADO REPETIDO
+       ======================= */
+    .page-header {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #fff;
     }
 
     .header-table {
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
-      border: 1px solid #000;
+      border: none;
+      border-bottom: 1px solid #000;
+      background: #fff;
     }
 
     .header-table td {
@@ -44,160 +147,263 @@
     }
 
     .header-logo {
-      width: 24%;
+      width: 25%;
+      height: 16mm;
       text-align: center;
-      padding: 4px 6px !important;
-      height: 50px;
       border-right: 1px solid #000;
+      padding: 2mm 2mm !important;
     }
 
     .header-title {
-      width: 48%;
+      width: 51%;
+      height: 16mm;
       text-align: center;
-      font-size: 11pt;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9.5pt;
       font-weight: 700;
       text-transform: uppercase;
-      padding: 0 6px !important;
-      line-height: 1.02;
+      line-height: 1.05;
       border-right: 1px solid #000;
+      padding: 0 2mm !important;
     }
 
     .header-meta {
-      width: 28%;
-      padding: 4px 6px !important;
-      font-size: 8.3pt;
-      line-height: 1.05;
+      width: 24%;
+      height: 16mm;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 6.3pt;
+      font-weight: 700;
+      line-height: 1.12;
+      padding: 1.5mm 1mm !important;
+      text-transform: uppercase;
     }
 
     .logo {
-      width: 128px;
-      max-width: 128px;
+      width: 31mm;
+      max-width: 31mm;
       height: auto;
       display: inline-block;
     }
 
     .meta-row {
-      margin: 0 0 2px 0;
+      margin: 0;
+      padding: 0;
       white-space: nowrap;
-    }
-
-    .meta-label {
-      font-weight: 700;
-      display: inline-block;
-      min-width: 52px;
     }
 
     .page-number::after {
       content: counter(page) " de " counter(pages);
     }
 
+    /* =======================
+       PIE DE PÁGINA REPETIDO
+       ======================= */
     .page-footer {
-      position: running(page-footer);
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0.25mm;
       width: 100%;
+      height: 12mm;
+      margin: 0;
+      padding: 0;
       text-align: center;
+      overflow: hidden;
+      background: #fff;
+      z-index: 10;
     }
 
     .footer-link {
       display: block;
       width: 100%;
+      height: 12mm;
+      padding: 0;
+      margin: 0;
       text-decoration: none;
     }
 
     .footer-img {
-      width: 728px;
-      height: 57px;
+      width: 100%;
+      height: 12mm;
       display: block;
+      padding: 0;
+      margin: 0;
+      border: none;
     }
 
-.documento {
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: 2mm;
-  padding: 2mm 2mm 2mm 2mm;
-  border: 1px solid #000;
-}
+    /* =======================
+       CONTENIDO GENERAL
+       ======================= */
+    .documento {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+    }
 
     .section {
-      margin-top: 5px;
+      margin: 0;
+      padding: 0;
+      page-break-inside: auto;
     }
 
     .section-title {
-      font-size: 10.5pt;
+      font-size: 10pt;
       font-weight: 700;
       text-transform: uppercase;
-      margin: 0 0 2px 0;
-      line-height: 1.02;
       text-decoration: underline;
+      line-height: 1.08;
+      margin: 0 0 1mm 0;
       page-break-after: avoid;
       break-after: avoid;
     }
 
-.texto {
-  white-space: pre-wrap;
-  text-align: justify;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.datos,
-.profesionales,
-.firmas {
-  white-space: pre-line;
-  text-align: justify;
-}
-
-    .valor-fechas-evaluacion {
-      display: inline;
+    /* =======================
+       DATOS DE IDENTIFICACIÓN
+       ======================= */
+    .datos {
+      width: 100%;
       white-space: normal;
-      overflow-wrap: break-word;
-      word-wrap: break-word;
-      word-break: normal;
+      text-align: left;
+      margin: 0;
+      padding: 0;
+    }
+
+    .datos p {
+      margin: 0;
+      padding: 0;
+      line-height: 1.14;
     }
 
     .label {
       font-weight: 700;
       text-transform: uppercase;
       display: inline-block;
-      min-width: 250px;
+      width: 82mm;
+      vertical-align: top;
+    }
+
+    .valor-fechas-evaluacion {
+      display: inline-block;
+      width: 70mm;
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: normal;
+      vertical-align: top;
+    }
+
+    /* =======================
+       TEXTOS NARRATIVOS
+       ======================= */
+    .texto {
+      white-space: pre-wrap;
+      text-align: justify;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: normal;
+      margin: 0 0 0 5mm;
+      padding: 0;
+      line-height: 1.14;
+    }
+
+    .texto p,
+    .profesionales p,
+    .firmas p {
+      margin: 0;
+      padding: 0;
+      line-height: 1.14;
+    }
+
+    /* =======================
+       REACTIVOS: COMPACTO Y SIN HUECOS
+       ======================= */
+    .reactivos-texto {
+      margin: 0 0 0 5mm;
+      padding: 0;
+      line-height: 1.08;
+      white-space: normal;
+      text-align: justify;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: normal;
+    }
+
+    .reactivos-texto .area-block {
+      margin: 0 0 0.8mm 0;
+      padding: 0;
+      page-break-inside: auto;
+      break-inside: auto;
+    }
+
+    .reactivos-texto .area-subtitle {
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 0.2mm 0;
+      padding: 0;
+      line-height: 1.05;
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    .reactivo-contenido {
+      margin: 0;
+      padding: 0;
+      line-height: 1.08;
+      white-space: normal;
+      text-align: justify;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: normal;
+    }
+
+    .area-block {
+      margin: 0 0 1.4mm 0;
+      padding: 0;
+      page-break-inside: auto;
+    }
+
+    .area-subtitle {
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 0.4mm 0;
+      padding: 0;
+      line-height: 1.1;
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    /* =======================
+       PROFESIONALES
+       ======================= */
+    .profesionales {
+      white-space: normal;
+      text-align: left;
+      margin: 0;
+      padding: 0;
+      line-height: 1.14;
+    }
+
+    .prof-group {
+      margin: 0 0 1mm 0;
+      padding: 0;
     }
 
     .label-small {
       font-weight: 700;
       text-transform: uppercase;
       display: inline-block;
-      min-width: 250px;
+      width: 78mm;
+      vertical-align: top;
     }
 
-    .area-subtitle {
-      font-weight: 700;
-      text-transform: uppercase;
-      margin: 2px 0 1px 0;
-      page-break-after: avoid;
-      break-after: avoid;
-    }
-
-    .area-block {
-      margin-bottom: 5px;
-    }
-
-    .profesionales {
-      margin-top: 1px;
-    }
-
-    .prof-group {
-      margin-bottom: 5px;
-    }
-
-    .profesionales .label {
-      min-width: 180px;
-    }
-
-    .coordinadora {
+    .profesionales p.coordinadora {
       text-align: center;
-      font-weight: 700;
-      margin-top: 5px;
+      font-weight: 400;
+      margin-top: 22mm;
       margin-bottom: 0;
+      line-height: 1.14;
     }
 
     .cargo {
@@ -205,45 +411,38 @@
       font-weight: 700;
       text-transform: uppercase;
       margin: 0;
+      line-height: 1.14;
     }
 
     .firmas {
-      margin-top: 8px;
+      white-space: normal;
+      text-align: left;
+      margin-top: 9mm;
+      padding: 0;
+      line-height: 1.14;
     }
 
     .firmas p {
-      margin: 0 0 4px 0;
+      margin: 0 0 4mm 0;
+    }
+
+    .section-title,
+    .area-subtitle {
+      page-break-inside: avoid;
     }
   </style>
 </head>
+
 <body>
 
-  <div class="page-header">
-    <table class="header-table">
-      <tr>
-        <td class="header-logo">
-          <img
-            th:if="${logoUcacueBase64 != null and !#strings.isEmpty(logoUcacueBase64)}"
-            th:src="${logoUcacueBase64}"
-            alt="Logo UCACUE"
-            class="logo"
-          />
-        </td>
+  <!-- MARCO FIJO PARA QUE EL BORDE LLEGUE HASTA EL PIE EN CADA PÁGINA -->
+  <div class="page-frame-left"></div>
+  <div class="page-frame-right"></div>
+  <div class="page-frame-top"></div>
+  <div class="page-frame-bottom"></div>
 
-        <td class="header-title">
-          INFORME PSICOPEDAGÓGICO
-        </td>
 
-        <td class="header-meta">
-          <div class="meta-row"><span class="meta-label">CÓDIGO:</span> F – VS – 65</div>
-          <div class="meta-row"><span class="meta-label">VERSION:</span> 01</div>
-          <div class="meta-row"><span class="meta-label">FECHA:</span> 2022-12-12</div>
-          <div class="meta-row"><span class="meta-label">Página</span> <span class="page-number"></span></div>
-        </td>
-      </tr>
-    </table>
-  </div>
-
+  <!-- PIE FIJO REPETIDO EN CADA PÁGINA -->
   <div class="page-footer">
     <a href="https://www.ucacue.edu.ec" class="footer-link">
       <img
@@ -255,101 +454,186 @@
     </a>
   </div>
 
-  <div class="documento">
-    <div class="section">
-      <div class="section-title">1. DATOS DE IDENTIFICACIÓN:</div>
-      <div class="datos">
-        <p><span class="label">NOMBRES Y APELLIDOS:</span><span th:text="${pacienteNombre}"></span></p>
-        <p><span class="label">FECHA DE NACIMIENTO:</span><span th:text="${pacienteFechaNacTexto}"></span></p>
-        <p><span class="label">EDAD:</span><span th:text="${pacienteEdad}"></span></p>
-        <p><span class="label">REPRESENTANTE:</span><span th:text="${informe.representante}"></span></p>
-        <p><span class="label">PARENTESCO:</span><span th:text="${informe.parentesco}"></span></p>
-        <p><span class="label">TELÉFONO DE CONTACTO:</span><span th:text="${pacienteTelefono}"></span></p>
-        <p><span class="label">INSTITUCIÓN EDUCATIVA:</span><span th:text="${pacienteInstitucion}"></span></p>
-        <p><span class="label">NIVEL EDUCATIVO:</span><span th:text="${pacienteNivel}"></span></p>
-        <p><span class="label">AÑO QUE CURSA:</span><span th:text="${pacienteAnio}"></span></p>
-        <p><span class="label">FECHA DE EVALUACIÓN:</span><span class="valor-fechas-evaluacion" th:text="${fechasEvaluacionTexto}"></span></p>
-        <p><span class="label">FECHA DE ELABORACIÓN DE INFORME:</span><span th:text="${fechaElaboracion}"></span></p>
-        <p><span class="label">FECHA DE LECTURA DEL INFORME:</span><span th:text="${fechaLectura}"></span></p>
-        <p><span class="label">Nº DE FICHA:</span><span th:text="${informe.numeroFicha}"></span></p>
-      </div>
-    </div>
+  <table class="main-wrapper">
+    <thead>
+      <tr>
+        <td class="header-cell">
+          <div class="page-header">
+            <table class="header-table">
+              <tr>
+                <td class="header-logo">
+                  <img
+                    th:if="${logoUcacueBase64 != null and !#strings.isEmpty(logoUcacueBase64)}"
+                    th:src="${logoUcacueBase64}"
+                    alt="Logo UCACUE"
+                    class="logo"
+                  />
+                </td>
 
-    <div class="section">
-      <div class="section-title">2. MOTIVO DE CONSULTA:</div>
-      <div class="texto" th:text="${informe.motivoConsulta}"></div>
-    </div>
+                <td class="header-title">
+                  INFORME PSICOPEDAGÓGICO
+                </td>
 
-    <div class="section">
-      <div class="section-title">3. HISTORIA ESCOLAR:</div>
-      <div class="texto" th:text="${informe.historiaEscolar}"></div>
-    </div>
+                <td class="header-meta">
+                  <div class="meta-row">CÓDIGO: F - VS - 65</div>
+                  <div class="meta-row">VERSION: 01</div>
+                  <div class="meta-row">FECHA: 2022-12-12</div>
+                  <div class="meta-row">Página <span class="page-number"></span></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </thead>
 
-    <div class="section">
-      <div class="section-title">4. PSICOBIOGRAFÍA:</div>
-      <div class="texto" th:text="${informe.psicobiografia}"></div>
-    </div>
+    <tbody>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="documento">
+            <div class="section">
+              <div class="section-title">1. DATOS DE IDENTIFICACIÓN:</div>
 
-    <div class="section">
-      <div class="section-title">5. OBSERVACIÓN EN LA CONSULTA:</div>
-      <div class="texto" th:text="${informe.observacionConsulta}"></div>
-    </div>
+              <div class="datos">
+                <p><span class="label">NOMBRES Y APELLIDOS:</span><span th:text="${pacienteNombre}"></span></p>
+                <p><span class="label">FECHA DE NACIMIENTO:</span><span th:text="${pacienteFechaNacTexto}"></span></p>
+                <p><span class="label">EDAD:</span><span th:text="${pacienteEdad}"></span></p>
+                <p><span class="label">REPRESENTANTE:</span><span th:text="${informe.representante}"></span></p>
+                <p><span class="label">PARENTESCO:</span><span th:text="${informe.parentesco}"></span></p>
+                <p><span class="label">TELÉFONO DE CONTACTO:</span><span th:text="${pacienteTelefono}"></span></p>
+                <p><span class="label">INSTITUCIÓN EDUCATIVA:</span><span th:text="${pacienteInstitucion}"></span></p>
+                <p><span class="label">NIVEL EDUCATIVO:</span><span th:text="${pacienteNivel}"></span></p>
+                <p><span class="label">AÑO QUE CURSA:</span><span th:text="${pacienteAnio}"></span></p>
+                <p><span class="label">FECHA DE EVALUACIÓN:</span><span class="valor-fechas-evaluacion" th:text="${fechasEvaluacionTexto}"></span></p>
+                <p><span class="label">FECHA DE ELABORACIÓN DE INFORME:</span><span th:text="${fechaElaboracion}"></span></p>
+                <p><span class="label">FECHA DE LECTURA DEL INFORME:</span><span th:text="${fechaLectura}"></span></p>
+                <p><span class="label">Nº DE FICHA:</span><span th:text="${informe.numeroFicha}"></span></p>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
 
-    <div class="section">
-      <div class="section-title">6. REACTIVOS APLICADOS Y RESULTADOS:</div>
-      <div class="texto">
-        <div class="area-block">
-          <div class="area-subtitle" th:text="${informe.areaPsicologiaEducativa} ?: 'PSICOLOGÍA EDUCATIVA'"></div>
-          <div th:text="${informe.reactivosPsicologiaEducativa}"></div>
-        </div>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">2. MOTIVO DE CONSULTA:</div>
+            <div class="texto" th:text="${informe.motivoConsulta}"></div>
+          </div>
+        </td>
+      </tr>
 
-        <div class="area-block">
-          <div class="area-subtitle" th:text="${informe.areaPsicologiaClinica} ?: 'PSICOLOGÍA CLÍNICA'"></div>
-          <div th:text="${informe.reactivosPsicologiaClinica}"></div>
-        </div>
-      </div>
-    </div>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">3. HISTORIA ESCOLAR:</div>
+            <div class="texto" th:text="${informe.historiaEscolar}"></div>
+          </div>
+        </td>
+      </tr>
 
-    <div class="section">
-      <div class="section-title">7. CONCLUSIONES:</div>
-      <div class="texto" th:text="${informe.conclusiones}"></div>
-    </div>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">4. PSICOBIOGRAFÍA:</div>
+            <div class="texto" th:text="${informe.psicobiografia}"></div>
+          </div>
+        </td>
+      </tr>
 
-    <div class="section">
-      <div class="section-title">8. RECOMENDACIONES PARA LA INSTITUCIÓN EDUCATIVA:</div>
-      <div class="texto" th:text="${informe.recomendacionesInstitucion}"></div>
-    </div>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">5. OBSERVACIÓN EN LA CONSULTA:</div>
+            <div class="texto" th:text="${informe.observacionConsulta}"></div>
+          </div>
+        </td>
+      </tr>
 
-    <div class="section">
-      <div class="section-title">9. RECOMENDACIONES PARA REPRESENTANTE O FAMILIARES:</div>
-      <div class="texto" th:text="${informe.recomendacionesRepresentante}"></div>
-    </div>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">6. REACTIVOS APLICADOS Y RESULTADOS:</div>
 
-    <div class="section">
-      <div class="section-title">10. PROFESIONALES RESPONSABLES:</div>
-      <div class="profesionales">
-        <div class="prof-group">
-          <p><span class="label-small">ÁREA:</span><span th:text="${informe.areaPsicologiaEducativa} ?: 'Psicología Educativa'"></span></p>
-          <p><span class="label-small">EVALUADO POR:</span><span th:text="${informe.evaluadorPsicologiaEducativa}"></span></p>
-          <p><span class="label-small">PROFESIONAL RESPONSABLE:</span><span th:text="${informe.profesionalPsicologiaEducativa}"></span></p>
-        </div>
+            <div class="reactivos-texto">
+              <div class="area-block">
+                <div class="area-subtitle" th:text="${informe.areaPsicologiaEducativa} ?: 'PSICOLOGÍA EDUCATIVA'"></div>
+                <div class="reactivo-contenido" th:text="${informe.reactivosPsicologiaEducativa}"></div>
+              </div>
 
-        <div class="prof-group">
-          <p><span class="label-small">ÁREA:</span><span th:text="${informe.areaPsicologiaClinica} ?: 'Psicología Clínica'"></span></p>
-          <p><span class="label-small">EVALUADO POR:</span><span th:text="${informe.evaluadorPsicologiaClinica}"></span></p>
-          <p><span class="label-small">PROFESIONAL RESPONSABLE:</span><span th:text="${informe.profesionalPsicologiaClinica}"></span></p>
-        </div>
+              <div class="area-block">
+                <div class="area-subtitle" th:text="${informe.areaPsicologiaClinica} ?: 'PSICOLOGÍA CLÍNICA'"></div>
+                <div class="reactivo-contenido" th:text="${informe.reactivosPsicologiaClinica}"></div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
 
-        <p class="coordinadora" th:text="${informe.coordinadora}"></p>
-        <p class="cargo">COORDINADORA DE LA UDIPSAI</p>
-      </div>
-    </div>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">7. CONCLUSIONES:</div>
+            <div class="texto" th:text="${informe.conclusiones}"></div>
+          </div>
+        </td>
+      </tr>
 
-    <div class="firmas">
-      <p>Fecha de entrega: ………………………………………………………………………</p>
-      <p>Nombre y Firma del representante: ……………………………………………………</p>
-      <p>CI:……………………</p>
-    </div>
-  </div>
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">8. RECOMENDACIONES PARA LA INSTITUCIÓN EDUCATIVA:</div>
+            <div class="texto" th:text="${informe.recomendacionesInstitucion}"></div>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">9. RECOMENDACIONES PARA REPRESENTANTE O FAMILIARES:</div>
+            <div class="texto" th:text="${informe.recomendacionesRepresentante}"></div>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="section">
+            <div class="section-title">10. PROFESIONALES RESPONSABLES:</div>
+
+            <div class="profesionales">
+              <div class="prof-group">
+                <p><span class="label-small">ÁREA:</span><span th:text="${informe.areaPsicologiaEducativa} ?: 'Psicología Educativa'"></span></p>
+                <p><span class="label-small">EVALUADO POR:</span><span th:text="${informe.evaluadorPsicologiaEducativa}"></span></p>
+                <p><span class="label-small">PROFESIONAL RESPONSABLE:</span><span th:text="${informe.profesionalPsicologiaEducativa}"></span></p>
+              </div>
+
+              <div class="prof-group">
+                <p><span class="label-small">ÁREA:</span><span th:text="${informe.areaPsicologiaClinica} ?: 'Psicología Clínica'"></span></p>
+                <p><span class="label-small">EVALUADO POR:</span><span th:text="${informe.evaluadorPsicologiaClinica}"></span></p>
+                <p><span class="label-small">PROFESIONAL RESPONSABLE:</span><span th:text="${informe.profesionalPsicologiaClinica}"></span></p>
+              </div>
+
+              <p class="coordinadora" th:text="${informe.coordinadora}"></p>
+              <p class="cargo">COORDINADORA DE LA UDIPSAI</p>
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      <tr class="section-row">
+        <td class="content-cell">
+          <div class="firmas">
+            <p>Fecha de entrega: ……………………………………………………………………………………</p>
+            <p>Nombre y Firma del representante: ………………………………………………………………</p>
+            <p>CI:………………………………</p>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+
+  </table>
+
 </body>
 </html>
