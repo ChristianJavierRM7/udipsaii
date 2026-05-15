@@ -3,6 +3,7 @@ package com.ucacue.udipsai.modules.informes.controller;
 import com.ucacue.udipsai.modules.informes.dto.InformeDTO;
 import com.ucacue.udipsai.modules.informes.dto.InformeRequest;
 import com.ucacue.udipsai.modules.informes.service.InformeService;
+import com.ucacue.udipsai.modules.informes.service.InformeWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +21,9 @@ public class InformeController {
 
     @Autowired
     private InformeService service;
+
+    @Autowired
+    private InformeWordService wordService;
 
     @GetMapping
     @PreAuthorize("hasAuthority('PERM_PACIENTES')")
@@ -43,6 +47,7 @@ public class InformeController {
     @PreAuthorize("hasAuthority('PERM_PACIENTES')")
     public ResponseEntity<InformeDTO> crear(@RequestBody InformeRequest request) {
         log.info("POST /api/informes pacienteId={}", request.getPacienteId());
+
         try {
             return ResponseEntity.ok(service.crearInforme(request));
         } catch (Exception e) {
@@ -53,8 +58,10 @@ public class InformeController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('PERM_PACIENTES')")
-    public ResponseEntity<InformeDTO> actualizar(@PathVariable Integer id,
-                                                  @RequestBody InformeRequest request) {
+    public ResponseEntity<InformeDTO> actualizar(
+            @PathVariable Integer id,
+            @RequestBody InformeRequest request
+    ) {
         try {
             return ResponseEntity.ok(service.actualizarInforme(id, request));
         } catch (Exception e) {
@@ -74,15 +81,34 @@ public class InformeController {
     @PreAuthorize("hasAuthority('PERM_PACIENTES')")
     public ResponseEntity<byte[]> descargarPdf(@PathVariable Integer id) {
         log.info("Generando PDF informe ID={}", id);
+
         try {
             byte[] pdf = service.generarPdf(id);
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=informe-" + id + ".pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe-" + id + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
             log.error("Error PDF informe {}: {}", id, e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/{id}/word")
+    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    public ResponseEntity<byte[]> descargarWord(@PathVariable Integer id) {
+        log.info("Generando Word informe ID={}", id);
+
+        try {
+            byte[] word = wordService.generarWord(id);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe-" + id + ".docx")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                    .body(word);
+        } catch (Exception e) {
+            log.error("Error Word informe {}: {}", id, e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }

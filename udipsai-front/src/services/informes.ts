@@ -57,10 +57,27 @@ export interface InformeRequest {
   coordinadora: string;
 }
 
+function descargarBlob(data: BlobPart, nombreArchivo: string, tipo: string) {
+  const url = window.URL.createObjectURL(new Blob([data], { type: tipo }));
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.setAttribute("download", nombreArchivo);
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  window.URL.revokeObjectURL(url);
+}
+
+function nombreSeguro(nombre: string) {
+  return nombre.replace(/\s+/g, "_").replace(/[^\wÁÉÍÓÚáéíóúÑñ-]/g, "");
+}
+
 // ── Servicio ─────────────────────────────────────────────────────────────────
 
 export const informesService = {
-
   listar: async (): Promise<InformeDTO[]> => {
     const response = await api.get("/informes");
     return response.data;
@@ -90,21 +107,27 @@ export const informesService = {
     await api.delete(`/informes/${id}`);
   },
 
-  // Descarga el PDF: pide el archivo como blob y dispara la descarga en el navegador
   descargarPdf: async (id: number, nombrePaciente: string): Promise<void> => {
     const response = await api.get(`/informes/${id}/pdf`, {
       responseType: "blob",
     });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `informe-${nombrePaciente.replace(/\s+/g, "_")}.pdf`
+
+    descargarBlob(
+      response.data,
+      `informe-${nombreSeguro(nombrePaciente)}.pdf`,
+      "application/pdf"
     );
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
+  },
+
+  descargarWord: async (id: number, nombrePaciente: string): Promise<void> => {
+    const response = await api.get(`/informes/${id}/word`, {
+      responseType: "blob",
+    });
+
+    descargarBlob(
+      response.data,
+      `informe-${nombreSeguro(nombrePaciente)}.docx`,
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
   },
 };

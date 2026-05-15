@@ -6,16 +6,22 @@ import PageMeta from "../../../components/common/PageMeta";
 import Button from "../../../components/ui/button/Button";
 import { informesService, InformeDTO } from "../../../services/informes";
 
+type TipoDescarga = "pdf" | "word";
+
 export default function ListaInformes() {
   const { pacienteId } = useParams<{ pacienteId: string }>();
   const navigate = useNavigate();
 
   const [informes, setInformes] = useState<InformeDTO[]>([]);
   const [cargando, setCargando] = useState(true);
-  const [descargando, setDescargando] = useState<number | null>(null);
+  const [descargando, setDescargando] = useState<{
+    id: number;
+    tipo: TipoDescarga;
+  } | null>(null);
 
   useEffect(() => {
     if (!pacienteId) return;
+
     informesService
       .listarPorPaciente(Number(pacienteId))
       .then(setInformes)
@@ -23,13 +29,15 @@ export default function ListaInformes() {
       .finally(() => setCargando(false));
   }, [pacienteId]);
 
-  const handleDescargar = async (informe: InformeDTO) => {
-    setDescargando(informe.id);
+  const handleDescargarPdf = async (informe: InformeDTO) => {
+    setDescargando({ id: informe.id, tipo: "pdf" });
+
     try {
       await informesService.descargarPdf(
         informe.id,
         informe.paciente.nombresApellidos
       );
+
       toast.success("PDF descargado correctamente");
     } catch {
       toast.error("No se pudo generar el PDF");
@@ -38,8 +46,26 @@ export default function ListaInformes() {
     }
   };
 
+  const handleDescargarWord = async (informe: InformeDTO) => {
+    setDescargando({ id: informe.id, tipo: "word" });
+
+    try {
+      await informesService.descargarWord(
+        informe.id,
+        informe.paciente.nombresApellidos
+      );
+
+      toast.success("Word descargado correctamente");
+    } catch {
+      toast.error("No se pudo generar el Word");
+    } finally {
+      setDescargando(null);
+    }
+  };
+
   const handleEliminar = async (id: number) => {
     if (!confirm("¿Está seguro de eliminar este informe?")) return;
+
     try {
       await informesService.eliminar(id);
       setInformes((prev) => prev.filter((i) => i.id !== id));
@@ -55,6 +81,7 @@ export default function ListaInformes() {
         title="Informes Psicopedagógicos | Udipsai"
         description="Listado de informes psicopedagógicos"
       />
+
       <PageBreadcrumb
         pageTitle="Informes Psicopedagógicos"
         items={[
@@ -65,23 +92,18 @@ export default function ListaInformes() {
       />
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-        {/* Encabezado */}
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
             Informes psicopedagógicos
           </h2>
-          <Button
-            onClick={() =>
-              navigate(`/fichas/informes/nuevo/${pacienteId}`)
-            }
-          >
+
+          <Button onClick={() => navigate(`/fichas/informes/nuevo/${pacienteId}`)}>
             + Nuevo informe
           </Button>
         </div>
 
-        {/* Tabla */}
         {cargando ? (
-          <p className="text-center text-gray-500 py-8">Cargando...</p>
+          <p className="py-8 text-center text-gray-500">Cargando...</p>
         ) : informes.length === 0 ? (
           <div className="py-12 text-center text-gray-400">
             <p className="text-lg font-medium">Sin informes registrados</p>
@@ -111,48 +133,69 @@ export default function ListaInformes() {
                   </th>
                 </tr>
               </thead>
+
               <tbody>
                 {informes.map((inf) => (
                   <tr
                     key={inf.id}
-                    className="border-b border-gray-100 dark:border-gray-800 last:border-0"
+                    className="border-b border-gray-100 last:border-0 dark:border-gray-800"
                   >
                     <td className="py-3 text-gray-700 dark:text-gray-300">
                       {inf.numeroFicha || "—"}
                     </td>
+
                     <td className="py-3 text-gray-700 dark:text-gray-300">
                       {inf.paciente.nombresApellidos}
                     </td>
+
                     <td className="py-3 text-gray-700 dark:text-gray-300">
                       {inf.fechaElaboracionInforme || "—"}
                     </td>
+
                     <td className="py-3 text-gray-700 dark:text-gray-300">
                       {inf.fechaLecturaInforme || "—"}
                     </td>
+
                     <td className="py-3">
-                      <div className="flex items-center gap-2">
-                        {/* Descargar PDF */}
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
-                          onClick={() => handleDescargar(inf)}
-                          disabled={descargando === inf.id}
+                          onClick={() => handleDescargarPdf(inf)}
+                          disabled={
+                            descargando?.id === inf.id &&
+                            descargando?.tipo === "pdf"
+                          }
                           title="Descargar PDF"
                           className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-50 dark:bg-blue-900/20 dark:text-blue-400"
                         >
-                          {descargando === inf.id
+                          {descargando?.id === inf.id &&
+                          descargando?.tipo === "pdf"
                             ? "Generando..."
-                            : "Descargar PDF"}
+                            : "PDF"}
                         </button>
-                        {/* Editar */}
+
                         <button
-                          onClick={() =>
-                            navigate(`/fichas/informes/editar/${inf.id}`)
+                          onClick={() => handleDescargarWord(inf)}
+                          disabled={
+                            descargando?.id === inf.id &&
+                            descargando?.tipo === "word"
                           }
+                          title="Descargar Word"
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:bg-emerald-900/20 dark:text-emerald-400"
+                        >
+                          {descargando?.id === inf.id &&
+                          descargando?.tipo === "word"
+                            ? "Generando..."
+                            : "Word"}
+                        </button>
+
+                        <button
+                          onClick={() => navigate(`/fichas/informes/editar/${inf.id}`)}
                           title="Editar"
                           className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
                         >
                           ✏️
                         </button>
-                        {/* Eliminar */}
+
                         <button
                           onClick={() => handleEliminar(inf.id)}
                           title="Eliminar"
