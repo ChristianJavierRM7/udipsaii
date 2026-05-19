@@ -609,30 +609,35 @@ function construirResumenHistoriaEscolar(fichaEducativa: unknown) {
   return partes.join("\n");
 }
 
-function construirResumenPsicobiografia(fichaClinica: unknown) {
+function agregarBloqueResumen(
+  bloques: string[],
+  titulo: string,
+  lineas: string[]
+) {
+  const lineasLimpias = lineas
+    .map((linea) => linea.trim())
+    .filter(Boolean);
+
+  if (lineasLimpias.length === 0) return;
+
+  bloques.push(`${titulo}\n${lineasLimpias.map((linea) => `- ${linea}`).join("\n")}`);
+}
+
+function valoresBooleanos(
+  objeto: Record<string, unknown>,
+  campos: string[],
+  etiquetas?: Record<string, string>
+) {
+  return resumenObjetoPorCampos(objeto, campos, {
+    soloVerdaderos: true,
+    etiquetas,
+  });
+}
+
+function construirResumenHistoriaYHabitos(fichaClinica: unknown) {
   if (!esObjeto(fichaClinica)) return "";
 
   const bloques: string[] = [];
-
-  const agregarBloque = (titulo: string, lineas: string[]) => {
-    const lineasLimpias = lineas
-      .map((linea) => linea.trim())
-      .filter(Boolean);
-
-    if (lineasLimpias.length === 0) return;
-
-    bloques.push(`${titulo}\n${lineasLimpias.map((linea) => `- ${linea}`).join("\n")}`);
-  };
-
-  const valoresBooleanos = (
-    objeto: Record<string, unknown>,
-    campos: string[],
-    etiquetas?: Record<string, string>
-  ) =>
-    resumenObjetoPorCampos(objeto, campos, {
-      soloVerdaderos: true,
-      etiquetas,
-    });
 
   const anamnesis = seccionDesdeRutas(fichaClinica, [
     "anamnesis",
@@ -646,24 +651,31 @@ function construirResumenPsicobiografia(fichaClinica: unknown) {
     const familiar =
       obtenerTexto(anamnesis, "anamnesisFamiliar") ||
       obtenerTexto(anamnesis, "familiar");
+
     const personal =
       obtenerTexto(anamnesis, "anamnesisPersonal") ||
       obtenerTexto(anamnesis, "personal");
+
     const momentos =
       obtenerTexto(anamnesis, "momentosEvolutivosEnElDesarrollo") ||
       obtenerTexto(anamnesis, "momentosEvolutivosDesarrollo");
+
     const oralidad = obtenerTexto(anamnesis, "habitosEnLaOralidad");
 
     if (familiar) lineas.push(`Anamnesis familiar: ${cerrarOracion(familiar)}`);
     if (personal) lineas.push(`Anamnesis personal: ${cerrarOracion(personal)}`);
+
     if (momentos) {
       lineas.push(
         `Momentos evolutivos en el desarrollo: ${cerrarOracion(momentos)}`
       );
     }
-    if (oralidad) lineas.push(`Hábitos en la oralidad: ${cerrarOracion(oralidad)}`);
 
-    agregarBloque("ANAMNESIS", lineas);
+    if (oralidad) {
+      lineas.push(`Hábitos en la oralidad: ${cerrarOracion(oralidad)}`);
+    }
+
+    agregarBloqueResumen(bloques, "ANAMNESIS", lineas);
   }
 
   const sueno = seccionDesdeRutas(fichaClinica, [
@@ -677,22 +689,25 @@ function construirResumenPsicobiografia(fichaClinica: unknown) {
   if (sueno) {
     const lineas: string[] = [];
 
-    const inicio = obtenerTexto(sueno, "inicioHorarioSueno");
-    const fin = obtenerTexto(sueno, "finHorarioSueno");
+    const inicioHorario = obtenerTexto(sueno, "inicioHorarioSueno");
+    const finHorario = obtenerTexto(sueno, "finHorarioSueno");
     const tipo = obtenerTexto(sueno, "tipoHorarioSueno");
     const compania = obtenerTexto(sueno, "companiaEnSueno");
     const edad = obtenerTexto(sueno, "edad");
     const observaciones = obtenerTexto(sueno, "observacionesHabitosSueno");
 
-    if (inicio || fin) {
+    if (inicioHorario || finHorario) {
       lineas.push(
-        `Horario de sueño: ${inicio || "no registrado"} a ${fin || "no registrado"}.`
+        `Horario de sueño: ${inicioHorario || "no registrado"} a ${finHorario || "no registrado"}.`
       );
     }
 
     if (tipo) lineas.push(`Tipo de horario de sueño: ${tipo}.`);
     if (compania) lineas.push(`Compañía en el sueño: ${compania}.`);
-    if (edad && edad !== "0") lineas.push(`Edad relacionada con hábitos de sueño: ${edad}.`);
+
+    if (edad && edad !== "0") {
+      lineas.push(`Edad relacionada con hábitos de sueño: ${edad}.`);
+    }
 
     const alteraciones = valoresBooleanos(sueno, [
       "hipersomnia",
@@ -707,9 +722,11 @@ function construirResumenPsicobiografia(fichaClinica: unknown) {
       lineas.push(`Alteraciones del sueño observadas: ${alteraciones.join(", ")}.`);
     }
 
-    if (observaciones) lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
+    if (observaciones) {
+      lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
+    }
 
-    agregarBloque("SUEÑO", lineas);
+    agregarBloqueResumen(bloques, "HÁBITOS DE SUEÑO", lineas);
   }
 
   const conducta = seccionDesdeRutas(fichaClinica, [
@@ -745,145 +762,24 @@ function construirResumenPsicobiografia(fichaClinica: unknown) {
       lineas.push(`Indicadores conductuales presentes: ${indicadores.join(", ")}.`);
     }
 
-    if (otras) lineas.push(`Otras conductas preocupantes: ${cerrarOracion(otras)}`);
-    if (observaciones) lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
-
-    agregarBloque("CONDUCTA", lineas);
-  }
-
-  const sexualidad = seccionDesdeRutas(fichaClinica, [
-    "sexualidad",
-    "aspectoPsicosexual",
-    "historiaHabitos.sexualidad",
-    "historiaYHabitos.sexualidad",
-  ]);
-
-  if (sexualidad) {
-    const lineas: string[] = [];
-
-    const datosPsicosexuales = resumenObjetoPorCampos(sexualidad, [
-      "sexoNacimiento",
-      "genero",
-      "orientacionSexual",
-      "curiosidadSexual",
-      "gradoInformacion",
-      "actividadSexual",
-      "masturbacion",
-      "promiscuidad",
-      "disfunciones",
-      "erotismo",
-      "parafilias",
-    ]);
-
-    const observaciones = obtenerTexto(
-      sexualidad,
-      "observacionesAspectoPsicosexual"
-    );
-
-    if (datosPsicosexuales.length > 0) {
-      lineas.push(`Aspectos registrados: ${datosPsicosexuales.join(", ")}.`);
+    if (otras) {
+      lineas.push(`Otras conductas preocupantes: ${cerrarOracion(otras)}`);
     }
 
-    if (observaciones) lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
+    if (observaciones) {
+      lineas.push(`Observaciones: ${cerrarOracion(observaciones)}`);
+    }
 
-    agregarBloque("SEXUALIDAD", lineas);
+    agregarBloqueResumen(bloques, "CONDUCTA", lineas);
   }
 
-  const lenguaje = seccionDesdeRutas(fichaClinica, [
-    "evaluacionLenguaje",
-    "evaluacionPsicologica.evaluacionLenguaje",
-    "evaluacionPsicologica.lenguaje",
-  ]);
+  return bloques.join("\n\n");
+}
 
-  if (lenguaje) {
-    const indicadores = valoresBooleanos(lenguaje, [
-      "palabrasRaras",
-      "lentoYTeatral",
-      "incoherente",
-      "perplejidad",
-      "obscenidad",
-      "afasiaAnomica",
-      "ensimismamiento",
-      "noDeseaHacerNada",
-      "apatia",
-      "logicoYClaro",
-      "pesimista",
-      "verborrea",
-      "suspicacia",
-      "disartria",
-      "afasiaGlobal",
-      "hayQueGuiarlo",
-      "haceCosasExtranas",
-      "humorVariable",
-      "vozMonotona",
-      "hiriente",
-      "abatimiento",
-      "enfado",
-      "afasiaExpresiva",
-      "ecolalia",
-      "molestoso",
-      "aislado",
-      "malHablado",
-      "charlatan",
-      "tension",
-      "preocupacion",
-      "afasiaReceptiva",
-      "palilalia",
-      "lento",
-      "participaEnGrupos",
-    ]);
+function construirResumenObservacionPsicologica(fichaClinica: unknown) {
+  if (!esObjeto(fichaClinica)) return "";
 
-    agregarBloque(
-      "EVALUACIÓN DEL LENGUAJE",
-      indicadores.length > 0
-        ? [`Indicadores presentes: ${indicadores.join(", ")}.`]
-        : []
-    );
-  }
-
-  const afectiva = seccionDesdeRutas(fichaClinica, [
-    "evaluacionAfectiva",
-    "evaluacionPsicologica.evaluacionAfectiva",
-    "evaluacionPsicologica.afectiva",
-  ]);
-
-  if (afectiva) {
-    const indicadores = valoresBooleanos(afectiva, [
-      "altaSensibilidad",
-      "solidaridad",
-      "ansiedadSituacional",
-      "perdidaRecienteInteres",
-      "aplanamiento",
-      "tenacidad",
-      "disociacionIdeoAfectiva",
-      "agresividad",
-      "generosidad",
-      "timidez",
-      "desesperacion",
-      "ambivalencia",
-      "incontinencia",
-      "anhedonia",
-      "sumision",
-      "afectuoso",
-      "ansiedadExpectante",
-      "euforia",
-      "irritabilidad",
-      "sentimientosInadecuados",
-      "rabietas",
-      "angustia",
-      "depresion",
-      "indiferencia",
-      "labilidad",
-      "neotimia",
-    ]);
-
-    agregarBloque(
-      "EVALUACIÓN AFECTIVA",
-      indicadores.length > 0
-        ? [`Indicadores presentes: ${indicadores.join(", ")}.`]
-        : []
-    );
-  }
+  const bloques: string[] = [];
 
   const cognitiva = seccionDesdeRutas(fichaClinica, [
     "evaluacionCognitiva",
@@ -951,7 +847,52 @@ function construirResumenPsicobiografia(fichaClinica: unknown) {
       lineas.push(`Otros indicadores cognitivos: ${valoresDirectos.join(", ")}.`);
     }
 
-    agregarBloque("EVALUACIÓN COGNITIVA", lineas);
+    agregarBloqueResumen(bloques, "EVALUACIÓN COGNITIVA", lineas);
+  }
+
+  const afectiva = seccionDesdeRutas(fichaClinica, [
+    "evaluacionAfectiva",
+    "evaluacionPsicologica.evaluacionAfectiva",
+    "evaluacionPsicologica.afectiva",
+  ]);
+
+  if (afectiva) {
+    const indicadores = valoresBooleanos(afectiva, [
+      "altaSensibilidad",
+      "solidaridad",
+      "ansiedadSituacional",
+      "perdidaRecienteInteres",
+      "aplanamiento",
+      "tenacidad",
+      "disociacionIdeoAfectiva",
+      "agresividad",
+      "generosidad",
+      "timidez",
+      "desesperacion",
+      "ambivalencia",
+      "incontinencia",
+      "anhedonia",
+      "sumision",
+      "afectuoso",
+      "ansiedadExpectante",
+      "euforia",
+      "irritabilidad",
+      "sentimientosInadecuados",
+      "rabietas",
+      "angustia",
+      "depresion",
+      "indiferencia",
+      "labilidad",
+      "neotimia",
+    ]);
+
+    agregarBloqueResumen(
+      bloques,
+      "EVALUACIÓN AFECTIVA",
+      indicadores.length > 0
+        ? [`Indicadores presentes: ${indicadores.join(", ")}.`]
+        : []
+    );
   }
 
   const pensamiento = seccionDesdeRutas(fichaClinica, [
@@ -998,7 +939,7 @@ function construirResumenPsicobiografia(fichaClinica: unknown) {
       lineas.push(`Otros indicadores: ${valoresDirectos.join(", ")}.`);
     }
 
-    agregarBloque("EVALUACIÓN DEL PENSAMIENTO", lineas);
+    agregarBloqueResumen(bloques, "EVALUACIÓN DEL PENSAMIENTO", lineas);
   }
 
   return bloques.join("\n\n");
@@ -1114,29 +1055,32 @@ export default function NuevoInforme() {
   useEffect(() => {
     if (!pacienteId) return;
 
-    const cargarPsicobiografiaDesdePsicologiaClinica = async () => {
+    const cargarDatosDesdePsicologiaClinica = async () => {
       try {
         const psicologiaClinica =
           await fichasService.obtenerPsicologiaClinica(pacienteId);
 
-        const resumenPsicobiografia =
-          construirResumenPsicobiografia(psicologiaClinica);
+        const resumenHistoriaYHabitos =
+          construirResumenHistoriaYHabitos(psicologiaClinica);
 
-        if (!resumenPsicobiografia) return;
+        const resumenObservacionPsicologica =
+          construirResumenObservacionPsicologica(psicologiaClinica);
 
         setForm((prev) => ({
           ...prev,
-          psicobiografia: prev.psicobiografia || resumenPsicobiografia,
+          psicobiografia: prev.psicobiografia || resumenHistoriaYHabitos,
+          observacionConsulta:
+            prev.observacionConsulta || resumenObservacionPsicologica,
         }));
       } catch (error) {
         console.warn(
-          "No se pudo cargar Psicología Clínica para llenar psicobiografía",
+          "No se pudo cargar Psicología Clínica para llenar historia/hábitos y observación psicológica",
           error
         );
       }
     };
 
-    cargarPsicobiografiaDesdePsicologiaClinica();
+    cargarDatosDesdePsicologiaClinica();
   }, [pacienteId]);
 
   const especialistasEducativa = useMemo(
@@ -1376,7 +1320,7 @@ export default function NuevoInforme() {
           />
         </ComponentCard>
 
-        <ComponentCard title="4. Psicobiografía">
+        <ComponentCard title="4. Historia y hábitos">
           <AreaTexto
             name="psicobiografia"
             value={form.psicobiografia}
