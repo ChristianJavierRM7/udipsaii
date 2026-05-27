@@ -535,75 +535,259 @@ function construirResumenHistoriaEscolar(fichaEducativa: unknown) {
   if (!esObjeto(fichaEducativa)) return "";
 
   const historiaEscolar = fichaEducativa.historiaEscolar;
-
-  if (!esObjeto(historiaEscolar)) return "";
+  const desarrollo = fichaEducativa.desarrollo;
+  const adaptacion = fichaEducativa.adaptacion;
+  const estadoGeneral = fichaEducativa.estadoGeneral;
 
   const partes: string[] = [];
 
-  const asignaturasGustan = obtenerTexto(historiaEscolar, "asignaturasGustan");
-  const asignaturasDisgustan = obtenerTexto(
-    historiaEscolar,
-    "asignaturasDisgustan"
-  );
-  const relacionDocentes = obtenerTexto(historiaEscolar, "relacionDocentes");
-  const causaRelacionDocentes = obtenerTexto(
-    historiaEscolar,
-    "causaRelacionDocentes"
-  );
-  const causaGustaIrInstitucion = obtenerTexto(
-    historiaEscolar,
-    "causaGustaIrInstitucion"
-  );
-  const relacionConGrupo = obtenerTexto(historiaEscolar, "relacionConGrupo");
-  const causaRelacionConGrupo = obtenerTexto(
-    historiaEscolar,
-    "causaRelacionConGrupo"
-  );
-
-  if (asignaturasGustan) {
-    partes.push(
-      cerrarOracion(`Asignaturas que le gustan: ${asignaturasGustan}`)
+  /**
+   * HISTORIA ESCOLAR
+   */
+  if (esObjeto(historiaEscolar)) {
+    const asignaturasGustan = obtenerTexto(historiaEscolar, "asignaturasGustan");
+    const asignaturasDisgustan = obtenerTexto(
+      historiaEscolar,
+      "asignaturasDisgustan"
     );
-  }
-
-  if (asignaturasDisgustan) {
-    partes.push(
-      cerrarOracion(`Asignaturas que no le gustan: ${asignaturasDisgustan}`)
+    const relacionDocentes = obtenerTexto(historiaEscolar, "relacionDocentes");
+    const causaRelacionDocentes = obtenerTexto(
+      historiaEscolar,
+      "causaRelacionDocentes"
     );
+    const causaGustaIrInstitucion = obtenerTexto(
+      historiaEscolar,
+      "causaGustaIrInstitucion"
+    );
+    const relacionConGrupo = obtenerTexto(historiaEscolar, "relacionConGrupo");
+    const causaRelacionConGrupo = obtenerTexto(
+      historiaEscolar,
+      "causaRelacionConGrupo"
+    );
+
+    if (asignaturasGustan) {
+      partes.push(
+        cerrarOracion(`Asignaturas que le gustan: ${asignaturasGustan}`)
+      );
+    }
+
+    if (asignaturasDisgustan) {
+      partes.push(
+        cerrarOracion(`Asignaturas que no le gustan: ${asignaturasDisgustan}`)
+      );
+    }
+
+    if (relacionDocentes || causaRelacionDocentes) {
+      partes.push(
+        cerrarOracion(
+          [
+            relacionDocentes
+              ? `Relación con docentes: ${relacionDocentes}`
+              : "",
+            causaRelacionDocentes
+              ? `Causa: ${causaRelacionDocentes}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(". ")
+        )
+      );
+    }
+
+    if (typeof historiaEscolar.gustaIrInstitucion === "boolean") {
+      const texto = historiaEscolar.gustaIrInstitucion
+        ? "Le gusta asistir a la institución"
+        : "No le gusta asistir a la institución";
+
+      const completo = causaGustaIrInstitucion
+        ? `${texto}. Causa: ${causaGustaIrInstitucion}`
+        : texto;
+
+      partes.push(cerrarOracion(completo));
+    }
+
+    if (relacionConGrupo || causaRelacionConGrupo) {
+      partes.push(
+        cerrarOracion(
+          [
+            relacionConGrupo
+              ? `Relación con el grupo: ${relacionConGrupo}`
+              : "",
+            causaRelacionConGrupo
+              ? `Causa: ${causaRelacionConGrupo}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(". ")
+        )
+      );
+    }
   }
 
-  if (relacionDocentes || causaRelacionDocentes) {
-    const textoRelacionDocentes = [
-      relacionDocentes ? `Relación con docentes: ${relacionDocentes}` : "",
-      causaRelacionDocentes ? `Causa: ${causaRelacionDocentes}` : "",
-    ]
-      .filter(Boolean)
-      .join(". ");
+  /**
+   * DESARROLLO ESCOLAR
+   */
+  if (esObjeto(desarrollo)) {
+    const lineas: string[] = [];
 
-    partes.push(cerrarOracion(textoRelacionDocentes));
+    const problemasAprendizaje = desarrollo.problemasAprendizaje;
+    const detalleProblemas = obtenerTexto(
+      desarrollo,
+      "problemasAprendizajeEspecificar"
+    );
+
+    if (typeof problemasAprendizaje === "boolean") {
+      lineas.push(
+        problemasAprendizaje
+          ? "Presenta dificultades de aprendizaje."
+          : "No se reportan dificultades de aprendizaje."
+      );
+    }
+
+    if (detalleProblemas) {
+      lineas.push(
+        `Detalle de dificultades de aprendizaje: ${cerrarOracion(detalleProblemas)}`
+      );
+    }
+
+    if (desarrollo.perdidaAnio) {
+      const causa = obtenerTexto(desarrollo, "gradoCausaPerdidaAnio");
+      lineas.push(
+        cerrarOracion(
+          `Ha presentado pérdida de año${causa ? `. Detalle: ${causa}` : ""}`
+        )
+      );
+    }
+
+    if (desarrollo.desercionEscolar) {
+      const causa = obtenerTexto(desarrollo, "gradoCausaDesercionEscolar");
+      lineas.push(
+        cerrarOracion(
+          `Antecedente de deserción escolar${causa ? `. Detalle: ${causa}` : ""}`
+        )
+      );
+    }
+
+    if (desarrollo.cambioInstitucion) {
+      const causa = obtenerTexto(desarrollo, "gradoCausaCambioInstitucion");
+      lineas.push(
+        cerrarOracion(
+          `Ha existido cambio de institución educativa${
+            causa ? `. Motivo: ${causa}` : ""
+          }`
+        )
+      );
+    }
+
+    partes.push(...lineas);
   }
 
-  if (typeof historiaEscolar.gustaIrInstitucion === "boolean") {
-    const textoGustaIr = historiaEscolar.gustaIrInstitucion
-      ? "Le gusta ir a la institución"
-      : "No le gusta ir a la institución";
+  /**
+   * NECESIDADES Y APOYO / ADAPTACIONES
+   */
+  if (esObjeto(adaptacion)) {
+    const lineas: string[] = [];
 
-    const textoCompleto = causaGustaIrInstitucion
-      ? `${textoGustaIr}. Causa: ${causaGustaIrInstitucion}`
-      : textoGustaIr;
+    if (adaptacion.inclusionEducativa) {
+      const causa = obtenerTexto(adaptacion, "causaInclusionEducativa");
 
-    partes.push(cerrarOracion(textoCompleto));
+      lineas.push(
+        cerrarOracion(
+          `Recibe inclusión educativa${
+            causa ? `. Motivo: ${causa}` : ""
+          }`
+        )
+      );
+    }
+
+    if (adaptacion.adaptacionesCurriculares) {
+      const grado = obtenerTexto(adaptacion, "gradoAdaptacion");
+      const asignaturas = obtenerTexto(adaptacion, "especifiqueAsignaturas");
+
+      lineas.push(
+        cerrarOracion(
+          `Presenta adaptaciones curriculares${
+            grado ? ` de grado ${grado}` : ""
+          }${asignaturas ? `. En asignaturas: ${asignaturas}` : ""}`
+        )
+      );
+    }
+
+    if (adaptacion.evaluacionPsicologicaUOtrosAnterior) {
+      const detalle = obtenerTexto(
+        adaptacion,
+        "causaEvaluacionPsicologicaUOtrosAnterior"
+      );
+
+      lineas.push(
+        cerrarOracion(
+          `Cuenta con evaluación psicológica o apoyo previo${
+            detalle ? `. ${detalle}` : ""
+          }`
+        )
+      );
+    }
+
+    if (adaptacion.recibeApoyo) {
+      const detalle = obtenerTexto(
+        adaptacion,
+        "causaLugarTiempoRecibeApoyo"
+      );
+
+      lineas.push(
+        cerrarOracion(
+          `Actualmente recibe apoyo${
+            detalle ? `. ${detalle}` : ""
+          }`
+        )
+      );
+    }
+
+    partes.push(...lineas);
   }
 
-  if (relacionConGrupo || causaRelacionConGrupo) {
-    const textoRelacionGrupo = [
-      relacionConGrupo ? `Relación con el grupo: ${relacionConGrupo}` : "",
-      causaRelacionConGrupo ? `Causa: ${causaRelacionConGrupo}` : "",
-    ]
-      .filter(Boolean)
-      .join(". ");
+  /**
+   * ESTADO GENERAL
+   */
+  if (esObjeto(estadoGeneral)) {
+    const aprovechamiento = obtenerTexto(
+      estadoGeneral,
+      "aprovechamientoGeneral"
+    );
 
-    partes.push(cerrarOracion(textoRelacionGrupo));
+    const actividad = obtenerTexto(
+      estadoGeneral,
+      "actividadEscolar"
+    );
+
+    const observaciones = obtenerTexto(
+      estadoGeneral,
+      "observaciones"
+    );
+
+    if (aprovechamiento) {
+      partes.push(
+        cerrarOracion(
+          `Aprovechamiento general: ${aprovechamiento}`
+        )
+      );
+    }
+
+    if (actividad) {
+      partes.push(
+        cerrarOracion(
+          `Actividad escolar: ${actividad}`
+        )
+      );
+    }
+
+    if (observaciones) {
+      partes.push(
+        cerrarOracion(
+          `Observaciones generales: ${observaciones}`
+        )
+      );
+    }
   }
 
   return partes.join("\n");
@@ -929,17 +1113,76 @@ function construirResumenObservacionPsicologica(fichaClinica: unknown) {
       }
     }
 
-    const valoresDirectos = resumenGenericoDeObjeto(pensamiento, [
-      "estructuraPensamiento",
-      "cursoPensamiento",
-      "contenidoPensamiento",
-    ]);
+    const camposPensamiento = [
+      "incoherencia",
+      "bloqueos",
+      "preservacion",
+      "disgregacion",
+      "estereotipiasEstructuraDelPensamiento",
+      "neologismos",
+      "musitacion",
+      "retardo",
+      "indecision",
+      "enfermedad",
+    ];
 
-    if (valoresDirectos.length > 0) {
-      lineas.push(`Otros indicadores: ${valoresDirectos.join(", ")}.`);
+    const otrosIndicadores = camposPensamiento
+      .map((campo) => {
+        const valor = pensamiento?.[campo];
+
+        if (
+          valor === null ||
+          valor === undefined ||
+          valor === "" ||
+          valor === false
+        ) {
+          return null;
+        }
+
+return `${campo}: ${valor}`;      })
+      .filter(Boolean);
+
+    if (otrosIndicadores.length > 0) {
+      lineas.push(`Otros indicadores: ${otrosIndicadores.join(", ")}.`);
     }
 
     agregarBloqueResumen(bloques, "EVALUACIÓN DEL PENSAMIENTO", lineas);
+  }
+
+  const evaluacionLenguaje = seccionDesdeRutas(fichaClinica, [
+    "evaluacionLenguaje",
+    "evaluacionPsicologica.evaluacionLenguaje",
+  ]);
+
+  if (evaluacionLenguaje) {
+    const indicadores = valoresBooleanos(evaluacionLenguaje, [
+      "palabrasRaras",
+      "logicoYClaro",
+      "vozMonotona",
+      "malHablado",
+      "lentoYTeatral",
+      "incoherente",
+      "verborrea",
+      "disartria",
+      "afasiaExpresiva",
+      "afasiaReceptiva",
+      "afasiaAnomica",
+      "afasiaGlobal",
+      "ecolalia",
+      "palilalia",
+      "mutismo",
+      "reticencia",
+      "evitaConversar",
+      "callado",
+    ]);
+
+    agregarBloqueResumen(
+      bloques,
+      "EVALUACIÓN DEL LENGUAJE",
+      indicadores.length > 0
+        ? [`Indicadores presentes: ${indicadores.join(", ")}.`]
+        : []
+    );
   }
 
   return bloques.join("\n\n");
