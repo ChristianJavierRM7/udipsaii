@@ -28,11 +28,17 @@ export type Paciente = {
 
 export interface PacienteCriteria {
   search?: string;
-  ciudad?: string;
   activo?: boolean;
   sedeId?: number;
   institucionEducativaId?: number;
   id?: number;
+  // Nuevos
+  
+  edadMin?: number;
+  edadMax?: number;
+  nivelEducativo?: string;
+  anioFicha?: number;
+  areaAtendida?: string;
 }
 
 export const pacientesService = {

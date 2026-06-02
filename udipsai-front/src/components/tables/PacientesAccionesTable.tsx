@@ -204,8 +204,8 @@ export default function PacientesAccionesTable() {
     if (newFilters.sortDirection) setSortDirection(newFilters.sortDirection);
 
     const { sortField: _sf, sortDirection: _sd, ...rest } = newFilters;
-
     const cleanedFilters: any = { ...rest };
+
     if (cleanedFilters.activo === "true") cleanedFilters.activo = true;
     else if (cleanedFilters.activo === "false") cleanedFilters.activo = false;
     else if (cleanedFilters.activo === "") delete cleanedFilters.activo;
@@ -213,9 +213,13 @@ export default function PacientesAccionesTable() {
     if (cleanedFilters.sedeId)
       cleanedFilters.sedeId = parseInt(cleanedFilters.sedeId);
     if (cleanedFilters.institucionEducativaId)
-      cleanedFilters.institucionEducativaId = parseInt(
-        cleanedFilters.institucionEducativaId,
-      );
+      cleanedFilters.institucionEducativaId = parseInt(cleanedFilters.institucionEducativaId);
+    if (cleanedFilters.edadMin)
+      cleanedFilters.edadMin = parseInt(cleanedFilters.edadMin);
+    if (cleanedFilters.edadMax)
+      cleanedFilters.edadMax = parseInt(cleanedFilters.edadMax);
+    if (cleanedFilters.anioFicha)
+      cleanedFilters.anioFicha = parseInt(cleanedFilters.anioFicha);
 
     setFilters(cleanedFilters);
     setCurrentPage(0);
@@ -249,11 +253,49 @@ export default function PacientesAccionesTable() {
         { value: "false", label: "Inactivo" },
       ],
     },
+
     {
       type: "input",
-      name: "ciudad",
-      label: "Ciudad",
-      placeholder: "Ej: Quito",
+      name: "edadMin",
+      label: "Edad mínima",
+      placeholder: "Ej: 5",
+    },
+    {
+      type: "input",
+      name: "edadMax",
+      label: "Edad máxima",
+      placeholder: "Ej: 18",
+    },
+    {
+      type: "select",
+      name: "nivelEducativo",
+      label: "Nivel Educativo",
+      placeholder: "Todos",
+      options: [
+        { value: "inicial", label: "Inicial" },
+        { value: "basica", label: "Básica" },
+        { value: "bachillerato", label: "Bachillerato" },
+        { value: "superior", label: "Superior" },
+        { value: "ninguno", label: "Ninguno" },
+      ],
+    },
+    {
+      type: "input",
+      name: "anioFicha",
+      label: "Año de ficha",
+      placeholder: "Ej: 2024",
+    },
+    {
+      type: "select",
+      name: "areaAtendida",
+      label: "Área atendida",
+      placeholder: "Todas",
+      options: [
+        { value: "educativa", label: "Psicología Educativa" },
+        { value: "clinica", label: "Psicología Clínica" },
+        { value: "fonoaudiologia", label: "Fonoaudiología" },
+        { value: "trabajo_social", label: "Historia Clínica / Trabajo Social" },
+      ],
     },
     {
       type: "select",
@@ -331,6 +373,12 @@ export default function PacientesAccionesTable() {
           sortDirection,
           sedeId: filters.sedeId?.toString(),
           institucionEducativaId: filters.institucionEducativaId?.toString(),
+          
+          nivelEducativo: filters.nivelEducativo,
+          areaAtendida: filters.areaAtendida,
+          edadMin: filters.edadMin?.toString(),
+          edadMax: filters.edadMax?.toString(),
+          anioFicha: filters.anioFicha?.toString(),
         }}
         onFiltersChange={handleFiltersChange}
       />

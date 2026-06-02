@@ -6,9 +6,6 @@ import PageMeta from "../../../components/common/PageMeta";
 import ComponentCard from "../../../components/common/ComponentCard";
 import { pacientesService } from "../../../services/pacientes";
 
-// listarActivos devuelve PageResponse<T> → usamos .content para el array
-// Pedimos size=1000 para traer todos los pacientes activos sin paginar
-
 interface PacienteResumen {
   id: number;
   nombresApellidos: string;
@@ -17,9 +14,13 @@ interface PacienteResumen {
 
 export default function SelectorPacienteInformes() {
   const navigate = useNavigate();
+
   const [pacientes, setPacientes] = useState<PacienteResumen[]>([]);
   const [filtro, setFiltro] = useState("");
   const [cargando, setCargando] = useState(true);
+
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [ordenarPor, setOrdenarPor] = useState("nombre_asc");
 
   useEffect(() => {
     pacientesService
@@ -29,15 +30,26 @@ export default function SelectorPacienteInformes() {
       .finally(() => setCargando(false));
   }, []);
 
-  const filtrados = pacientes.filter(
-    (p) =>
-      p.nombresApellidos.toLowerCase().includes(filtro.toLowerCase()) ||
-      p.cedula.includes(filtro)
-  );
+  const filtrados = [...pacientes]
+    .filter(
+      (p) =>
+        p.nombresApellidos.toLowerCase().includes(filtro.toLowerCase()) ||
+        p.cedula.includes(filtro)
+    )
+    .sort((a, b) => {
+      if (ordenarPor === "nombre_desc") {
+        return b.nombresApellidos.localeCompare(a.nombresApellidos);
+      }
+      return a.nombresApellidos.localeCompare(b.nombresApellidos);
+    });
 
   return (
     <>
-      <PageMeta title="Informes Psicopedagógicos | Udipsai" description="Selecciona un paciente" />
+      <PageMeta
+        title="Informes Psicopedagógicos | Udipsai"
+        description="Selecciona un paciente"
+      />
+
       <PageBreadcrumb
         pageTitle="Informes Psicopedagógicos"
         items={[
@@ -56,27 +68,70 @@ export default function SelectorPacienteInformes() {
             onChange={(e) => setFiltro(e.target.value)}
             className="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
           />
+
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setMostrarFiltros(!mostrarFiltros)}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              {mostrarFiltros ? "Ocultar filtros" : "Filtros"}
+            </button>
+          </div>
+
+          {mostrarFiltros && (
+            <div className="mt-4">
+              <select
+                value={ordenarPor}
+                onChange={(e) => setOrdenarPor(e.target.value)}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              >
+                <option value="nombre_asc">Nombre A-Z</option>
+                <option value="nombre_desc">Nombre Z-A</option>
+              </select>
+            </div>
+          )}
         </div>
 
         {cargando ? (
-          <p className="py-8 text-center text-gray-400">Cargando pacientes...</p>
+          <p className="py-8 text-center text-gray-400">
+            Cargando pacientes...
+          </p>
         ) : filtrados.length === 0 ? (
-          <p className="py-8 text-center text-gray-400">No se encontraron pacientes</p>
+          <p className="py-8 text-center text-gray-400">
+            No se encontraron pacientes
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">Nombre</th>
-                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">Cédula</th>
-                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">Acción</th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    Nombre
+                  </th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    Cédula
+                  </th>
+                  <th className="pb-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                    Acción
+                  </th>
                 </tr>
               </thead>
+
               <tbody>
                 {filtrados.map((p) => (
-                  <tr key={p.id} className="border-b border-gray-100 last:border-0 dark:border-gray-800">
-                    <td className="py-3 text-gray-800 dark:text-gray-200">{p.nombresApellidos}</td>
-                    <td className="py-3 text-gray-500 dark:text-gray-400">{p.cedula}</td>
+                  <tr
+                    key={p.id}
+                    className="border-b border-gray-100 last:border-0 dark:border-gray-800"
+                  >
+                    <td className="py-3 text-gray-800 dark:text-gray-200">
+                      {p.nombresApellidos}
+                    </td>
+
+                    <td className="py-3 text-gray-500 dark:text-gray-400">
+                      {p.cedula}
+                    </td>
+
                     <td className="py-3">
                       <button
                         onClick={() => navigate(`/fichas/informes/${p.id}`)}
