@@ -7,6 +7,7 @@ import java.time.LocalDate;
 public class PacienteRequest {
 
     private String cedula;
+    private String sexo;
     private String nombresApellidos;
     private LocalDate fechaNacimiento;
     private String ciudad;

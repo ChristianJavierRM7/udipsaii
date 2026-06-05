@@ -25,6 +25,7 @@ export default function FormularioPacientes() {
 
   const [formData, setFormData] = useState({
     cedula: "",
+    sexo: "",
     nombresApellidos: "",
     fechaNacimiento: new Date().toISOString().split("T")[0],
     fotoUrl: "",
@@ -99,7 +100,7 @@ export default function FormularioPacientes() {
               (d: any) => d.nombre === "Ficha Detección",
             );
             setExistingFichas({ compromiso, deteccion });
-            
+
             const otros = data.documentos.filter(
               (d: any) => d.nombre !== "Ficha Compromiso" && d.nombre !== "Ficha Detección"
             );
@@ -333,42 +334,42 @@ export default function FormularioPacientes() {
     { value: "2", label: "Vespertina" },
   ];
   const optionsNivelEducativo = [
-    { value: "inicial", label: "Inicial" },
-    { value: "preparatoria", label: "Preparatoria" },
-    { value: "basica-elemental", label: "Básica Elemental" },
-    { value: "basica-media", label: "Básica Media" },
-    { value: "basica-superior", label: "Básica Superior" },
-    { value: "bachillerato", label: "Bachillerato" },
-    { value: "no-escolarizado", label: "No Escolarizado" },
+    { value: "INICIAL", label: "Inicial" },
+    { value: "PREPARATORIA", label: "Preparatoria" },
+    { value: "BASICA_ELEMENTAL", label: "Básica Elemental" },
+    { value: "BASICA_MEDIA", label: "Básica Media" },
+    { value: "BASICA_SUPERIOR", label: "Básica Superior" },
+    { value: "BACHILLERATO", label: "Bachillerato" },
+    { value: "NO_ESCOLARIZADO", label: "No Escolarizado" },
   ];
   const optionsAñoEducativo = (nivelEducativo: string) => {
     switch (nivelEducativo) {
-      case "inicial":
+      case "INICIAL":
         return [
           { value: "inicial 1", label: "Inicial 1" },
           { value: "inicial 2", label: "Inicial 2" },
         ];
-      case "preparatoria":
+      case "PREPARATORIA":
         return [{ value: "primero", label: "Primero" }];
-      case "basica-elemental":
+      case "BASICA_ELEMENTAL":
         return [
           { value: "segundo", label: "Segundo" },
           { value: "tercero", label: "Tercero" },
           { value: "cuarto", label: "Cuarto" },
         ];
-      case "basica-media":
+      case "BASICA_MEDIA":
         return [
           { value: "quinto", label: "Quinto" },
           { value: "sexto", label: "Sexto" },
           { value: "séptimo", label: "Séptimo" },
         ];
-      case "basica-superior":
+      case "BASICA_SUPERIOR":
         return [
           { value: "octavo", label: "Octavo" },
           { value: "noveno", label: "Noveno" },
           { value: "decimo", label: "Décimo" },
         ];
-      case "bachillerato":
+      case "BACHILLERATO":
         return [
           {
             value: "primero de bachillerato",
@@ -458,6 +459,18 @@ export default function FormularioPacientes() {
                 onChange={handleChange}
                 error={!!errors.cedula}
                 hint={errors.cedula}
+              />
+            </div>
+            <div>
+              <Label htmlFor="sexo">Sexo</Label>
+              <Select
+                options={[
+                  { value: "M", label: "Masculino" },
+                  { value: "F", label: "Femenino" },
+                ]}
+                placeholder="Seleccione el sexo"
+                onChange={(value) => handleSelectChange("sexo", value)}
+                value={formData.sexo || ""}
               />
             </div>
             <div>
@@ -632,16 +645,16 @@ export default function FormularioPacientes() {
                 {permissions.includes(
                   "PERM_INSTITUCIONES_EDUCATIVAS_CREAR",
                 ) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={openInstitucionModal}
-                    title="Agregar nueva institución"
-                    className="hover:bg-red-500 hover:text-white"
-                  >
-                    <Plus size={18} />
-                  </Button>
-                )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={openInstitucionModal}
+                      title="Agregar nueva institución"
+                      className="hover:bg-red-500 hover:text-white"
+                    >
+                      <Plus size={18} />
+                    </Button>
+                  )}
               </div>
             </div>
             <div>
@@ -664,7 +677,7 @@ export default function FormularioPacientes() {
                 value={formData.nivelEducativo || ""}
               />
             </div>
-            {formData.nivelEducativo !== "no-escolarizado" &&
+            {formData.nivelEducativo !== "NO_ESCOLARIZADO" &&
               formData.nivelEducativo !== "" && (
                 <div>
                   <Label htmlFor="anioEducacion">Año Educativo</Label>
@@ -735,11 +748,10 @@ export default function FormularioPacientes() {
             <div className="flex flex-col gap-3">
               <Label>Ficha de Compromiso (PDF)</Label>
               <div
-                className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all h-32 ${
-                  fichaCompromisoFile || existingFichas.compromiso
+                className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all h-32 ${fichaCompromisoFile || existingFichas.compromiso
                     ? "border-green-200 bg-green-50/30 dark:border-green-500/30 dark:bg-green-500/5"
                     : "border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-500 bg-white dark:bg-gray-900"
-                }`}
+                  }`}
               >
                 <input
                   id="fichaCompromiso"
@@ -785,11 +797,10 @@ export default function FormularioPacientes() {
             <div className="flex flex-col gap-3">
               <Label>Ficha de Detección (PDF)</Label>
               <div
-                className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all h-32 ${
-                  fichaDeteccionFile || existingFichas.deteccion
+                className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all h-32 ${fichaDeteccionFile || existingFichas.deteccion
                     ? "border-green-200 bg-green-50/30 dark:border-green-500/30 dark:bg-green-500/5"
                     : "border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-500 bg-white dark:bg-gray-900"
-                }`}
+                  }`}
               >
                 <input
                   id="fichaDeteccion"
@@ -886,7 +897,7 @@ export default function FormularioPacientes() {
                     </button>
                   </div>
                 ))}
-                
+
                 <div className="relative border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-500 rounded-xl p-4 flex flex-col items-center justify-center transition-all bg-white dark:bg-gray-900 h-[58px] cursor-pointer group">
                   <input
                     id="otrosDocumentos"

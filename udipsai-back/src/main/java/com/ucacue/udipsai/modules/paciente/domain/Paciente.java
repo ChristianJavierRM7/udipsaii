@@ -46,6 +46,9 @@ public class Paciente {
     @Column(length = 100)
     private String ciudad;
 
+    @Column(length = 20)
+    private String sexo;
+
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 

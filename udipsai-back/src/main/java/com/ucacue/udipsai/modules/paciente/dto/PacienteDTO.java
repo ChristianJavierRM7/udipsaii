@@ -24,6 +24,7 @@ public class PacienteDTO {
     private LocalDateTime fechaApertura;
 
     private Boolean activo;
+    private String sexo;
     private String nombresApellidos;
     private String ciudad;
 

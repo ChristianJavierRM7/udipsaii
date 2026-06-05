@@ -109,57 +109,128 @@ public class PacienteService {
     }
 
     private Specification<Paciente> createSpecification(PacienteCriteriaDTO criteria) {
-        return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+    return (root, query, cb) -> {
+        List<Predicate> predicates = new ArrayList<>();
 
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PASANTE"))) {
-                String cedula = auth.getName();
-                var pasanteOpt = pasanteRepository.findByCedula(cedula);
-                if (pasanteOpt.isPresent()) {
-                    Integer pasanteId = pasanteOpt.get().getId();
-                    List<Integer> assignedPatientIds = asignacionRepository.findByPasanteIdAndActivoTrue(pasanteId)
-                            .stream()
-                            .map(a -> a.getPaciente().getId())
-                            .collect(Collectors.toList());
-                    
-                    if (assignedPatientIds.isEmpty()) {
-                        predicates.add(cb.disjunction());
-                    } else {
-                        predicates.add(root.get("id").in(assignedPatientIds));
-                    }
-                } else {
+        // Control de acceso pasante (no tocar)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PASANTE"))) {
+            String cedula = auth.getName();
+            var pasanteOpt = pasanteRepository.findByCedula(cedula);
+            if (pasanteOpt.isPresent()) {
+                Integer pasanteId = pasanteOpt.get().getId();
+                List<Integer> assignedPatientIds = asignacionRepository.findByPasanteIdAndActivoTrue(pasanteId)
+                        .stream()
+                        .map(a -> a.getPaciente().getId())
+                        .collect(Collectors.toList());
+                if (assignedPatientIds.isEmpty()) {
                     predicates.add(cb.disjunction());
+                } else {
+                    predicates.add(root.get("id").in(assignedPatientIds));
+                }
+            } else {
+                predicates.add(cb.disjunction());
+            }
+        }
+
+        // Búsqueda por nombre o cédula
+        if (StringUtils.hasText(criteria.getSearch())) {
+            String searchPattern = "%" + criteria.getSearch().toLowerCase() + "%";
+            predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("nombresApellidos")), searchPattern),
+                    cb.like(cb.lower(root.get("cedula")), searchPattern)));
+        }
+
+        // Estado activo (default true)
+        Boolean activeFilter = criteria.getActivo() != null ? criteria.getActivo() : true;
+        predicates.add(cb.equal(root.get("activo"), activeFilter));
+
+        // Sede
+        if (criteria.getSedeId() != null) {
+            Join<Object, Object> sedeJoin = root.join("sede");
+            predicates.add(cb.equal(sedeJoin.get("id"), criteria.getSedeId()));
+        }
+
+        // Institución educativa
+        if (criteria.getInstitucionEducativaId() != null) {
+            Join<Object, Object> ieJoin = root.join("institucionEducativa");
+            predicates.add(cb.equal(ieJoin.get("id"), criteria.getInstitucionEducativaId()));
+        }
+
+        // Sexo
+        if (StringUtils.hasText(criteria.getSexo())) {
+            predicates.add(cb.equal(cb.lower(root.get("sexo")), criteria.getSexo().toLowerCase()));
+        }
+
+        // Rango de edad (calculado desde fechaNacimiento)
+        if (criteria.getEdadMin() != null) {
+            // fechaNacimiento <= hoy - edadMin años
+            java.time.LocalDate fechaMax = java.time.LocalDate.now().minusYears(criteria.getEdadMin());
+            predicates.add(cb.lessThanOrEqualTo(root.get("fechaNacimiento"), fechaMax));
+        }
+        if (criteria.getEdadMax() != null) {
+            // fechaNacimiento >= hoy - (edadMax+1) años + 1 día
+            java.time.LocalDate fechaMin = java.time.LocalDate.now().minusYears(criteria.getEdadMax() + 1).plusDays(1);
+            predicates.add(cb.greaterThanOrEqualTo(root.get("fechaNacimiento"), fechaMin));
+        }
+
+        // Nivel educativo
+        if (StringUtils.hasText(criteria.getNivelEducativo())) {
+            predicates.add(cb.equal(cb.lower(root.get("nivelEducativo")),
+                    criteria.getNivelEducativo().toLowerCase()));
+        }
+
+        // Año de apertura de ficha
+        if (criteria.getAnioFicha() != null) {
+            java.time.LocalDateTime inicio =
+            java.time.LocalDate.of(criteria.getAnioFicha(), 1, 1).atStartOfDay();
+
+            java.time.LocalDateTime fin = java.time.LocalDate.of(criteria.getAnioFicha(), 12, 31).atTime(23, 59, 59);
+    predicates.add(
+        cb.between(root.get("fechaApertura"), inicio, fin)
+    );
+}
+
+        // Área atendida (verifica si tiene ficha en esa área)
+        if (StringUtils.hasText(criteria.getAreaAtendida())) {
+            String area = criteria.getAreaAtendida().toLowerCase();
+            jakarta.persistence.criteria.Subquery<Integer> subquery = query.subquery(Integer.class);
+
+            switch (area) {
+                case "educativa" -> {
+                    var sub = subquery.from(com.ucacue.udipsai.modules.psicologiaeducativa.domain.PsicologiaEducativa.class);
+                    subquery.select(sub.get("paciente").get("id"))
+                            .where(cb.and(
+                                cb.equal(sub.get("paciente").get("id"), root.get("id")),
+                                cb.equal(sub.get("activo"), true)));
+                }
+                case "clinica" -> {
+                    var sub = subquery.from(com.ucacue.udipsai.modules.psicologiaclinica.domain.PsicologiaClinica.class);
+                    subquery.select(sub.get("paciente").get("id"))
+                            .where(cb.and(
+                                cb.equal(sub.get("paciente").get("id"), root.get("id")),
+                                cb.equal(sub.get("activo"), true)));
+                }
+                case "fonoaudiologia" -> {
+                    var sub = subquery.from(com.ucacue.udipsai.modules.fonoaudiologia.domain.Fonoaudiologia.class);
+                    subquery.select(sub.get("paciente").get("id"))
+                            .where(cb.and(
+                                cb.equal(sub.get("paciente").get("id"), root.get("id")),
+                                cb.equal(sub.get("activo"), true)));
+                }
+                case "trabajo_social", "clinica_historia" -> {
+                    var sub = subquery.from(com.ucacue.udipsai.modules.historiaclinica.domain.HistoriaClinica.class);
+                    subquery.select(sub.get("paciente").get("id"))
+                            .where(cb.and(
+                                cb.equal(sub.get("paciente").get("id"), root.get("id")),
+                                cb.equal(sub.get("activo"), true)));
                 }
             }
-            
-            if (StringUtils.hasText(criteria.getSearch())) {
-                String searchPattern = "%" + criteria.getSearch().toLowerCase() + "%";
-                predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("nombresApellidos")), searchPattern),
-                        cb.like(cb.lower(root.get("cedula")), searchPattern)));
-            }
-
-            if (StringUtils.hasText(criteria.getCiudad())) {
-                predicates.add(cb.like(cb.lower(root.get("ciudad")),
-                        "%" + criteria.getCiudad().toLowerCase() + "%"));
-            }
-            
-            Boolean activeFilter = criteria.getActivo() != null ? criteria.getActivo() : true;
-            predicates.add(cb.equal(root.get("activo"), activeFilter));
-
-            if (criteria.getSedeId() != null) {
-                Join<Object, Object> sedeJoin = root.join("sede");
-                predicates.add(cb.equal(sedeJoin.get("id"), criteria.getSedeId()));
-            }
-            if (criteria.getInstitucionEducativaId() != null) {
-                Join<Object, Object> ieJoin = root.join("institucionEducativa");
-                predicates.add(cb.equal(ieJoin.get("id"), criteria.getInstitucionEducativaId()));
-            }
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-    }
+            predicates.add(cb.exists(subquery));
+        }
+        return cb.and(predicates.toArray(new Predicate[0]));
+    };
+}
 
     @Transactional
     public PacienteDTO crearPaciente(PacienteRequest request, MultipartFile foto, MultipartFile fichaCompromiso, MultipartFile fichaDeteccion, List<MultipartFile> otrosDocumentos) {
@@ -177,6 +248,7 @@ public class PacienteService {
 
         Paciente paciente = new Paciente();
         mapearRequestAEntidad(request, paciente);
+        paciente.setSexo(request.getSexo());
         paciente.setFechaApertura(LocalDateTime.now());
         paciente.setActivo(true);
 
@@ -318,6 +390,7 @@ public class PacienteService {
     public PacienteDTO convertirADTO(Paciente paciente) {
         return PacienteDTO.builder()
                 .id(paciente.getId())
+                .sexo(paciente.getSexo())
                 .fechaApertura(paciente.getFechaApertura())
                 .activo(paciente.getActivo())
                 .nombresApellidos(paciente.getNombresApellidos())
@@ -417,3 +490,4 @@ public class PacienteService {
         log.info("Documento ID {} eliminado (lógicamente)", id);
     }
 }
+
