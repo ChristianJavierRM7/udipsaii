@@ -17,6 +17,8 @@ export interface InformeDTO {
   observacionConsulta: string;
   reactivosPsicologiaEducativa: string;
   reactivosPsicologiaClinica: string;
+  reactivosFonoaudiologia: string;
+  reactivosTrabajoSocial: string;
   conclusiones: string;
   recomendacionesInstitucion: string;
   recomendacionesRepresentante: string;
@@ -45,6 +47,8 @@ export interface InformeRequest {
   observacionConsulta: string;
   reactivosPsicologiaEducativa: string;
   reactivosPsicologiaClinica: string;
+  reactivosFonoaudiologia: string;
+  reactivosTrabajoSocial: string;
   conclusiones: string;
   recomendacionesInstitucion: string;
   recomendacionesRepresentante: string;

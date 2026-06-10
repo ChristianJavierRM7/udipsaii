@@ -41,6 +41,7 @@ export default function FormularioEspecialistas() {
     fonoAudiologia: false,
     psicologiaClinica: false,
     psicologiaEducativa: false,
+    informes: false,
     citas: false,
   });
 
@@ -124,6 +125,11 @@ export default function FormularioEspecialistas() {
               psicologiaEducativaCrear: data.permisos.psicologiaEducativaCrear || false,
               psicologiaEducativaEditar: data.permisos.psicologiaEducativaEditar || false,
               psicologiaEducativaEliminar: data.permisos.psicologiaEducativaEliminar || false,
+
+              informes: data.permisos.informes || false,
+              informesCrear: data.permisos.informesCrear || false,
+              informesEditar: data.permisos.informesEditar || false,
+              informesEliminar: data.permisos.informesEliminar || false,
 
               citas: data.permisos.citas || false,
               citasCrear: data.permisos.citasCrear || false,

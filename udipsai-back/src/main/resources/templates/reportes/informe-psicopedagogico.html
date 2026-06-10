@@ -556,14 +556,9 @@
             <div class="section-title">6. REACTIVOS APLICADOS Y RESULTADOS:</div>
 
             <div class="reactivos-texto">
-              <div class="area-block">
-                <div class="area-subtitle" th:text="${informe.areaPsicologiaEducativa} ?: 'PSICOLOGÍA EDUCATIVA'"></div>
-                <div class="reactivo-contenido" th:text="${informe.reactivosPsicologiaEducativa}"></div>
-              </div>
-
-              <div class="area-block">
-                <div class="area-subtitle" th:text="${informe.areaPsicologiaClinica} ?: 'PSICOLOGÍA CLÍNICA'"></div>
-                <div class="reactivo-contenido" th:text="${informe.reactivosPsicologiaClinica}"></div>
+              <div class="area-block" th:each="seccion : ${reactivosSeccion}">
+                <div class="area-subtitle" th:text="${seccion.titulo}"></div>
+                <div class="reactivo-contenido" th:text="${seccion.contenido}"></div>
               </div>
             </div>
           </div>

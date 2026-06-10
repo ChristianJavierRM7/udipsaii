@@ -2,7 +2,13 @@ import { useAuth } from "../../context/AuthContext";
 import { Navigate, Outlet } from "react-router";
 
 interface PermissionRouteProps {
-  requiredPermission: string;
+  requiredPermission: string | string[];
+}
+
+function hasPermission(permissions: string[], requiredPermission: string | string[]) {
+  return Array.isArray(requiredPermission)
+    ? requiredPermission.some((permission) => permissions.includes(permission))
+    : permissions.includes(requiredPermission);
 }
 
 export default function PermissionRoute({
@@ -18,7 +24,7 @@ export default function PermissionRoute({
     );
   }
 
-  if (!permissions.includes(requiredPermission)) {
+  if (!hasPermission(permissions, requiredPermission)) {
     return <Navigate to="/" replace />;
   }
 

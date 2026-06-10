@@ -28,10 +28,18 @@ type NavItem = {
     path: string;
     pro?: boolean;
     new?: boolean;
-    requiredPermission?: string;
+    requiredPermission?: string | string[];
   }[];
-  requiredPermission?: string;
+  requiredPermission?: string | string[];
 };
+
+function hasAnyPermission(permissions: string[], requiredPermission?: string | string[]) {
+  if (!requiredPermission) return true;
+
+  return Array.isArray(requiredPermission)
+    ? requiredPermission.some((permission) => permissions.includes(permission))
+    : permissions.includes(requiredPermission);
+}
 
 const navItems: NavItem[] = [
   {
@@ -51,17 +59,17 @@ const navItems: NavItem[] = [
   {
     name: "Fichas",
     icon: <ClipboardList size={20} />,
-    requiredPermission: "PERM_PACIENTES",
+    requiredPermission: ["PERM_PACIENTES", "PERM_INFORMES"],
     subItems: [
       {
         name: "Todas las fichas",
         path: "/fichas",
-        // Sin requiredPermission: visible para cualquiera que tenga PERM_PACIENTES
+        requiredPermission: "PERM_PACIENTES",
       },
       {
         name: "Informes psicopedagógicos",
         path: "/fichas/informes",
-        // Sin requiredPermission extra: usa el del padre (PERM_PACIENTES)
+        requiredPermission: "PERM_INFORMES",
       },
     ],
   },
@@ -161,13 +169,13 @@ const AppSidebar: React.FC = () => {
     return items
       .filter((item) => {
         if (!item.requiredPermission) return true;
-        return permissions.includes(item.requiredPermission);
+        return hasAnyPermission(permissions, item.requiredPermission);
       })
       .map((item) => {
         if (item.subItems) {
           const filteredSubItems = item.subItems.filter((subItem) => {
             if (!subItem.requiredPermission) return true;
-            return permissions.includes(subItem.requiredPermission);
+            return hasAnyPermission(permissions, subItem.requiredPermission);
           });
           return { ...item, subItems: filteredSubItems };
         }
@@ -180,14 +188,8 @@ const AppSidebar: React.FC = () => {
       });
   };
 
-  const filteredNavItems = useMemo(
-    () => filterItems(navItems),
-    [permissions]
-  );
-  const filteredOthersItems = useMemo(
-    () => filterItems(othersItems),
-    [permissions]
-  );
+  const filteredNavItems = useMemo(() => filterItems(navItems), [permissions]);
+  const filteredOthersItems = useMemo(() => filterItems(othersItems), [permissions]);
 
   useEffect(() => {
   }, [permissions, filteredNavItems]);

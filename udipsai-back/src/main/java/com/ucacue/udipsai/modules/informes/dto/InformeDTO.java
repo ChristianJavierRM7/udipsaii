@@ -33,6 +33,8 @@ public class InformeDTO {
     private String observacionConsulta;
     private String reactivosPsicologiaEducativa;
     private String reactivosPsicologiaClinica;
+    private String reactivosFonoaudiologia;
+    private String reactivosTrabajoSocial;
     private String conclusiones;
     private String recomendacionesInstitucion;
     private String recomendacionesRepresentante;

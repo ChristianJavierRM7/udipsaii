@@ -16,6 +16,7 @@ export interface PermissionsState {
   fonoAudiologia: boolean;
   psicologiaClinica: boolean;
   psicologiaEducativa: boolean;
+  informes: boolean;
   citas: boolean;
 
   // Granular - Pacientes
@@ -78,6 +79,11 @@ export interface PermissionsState {
   psicologiaEducativaEditar?: boolean;
   psicologiaEducativaEliminar?: boolean;
 
+  // Granular - Informes
+  informesCrear?: boolean;
+  informesEditar?: boolean;
+  informesEliminar?: boolean;
+
   // Granular - Citas
   citasCrear?: boolean;
   citasEditar?: boolean;
@@ -100,6 +106,7 @@ const categories = [
       { key: "fonoAudiologia", label: "Fonoaudiología" },
       { key: "psicologiaClinica", label: "Psicología Clínica" },
       { key: "psicologiaEducativa", label: "Psicología Educativa" },
+      { key: "informes", label: "Informes Psicopedagógicos" },
     ] as const,
   },
   {

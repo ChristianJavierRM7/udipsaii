@@ -76,6 +76,12 @@ public class InformePsicopedagogico {
     @Column(name = "reactivos_psicologia_clinica", columnDefinition = "TEXT")
     private String reactivosPsicologiaClinica;
 
+    @Column(name = "reactivos_fonoaudiologia", columnDefinition = "TEXT")
+    private String reactivosFonoaudiologia;
+
+    @Column(name = "reactivos_trabajo_social", columnDefinition = "TEXT")
+    private String reactivosTrabajoSocial;
+
     // ─── Sección 7: Conclusiones ────────────────────────────────────────────
     @Column(name = "conclusiones", columnDefinition = "TEXT")
     private String conclusiones;

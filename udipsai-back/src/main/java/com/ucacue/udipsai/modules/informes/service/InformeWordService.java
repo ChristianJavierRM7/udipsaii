@@ -9,13 +9,10 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBorder;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageBorders;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STBorder;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
-import org.apache.poi.xwpf.usermodel.BreakType;
 import org.apache.poi.xwpf.usermodel.Document;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.TableRowAlign;
-import org.apache.poi.xwpf.usermodel.TextAlignment;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
-import org.apache.poi.xwpf.usermodel.VerticalAlign;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFFooter;
 import org.apache.poi.xwpf.usermodel.XWPFHeader;
@@ -37,7 +34,11 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -72,16 +73,28 @@ public class InformeWordService {
             agregarSeccion(document, "4. PSICOBIOGRAFÍA:", informe.getPsicobiografia());
             agregarSeccion(document, "5. OBSERVACIÓN EN LA CONSULTA:", informe.getObservacionConsulta());
 
-            agregarTituloSeccion(document, "6. REACTIVOS APLICADOS Y RESULTADOS:");
-            agregarSubtitulo(document, safe(informe.getAreaPsicologiaEducativa()).isBlank()
-                    ? "PSICOLOGÍA EDUCATIVA"
-                    : informe.getAreaPsicologiaEducativa().toUpperCase());
-            agregarTexto(document, informe.getReactivosPsicologiaEducativa());
+                List<Map<String, String>> reactivosSeccion = new ArrayList<>();
+                agregarReactivoOpcional(
+                    reactivosSeccion,
+                    safe(informe.getAreaPsicologiaEducativa()).isBlank() ? "PSICOLOGÍA EDUCATIVA" : informe.getAreaPsicologiaEducativa(),
+                    informe.getReactivosPsicologiaEducativa()
+                );
+                agregarReactivoOpcional(
+                    reactivosSeccion,
+                    safe(informe.getAreaPsicologiaClinica()).isBlank() ? "PSICOLOGÍA CLÍNICA" : informe.getAreaPsicologiaClinica(),
+                    informe.getReactivosPsicologiaClinica()
+                );
+                agregarReactivoOpcional(reactivosSeccion, "FONOAUDIOLOGÍA", informe.getReactivosFonoaudiologia());
+                agregarReactivoOpcional(reactivosSeccion, "TRABAJO SOCIAL", informe.getReactivosTrabajoSocial());
 
-            agregarSubtitulo(document, safe(informe.getAreaPsicologiaClinica()).isBlank()
-                    ? "PSICOLOGÍA CLÍNICA"
-                    : informe.getAreaPsicologiaClinica().toUpperCase());
-            agregarTexto(document, informe.getReactivosPsicologiaClinica());
+                if (!reactivosSeccion.isEmpty()) {
+                agregarTituloSeccion(document, "6. REACTIVOS APLICADOS Y RESULTADOS:");
+
+                for (Map<String, String> seccion : reactivosSeccion) {
+                    agregarSubtitulo(document, seccion.get("titulo"));
+                    agregarTexto(document, seccion.get("contenido"));
+                }
+                }
 
             agregarSeccion(document, "7. CONCLUSIONES:", informe.getConclusiones());
             agregarSeccion(document, "8. RECOMENDACIONES PARA LA INSTITUCIÓN EDUCATIVA:", informe.getRecomendacionesInstitucion());
@@ -294,6 +307,25 @@ private void configurarBorde(CTBorder border, int espacio) {
     private void agregarSeccion(XWPFDocument document, String titulo, String contenido) {
         agregarTituloSeccion(document, titulo);
         agregarTexto(document, contenido);
+    }
+
+    private void agregarSeccionOpcional(XWPFDocument document, String titulo, String contenido) {
+        if (safe(contenido).isBlank()) {
+            return;
+        }
+
+        agregarSeccion(document, titulo, contenido);
+    }
+
+    private void agregarReactivoOpcional(List<Map<String, String>> reactivos, String titulo, String contenido) {
+        if (safe(contenido).isBlank()) {
+            return;
+        }
+
+        Map<String, String> seccion = new HashMap<>();
+        seccion.put("titulo", titulo);
+        seccion.put("contenido", contenido);
+        reactivos.add(seccion);
     }
 
     private void agregarTituloSeccion(XWPFDocument document, String titulo) {

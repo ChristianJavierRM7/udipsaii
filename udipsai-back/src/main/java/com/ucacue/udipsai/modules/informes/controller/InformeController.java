@@ -26,25 +26,25 @@ public class InformeController {
     private InformeWordService wordService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES')")
     public ResponseEntity<List<InformeDTO>> listar() {
         return ResponseEntity.ok(service.listarInformes());
     }
 
     @GetMapping("/paciente/{pacienteId}")
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES')")
     public ResponseEntity<List<InformeDTO>> listarPorPaciente(@PathVariable Integer pacienteId) {
         return ResponseEntity.ok(service.listarInformesPorPaciente(pacienteId));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES')")
     public ResponseEntity<InformeDTO> obtener(@PathVariable Integer id) {
         return ResponseEntity.ok(service.obtenerPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES_CREAR')")
     public ResponseEntity<InformeDTO> crear(@RequestBody InformeRequest request) {
         log.info("POST /api/informes pacienteId={}", request.getPacienteId());
 
@@ -57,7 +57,7 @@ public class InformeController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES_EDITAR')")
     public ResponseEntity<InformeDTO> actualizar(
             @PathVariable Integer id,
             @RequestBody InformeRequest request
@@ -71,14 +71,14 @@ public class InformeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES_ELIMINAR')")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         service.eliminarInforme(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/pdf")
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES')")
     public ResponseEntity<byte[]> descargarPdf(@PathVariable Integer id) {
         log.info("Generando PDF informe ID={}", id);
 
@@ -96,7 +96,7 @@ public class InformeController {
     }
 
     @GetMapping("/{id}/word")
-    @PreAuthorize("hasAuthority('PERM_PACIENTES')")
+    @PreAuthorize("hasAuthority('PERM_INFORMES')")
     public ResponseEntity<byte[]> descargarWord(@PathVariable Integer id) {
         log.info("Generando Word informe ID={}", id);
 

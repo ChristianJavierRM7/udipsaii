@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -133,6 +134,21 @@ public class InformeService {
                 ? informe.getFechaLecturaInforme().format(fmt)
                 : "");
 
+        List<Map<String, String>> reactivosSeccion = new ArrayList<>();
+        agregarReactivoOpcional(
+            reactivosSeccion,
+            safe(informe.getAreaPsicologiaEducativa()).isBlank() ? "PSICOLOGÍA EDUCATIVA" : informe.getAreaPsicologiaEducativa(),
+            informe.getReactivosPsicologiaEducativa()
+        );
+        agregarReactivoOpcional(
+            reactivosSeccion,
+            safe(informe.getAreaPsicologiaClinica()).isBlank() ? "PSICOLOGÍA CLÍNICA" : informe.getAreaPsicologiaClinica(),
+            informe.getReactivosPsicologiaClinica()
+        );
+        agregarReactivoOpcional(reactivosSeccion, "FONOAUDIOLOGÍA", informe.getReactivosFonoaudiologia());
+        agregarReactivoOpcional(reactivosSeccion, "TRABAJO SOCIAL", informe.getReactivosTrabajoSocial());
+        datos.put("reactivosSeccion", reactivosSeccion);
+
         return pdfService.generatePdfFromHtml("reportes/informe-psicopedagogico", datos);
     }
 
@@ -149,6 +165,8 @@ public class InformeService {
         e.setObservacionConsulta(r.getObservacionConsulta());
         e.setReactivosPsicologiaEducativa(r.getReactivosPsicologiaEducativa());
         e.setReactivosPsicologiaClinica(r.getReactivosPsicologiaClinica());
+        e.setReactivosFonoaudiologia(r.getReactivosFonoaudiologia());
+        e.setReactivosTrabajoSocial(r.getReactivosTrabajoSocial());
         e.setConclusiones(r.getConclusiones());
         e.setRecomendacionesInstitucion(r.getRecomendacionesInstitucion());
         e.setRecomendacionesRepresentante(r.getRecomendacionesRepresentante());
@@ -189,6 +207,8 @@ public class InformeService {
         dto.setObservacionConsulta(i.getObservacionConsulta());
         dto.setReactivosPsicologiaEducativa(i.getReactivosPsicologiaEducativa());
         dto.setReactivosPsicologiaClinica(i.getReactivosPsicologiaClinica());
+        dto.setReactivosFonoaudiologia(i.getReactivosFonoaudiologia());
+        dto.setReactivosTrabajoSocial(i.getReactivosTrabajoSocial());
         dto.setConclusiones(i.getConclusiones());
         dto.setRecomendacionesInstitucion(i.getRecomendacionesInstitucion());
         dto.setRecomendacionesRepresentante(i.getRecomendacionesRepresentante());
@@ -211,6 +231,17 @@ public class InformeService {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private void agregarReactivoOpcional(List<Map<String, String>> reactivos, String titulo, String contenido) {
+        if (safe(contenido).isBlank()) {
+            return;
+        }
+
+        Map<String, String> seccion = new HashMap<>();
+        seccion.put("titulo", titulo);
+        seccion.put("contenido", contenido);
+        reactivos.add(seccion);
     }
 
     private String formatearFechaFlexible(String value, DateTimeFormatter fmt) {

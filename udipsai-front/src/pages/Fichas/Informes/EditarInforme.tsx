@@ -358,6 +358,31 @@ const PARENTESCOS = [
   { value: "Otro", label: "Otro (especificar)" },
 ];
 
+const SECCIONES_REACTIVOS_OPCIONALES: Array<{
+  label: string;
+  name: keyof FormState;
+}> = [
+  { label: "Fonoaudiología", name: "reactivosFonoaudiologia" },
+  { label: "Trabajo Social", name: "reactivosTrabajoSocial" },
+];
+
+const SECCIONES_REACTIVOS_BASE: Array<{
+  label: string;
+  name: keyof FormState;
+  areaName: keyof FormState;
+}> = [
+  {
+    label: "Psicología Educativa",
+    name: "reactivosPsicologiaEducativa",
+    areaName: "areaPsicologiaEducativa",
+  },
+  {
+    label: "Psicología Clínica",
+    name: "reactivosPsicologiaClinica",
+    areaName: "areaPsicologiaClinica",
+  },
+];
+
 const VACIO: FormState = {
   numeroFicha: "",
   representante: "",
@@ -372,6 +397,8 @@ const VACIO: FormState = {
   observacionConsulta: "",
   reactivosPsicologiaEducativa: "",
   reactivosPsicologiaClinica: "",
+  reactivosFonoaudiologia: "",
+  reactivosTrabajoSocial: "",
   conclusiones: "",
   recomendacionesInstitucion: "",
   recomendacionesRepresentante: "",
@@ -458,6 +485,8 @@ export default function EditarInforme() {
           observacionConsulta: inf.observacionConsulta ?? "",
           reactivosPsicologiaEducativa: inf.reactivosPsicologiaEducativa ?? "",
           reactivosPsicologiaClinica: inf.reactivosPsicologiaClinica ?? "",
+          reactivosFonoaudiologia: inf.reactivosFonoaudiologia ?? "",
+          reactivosTrabajoSocial: inf.reactivosTrabajoSocial ?? "",
           conclusiones: inf.conclusiones ?? "",
           recomendacionesInstitucion: inf.recomendacionesInstitucion ?? "",
           recomendacionesRepresentante: inf.recomendacionesRepresentante ?? "",
@@ -726,21 +755,67 @@ export default function EditarInforme() {
         </ComponentCard>
 
         <ComponentCard title="6. Reactivos aplicados y resultados">
-          <div className="space-y-4">
-            <AreaTexto
-              label="Psicología Educativa"
-              name="reactivosPsicologiaEducativa"
-              value={form.reactivosPsicologiaEducativa}
-              onChange={onTextarea}
-              filas={5}
-            />
-            <AreaTexto
-              label="Psicología Clínica"
-              name="reactivosPsicologiaClinica"
-              value={form.reactivosPsicologiaClinica}
-              onChange={onTextarea}
-              filas={5}
-            />
+          <div className="space-y-5">
+            <div className="grid gap-4 lg:grid-cols-2">
+              {SECCIONES_REACTIVOS_BASE.map((seccion) => (
+                <div
+                  key={String(seccion.name)}
+                  className="rounded-2xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 p-4 shadow-sm dark:border-gray-800 dark:from-white/5 dark:to-white/[0.03]"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">
+                        Reactivo base
+                      </p>
+                      <h3 className="mt-1 text-base font-semibold text-gray-800 dark:text-white">
+                        {seccion.label}
+                      </h3>
+                    </div>
+                    <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:bg-brand-900/20 dark:text-brand-300">
+                      Visible si tiene texto
+                    </span>
+                  </div>
+
+                  <AreaTexto
+                    name={seccion.name}
+                    value={form[seccion.name]}
+                    onChange={onTextarea}
+                    filas={5}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <details className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 transition-colors hover:border-brand-300 dark:border-gray-700 dark:bg-white/5">
+              <summary className="cursor-pointer list-none text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Áreas adicionales opcionales
+              </summary>
+
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                {SECCIONES_REACTIVOS_OPCIONALES.map((seccion) => (
+                  <div
+                    key={String(seccion.name)}
+                    className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-black/10"
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
+                        {seccion.label}
+                      </h3>
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                        Opcional
+                      </span>
+                    </div>
+
+                    <AreaTexto
+                      name={seccion.name}
+                      value={form[seccion.name]}
+                      onChange={onTextarea}
+                      filas={5}
+                    />
+                  </div>
+                ))}
+              </div>
+            </details>
           </div>
         </ComponentCard>
 

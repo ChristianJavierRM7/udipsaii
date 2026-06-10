@@ -96,7 +96,7 @@ export const privateRouteObjects: RouteObject[] = [
   // ── Fichas (BLOQUE ÚNICO sin duplicados) ────────────────────────────────────
   {
     path: "fichas",
-    element: <PermissionRoute requiredPermission="PERM_PACIENTES" />,
+    element: <PermissionRoute requiredPermission={["PERM_PACIENTES", "PERM_INFORMES"]} />,
     children: [
       { index: true, element: <ListaFichasUnificadas /> },
 
@@ -115,10 +115,10 @@ export const privateRouteObjects: RouteObject[] = [
       { path: "psicologia-educativa/editar/:id", ...protectedRoute("PERM_PSICOLOGIA_EDUCATIVA_EDITAR", <EditarPsicologiaEducativa />) },
 
       // ── Informes psicopedagógicos ──────────────────────────────────────────
-      { path: "informes",                    ...protectedRoute("PERM_PACIENTES", <SelectorPacienteInformes />) },
-      { path: "informes/:pacienteId",        ...protectedRoute("PERM_PACIENTES", <ListaInformes />) },
-      { path: "informes/nuevo/:pacienteId",  ...protectedRoute("PERM_PACIENTES", <NuevoInforme />) },
-      { path: "informes/editar/:id",         ...protectedRoute("PERM_PACIENTES", <EditarInforme />) },
+      { path: "informes",                    ...protectedRoute("PERM_INFORMES", <SelectorPacienteInformes />) },
+      { path: "informes/:pacienteId",        ...protectedRoute("PERM_INFORMES", <ListaInformes />) },
+      { path: "informes/nuevo/:pacienteId",  ...protectedRoute("PERM_INFORMES_CREAR", <NuevoInforme />) },
+      { path: "informes/editar/:id",         ...protectedRoute("PERM_INFORMES_EDITAR", <EditarInforme />) },
     ]
   },
 
