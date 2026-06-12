@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -150,6 +153,42 @@ public class InformeService {
         datos.put("reactivosSeccion", reactivosSeccion);
 
         return pdfService.generatePdfFromHtml("reportes/informe-psicopedagogico", datos);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] generarZipPorRango(Integer pacienteId, LocalDate desde, LocalDate hasta) throws Exception {
+        log.info("Generando ZIP informes pacienteId={} desde={} hasta={}", pacienteId, desde, hasta);
+
+        List<InformePsicopedagogico> informes = repository.findByPacienteIdAndActivo(pacienteId, true)
+                .stream()
+                .filter(i -> {
+                    LocalDate fecha = i.getFechaElaboracionInforme();
+                    if (fecha == null) return false;
+                    if (desde != null && fecha.isBefore(desde)) return false;
+                    if (hasta != null && fecha.isAfter(hasta)) return false;
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        if (informes.isEmpty()) {
+            throw new RuntimeException("No hay informes en el rango de fechas indicado");
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (InformePsicopedagogico informe : informes) {
+                byte[] pdf = generarPdf(informe.getId());
+                String nombreArchivo = String.format("Informe_%s_%s.pdf",
+                        informe.getNumeroFicha() != null ? informe.getNumeroFicha() : informe.getId(),
+                        informe.getPaciente().getNombresApellidos().replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]", "").trim()
+                );
+                zos.putNextEntry(new ZipEntry(nombreArchivo));
+                zos.write(pdf);
+                zos.closeEntry();
+            }
+        }
+
+        return baos.toByteArray();
     }
 
     private void mapToEntity(InformeRequest r, InformePsicopedagogico e) {

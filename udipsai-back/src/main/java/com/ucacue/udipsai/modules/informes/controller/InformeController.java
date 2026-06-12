@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api/informes")
 @Slf4j
@@ -95,20 +97,30 @@ public class InformeController {
         }
     }
 
-    @GetMapping("/{id}/word")
+    @GetMapping("/paciente/{pacienteId}/zip")
     @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
-    public ResponseEntity<byte[]> descargarWord(@PathVariable Integer id) {
-        log.info("Generando Word informe ID={}", id);
-
+    public ResponseEntity<byte[]> descargarZip(
+            @PathVariable Integer pacienteId,
+            @RequestParam(required = false) String desde,
+            @RequestParam(required = false) String hasta) {
+        log.info("Generando ZIP informes pacienteId={} desde={} hasta={}", pacienteId, desde, hasta);
         try {
-            byte[] word = wordService.generarWord(id);
+            LocalDate fechaDesde = (desde != null && !desde.isBlank()) ? LocalDate.parse(desde) : null;
+            LocalDate fechaHasta = (hasta != null && !hasta.isBlank()) ? LocalDate.parse(hasta) : null;
+
+            byte[] zip = service.generarZipPorRango(pacienteId, fechaDesde, fechaHasta);
+            String filename = "Informes_paciente_" + pacienteId + "_" + LocalDate.now() + ".zip";
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe-" + id + ".docx")
-                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
-                    .body(word);
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, "application/zip")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                    .body(zip);
+        } catch (RuntimeException e) {
+            log.warn("ZIP informes: {}", e.getMessage());
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            log.error("Error Word informe {}: {}", id, e.getMessage());
+            log.error("Error al generar ZIP informes pacienteId={}: {}", pacienteId, e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }

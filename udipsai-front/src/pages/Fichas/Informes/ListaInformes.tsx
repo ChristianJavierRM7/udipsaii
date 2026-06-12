@@ -7,7 +7,7 @@ import Button from "../../../components/ui/button/Button";
 import DatePicker from "../../../components/form/date-picker";
 import { useAuth } from "../../../context/AuthContext";
 import { informesService, InformeDTO } from "../../../services/informes";
-import JSZip from "jszip";
+
 
 type TipoDescarga = "pdf" | "word";
 
@@ -30,7 +30,7 @@ export default function ListaInformes() {
   const [ordenDir, setOrdenDir] = useState<"desc" | "asc">("desc");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
-  const [descargandoZip, setDescargandoZip] = useState(false);
+  const [descargandoZip] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const canCreate = hasPermission("PERM_INFORMES_CREAR");
@@ -127,38 +127,20 @@ export default function ListaInformes() {
     }
   };
 
-  const informesEnRango = () => {
-    return informes.filter((inf) => {
-      const fecha = inf.fechaElaboracionInforme?.toString().slice(0, 10);
-      if (!fecha) return false;
-      if (fechaDesde && fecha < fechaDesde) return false;
-      if (fechaHasta && fecha > fechaHasta) return false;
-      return true;
-    });
-  };
-
   const handleDescargarZip = async () => {
-    const seleccionados = informesEnRango();
-    if (seleccionados.length === 0) return toast.warning("No hay informes en este rango");
+    if (!pacienteId) return;
+    const token = localStorage.getItem("accessToken");
+    const params = new URLSearchParams();
+    if (fechaDesde) params.append("desde", fechaDesde);
+    if (fechaHasta) params.append("hasta", fechaHasta);
+    if (token) params.append("token", token);
 
-    setDescargandoZip(true);
-    try {
-      const zip = new JSZip();
-      for (const inf of seleccionados) {
-        const blob = await informesService.obtenerPdfBlob(inf.id);
-        const nombreArchivo = `Informe_${inf.numeroFicha || inf.id}_${inf.paciente.nombresApellidos}.pdf`;
-        zip.file(nombreArchivo, blob);
-      }
-      const content = await zip.generateAsync({ type: "blob" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(content);
-      link.download = `Informes_${pacienteId}_${new Date().getTime()}.zip`;
-      link.click();
-    } catch {
-      toast.error("Error al generar el archivo ZIP");
-    } finally {
-      setDescargandoZip(false);
-    }
+    const link = document.createElement("a");
+    link.href = `/api/informes/paciente/${pacienteId}/zip?${params.toString()}`;
+    link.download = `Informes_${pacienteId}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleDescargarWord = async (informe: InformeDTO) => {
