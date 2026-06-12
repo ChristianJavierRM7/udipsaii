@@ -32,8 +32,7 @@ export interface PacienteCriteria {
   sedeId?: number;
   institucionEducativaId?: number;
   id?: number;
-  // Nuevos
-  
+  sexo?: string;
   edadMin?: number;
   edadMax?: number;
   nivelEducativo?: string;

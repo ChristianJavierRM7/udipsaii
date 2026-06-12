@@ -182,14 +182,10 @@ public class PacienteService {
 
         // Año de apertura de ficha
         if (criteria.getAnioFicha() != null) {
-            java.time.LocalDateTime inicio =
-            java.time.LocalDate.of(criteria.getAnioFicha(), 1, 1).atStartOfDay();
-
-            java.time.LocalDateTime fin = java.time.LocalDate.of(criteria.getAnioFicha(), 12, 31).atTime(23, 59, 59);
-    predicates.add(
-        cb.between(root.get("fechaApertura"), inicio, fin)
-    );
-}
+            predicates.add(cb.equal(
+                    cb.function("YEAR", Integer.class, root.get("fechaApertura")),
+                    criteria.getAnioFicha()));
+        }
 
         // Área atendida (verifica si tiene ficha en esa área)
         if (StringUtils.hasText(criteria.getAreaAtendida())) {
@@ -352,6 +348,7 @@ public class PacienteService {
     }
 
     private void mapearRequestAEntidad(PacienteRequest request, Paciente paciente) {
+        paciente.setSexo(request.getSexo());
         paciente.setNombresApellidos(request.getNombresApellidos());
         paciente.setCiudad(request.getCiudad());
         paciente.setFechaNacimiento(request.getFechaNacimiento());
@@ -490,4 +487,3 @@ public class PacienteService {
         log.info("Documento ID {} eliminado (lógicamente)", id);
     }
 }
-

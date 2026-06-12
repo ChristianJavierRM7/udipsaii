@@ -7,6 +7,8 @@ import ComponentCard from "../../../components/common/ComponentCard";
 import Button from "../../../components/ui/button/Button";
 import { informesService, InformeRequest } from "../../../services/informes";
 import { fichasService } from "../../../services/fichas";
+import DatePicker from "../../../components/form/date-picker";
+
 import {
   especialistasService,
   EspecialistaDTO,
@@ -1512,12 +1514,14 @@ export default function NuevoInforme() {
               </label>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <input
-                  type="date"
-                  value={fechaEvaluacionTemporal}
-                  onChange={(e) => setFechaEvaluacionTemporal(e.target.value)}
-                  className="dark:bg-dark-900 h-11 flex-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 dark:border-gray-700 dark:text-white/90"
-                />
+                <div className="flex-1">
+                  <DatePicker
+                    id="fechaEvaluacionTemporal"
+                    placeholder="Seleccione una fecha"
+                    onChange={(_dates, dateStr) => setFechaEvaluacionTemporal(dateStr)}
+                    defaultDate={fechaEvaluacionTemporal || undefined}
+                  />
+                </div>
 
                 <button
                   type="button"
@@ -1554,21 +1558,29 @@ export default function NuevoInforme() {
               </p>
             </div>
 
-            <Campo
-              label="Fecha elaboración informe"
-              name="fechaElaboracionInforme"
-              type="date"
-              value={form.fechaElaboracionInforme}
-              onChange={onInput}
-            />
+            <div>
+              <DatePicker
+                id="fechaElaboracionInforme"
+                label="Fecha elaboración informe"
+                placeholder="Seleccione una fecha"
+                defaultDate={form.fechaElaboracionInforme || undefined}
+                onChange={(_dates, dateStr) =>
+                  setForm((prev) => ({ ...prev, fechaElaboracionInforme: dateStr }))
+                }
+              />
+            </div>
 
-            <Campo
-              label="Fecha lectura informe"
-              name="fechaLecturaInforme"
-              type="date"
-              value={form.fechaLecturaInforme}
-              onChange={onInput}
-            />
+            <div>
+              <DatePicker
+                id="fechaLecturaInforme"
+                label="Fecha lectura informe"
+                placeholder="Seleccione una fecha"
+                defaultDate={form.fechaLecturaInforme || undefined}
+                onChange={(_dates, dateStr) =>
+                  setForm((prev) => ({ ...prev, fechaLecturaInforme: dateStr }))
+                }
+              />
+            </div>
           </div>
         </ComponentCard>
 

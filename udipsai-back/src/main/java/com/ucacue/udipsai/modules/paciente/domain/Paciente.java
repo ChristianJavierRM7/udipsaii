@@ -46,7 +46,7 @@ public class Paciente {
     @Column(length = 100)
     private String ciudad;
 
-    @Column(length = 20)
+    @Column(name = "sexo", length = 1)
     private String sexo;
 
     @Column(name = "fecha_nacimiento")

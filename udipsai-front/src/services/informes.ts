@@ -123,6 +123,14 @@ export const informesService = {
     );
   },
 
+  obtenerPdfBlob: async (id: number): Promise<Blob> => {
+    const response = await api.get(`/informes/${id}/pdf`, {
+      responseType: "blob",
+    });
+
+    return response.data;
+  },
+
   descargarWord: async (id: number, nombrePaciente: string): Promise<void> => {
     const response = await api.get(`/informes/${id}/word`, {
       responseType: "blob",

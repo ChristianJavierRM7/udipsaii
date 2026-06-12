@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PacienteCriteriaDTO {
     private String search;
-    private String ciudad;
     private Boolean activo;
     private Integer sedeId;
     private Integer institucionEducativaId;

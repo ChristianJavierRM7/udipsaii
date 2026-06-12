@@ -69,7 +69,7 @@ const navItems: NavItem[] = [
       {
         name: "Informes psicopedagógicos",
         path: "/fichas/informes",
-        requiredPermission: "PERM_INFORMES",
+        requiredPermission: ["PERM_PACIENTES", "PERM_INFORMES"],
       },
     ],
   },

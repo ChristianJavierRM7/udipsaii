@@ -6,11 +6,14 @@ import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
 import PageMeta from "../../../components/common/PageMeta";
 import ComponentCard from "../../../components/common/ComponentCard";
 import { FilterDropdown } from "../../../components/common/FilterDropdown";
+import DatePicker from "../../../components/form/date-picker";
 
 import Select from "../../../components/form/Select";
 import Label from "../../../components/form/Label";
 
 import { pacientesService } from "../../../services/pacientes";
+import { informesService } from "../../../services/informes";
+import JSZip from "jszip";
 
 interface PacienteResumen {
   id: number;
@@ -30,6 +33,9 @@ export default function SelectorPacienteInformes() {
   const [edadMax, setEdadMax] = useState("");
   const [anioFicha, setAnioFicha] = useState("");
   const [areaAtendida, setAreaAtendida] = useState("");
+  const [fechaDesdeGlobal, setFechaDesdeGlobal] = useState("");
+  const [fechaHastaGlobal, setFechaHastaGlobal] = useState("");
+  const [descargandoZipGlobal, setDescargandoZipGlobal] = useState(false);
 
   useEffect(() => {
     cargarPacientes();
@@ -87,6 +93,31 @@ export default function SelectorPacienteInformes() {
     await cargarPacientes();
   };
 
+  const handleDescargarZipGlobal = async () => {
+    if (!fechaDesdeGlobal || !fechaHastaGlobal) return toast.info("Seleccione un rango de fechas");
+    
+    setDescargandoZipGlobal(true);
+    try {
+      const zip = new JSZip();
+      // Lógica de descarga masiva global basada en pacientes actuales filtrados
+      for (const p of filtrados) {
+        const infs = await informesService.listarPorPaciente(p.id);
+        const filtradosFecha = infs.filter(i => {
+          const f = i.fechaElaboracionInforme?.toString().slice(0, 10);
+          return f && f >= fechaDesdeGlobal && f <= fechaHastaGlobal;
+        });
+        
+        for (const inf of filtradosFecha) {
+          const blob = await informesService.obtenerPdfBlob(inf.id);
+          zip.file(`${p.nombresApellidos}/Informe_${inf.id}.pdf`, blob);
+        }
+      }
+      const content = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a"); link.href = URL.createObjectURL(content);
+      link.download = `Descarga_Global_${new Date().getTime()}.zip`; link.click();
+    } catch { toast.error("Error en descarga global"); } finally { setDescargandoZipGlobal(false); }
+  };
+
   const filtrados = pacientes.filter(
     (p) =>
       p.nombresApellidos.toLowerCase().includes(filtro.toLowerCase()) ||
@@ -111,6 +142,22 @@ export default function SelectorPacienteInformes() {
 
       <ComponentCard title="Selecciona un paciente">
         <div className="mb-4 flex gap-2">
+          <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 p-1 rounded-lg border border-gray-200 dark:border-gray-800">
+            <DatePicker 
+              id="fecha-desde-global"
+            placeholder="Desde" onChange={(_, d) => setFechaDesdeGlobal(d)} />
+            <DatePicker 
+              id="fecha-hasta-global"
+            placeholder="Hasta" onChange={(_, d) => setFechaHastaGlobal(d)} />
+            <button 
+              onClick={handleDescargarZipGlobal}
+              disabled={descargandoZipGlobal}
+              className="px-3 py-2 bg-brand-500 text-white rounded-lg text-xs font-medium hover:bg-brand-600 disabled:opacity-50"
+            >
+              {descargandoZipGlobal ? "Procesando..." : "Descargar todos"}
+            </button>
+          </div>
+
           <input
             type="text"
             placeholder="Buscar por nombre o cédula..."

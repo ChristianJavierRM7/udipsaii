@@ -4,13 +4,17 @@ import { toast } from "react-toastify";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
 import PageMeta from "../../../components/common/PageMeta";
 import Button from "../../../components/ui/button/Button";
+import DatePicker from "../../../components/form/date-picker";
+import { useAuth } from "../../../context/AuthContext";
 import { informesService, InformeDTO } from "../../../services/informes";
+import JSZip from "jszip";
 
 type TipoDescarga = "pdf" | "word";
 
 export default function ListaInformes() {
   const { pacienteId } = useParams<{ pacienteId: string }>();
   const navigate = useNavigate();
+  const { hasPermission } = useAuth();
 
   const [informes, setInformes] = useState<InformeDTO[]>([]);
   const [informesFiltrados, setInformesFiltrados] = useState<InformeDTO[]>([]);
@@ -24,7 +28,14 @@ export default function ListaInformes() {
   const [fechaLectDesde, setFechaLectDesde] = useState("");
   const [fechaLectHasta, setFechaLectHasta] = useState("");
   const [ordenDir, setOrdenDir] = useState<"desc" | "asc">("desc");
+  const [fechaDesde, setFechaDesde] = useState("");
+  const [fechaHasta, setFechaHasta] = useState("");
+  const [descargandoZip, setDescargandoZip] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+
+  const canCreate = hasPermission("PERM_INFORMES_CREAR");
+  const canEdit = hasPermission("PERM_INFORMES_EDITAR");
+  const canDelete = hasPermission("PERM_INFORMES_ELIMINAR");
 
   useEffect(() => {
     if (!pacienteId) return;
@@ -116,6 +127,40 @@ export default function ListaInformes() {
     }
   };
 
+  const informesEnRango = () => {
+    return informes.filter((inf) => {
+      const fecha = inf.fechaElaboracionInforme?.toString().slice(0, 10);
+      if (!fecha) return false;
+      if (fechaDesde && fecha < fechaDesde) return false;
+      if (fechaHasta && fecha > fechaHasta) return false;
+      return true;
+    });
+  };
+
+  const handleDescargarZip = async () => {
+    const seleccionados = informesEnRango();
+    if (seleccionados.length === 0) return toast.warning("No hay informes en este rango");
+
+    setDescargandoZip(true);
+    try {
+      const zip = new JSZip();
+      for (const inf of seleccionados) {
+        const blob = await informesService.obtenerPdfBlob(inf.id);
+        const nombreArchivo = `Informe_${inf.numeroFicha || inf.id}_${inf.paciente.nombresApellidos}.pdf`;
+        zip.file(nombreArchivo, blob);
+      }
+      const content = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(content);
+      link.download = `Informes_${pacienteId}_${new Date().getTime()}.zip`;
+      link.click();
+    } catch {
+      toast.error("Error al generar el archivo ZIP");
+    } finally {
+      setDescargandoZip(false);
+    }
+  };
+
   const handleDescargarWord = async (informe: InformeDTO) => {
     setDescargando({ id: informe.id, tipo: "word" });
     try {
@@ -158,6 +203,29 @@ export default function ListaInformes() {
             Informes psicopedagógicos
           </h2>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-4 bg-gray-50 dark:bg-white/5 p-1.5 rounded-xl border border-gray-200 dark:border-gray-800">
+              <DatePicker
+                id="fecha-desde"
+                placeholder="Desde"
+                onChange={(_, dateStr) => setFechaDesde(dateStr)}
+              />
+              <DatePicker
+                id="fecha-hasta"
+                placeholder="Hasta"
+                onChange={(_, dateStr) => setFechaHasta(dateStr)}
+              />
+              <button
+                onClick={handleDescargarZip}
+                disabled={descargandoZip}
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                {descargandoZip ? "Generando ZIP..." : "Descargar ZIP"}
+              </button>
+            </div>
+
             <button
               onClick={() => setMostrarFiltros(!mostrarFiltros)}
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
@@ -176,9 +244,11 @@ export default function ListaInformes() {
                 </span>
               )}
             </button>
-            <Button onClick={() => navigate(`/fichas/informes/nuevo/${pacienteId}`)}>
-              + Nuevo informe
-            </Button>
+            {canCreate && (
+              <Button onClick={() => navigate(`/fichas/informes/nuevo/${pacienteId}`)}>
+                + Nuevo informe
+              </Button>
+            )}
           </div>
         </div>
 
@@ -338,18 +408,22 @@ export default function ListaInformes() {
                         >
                           {descargando?.id === inf.id && descargando?.tipo === "word" ? "Generando..." : "Word"}
                         </button>
-                        <button
-                          onClick={() => navigate(`/fichas/informes/editar/${inf.id}`)}
-                          className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleEliminar(inf.id)}
-                          className="rounded-lg border border-red-200 p-1.5 text-red-500 hover:bg-red-50 dark:border-red-900 dark:text-red-400"
-                        >
-                          🗑️
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={() => navigate(`/fichas/informes/editar/${inf.id}`)}
+                            className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
+                          >
+                            ✏️
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={() => handleEliminar(inf.id)}
+                            className="rounded-lg border border-red-200 p-1.5 text-red-500 hover:bg-red-50 dark:border-red-900 dark:text-red-400"
+                          >
+                            🗑️
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -41,7 +41,7 @@ const ListaInformes            = lazy(() => import("../pages/Fichas/Informes/Lis
 const NuevoInforme             = lazy(() => import("../pages/Fichas/Informes/NuevoInforme"));
 const EditarInforme            = lazy(() => import("../pages/Fichas/Informes/EditarInforme"));
 
-const protectedRoute = (permission: string, element: ReactNode, children?: RouteObject[]): RouteObject => ({
+const protectedRoute = (permission: string | string[], element: ReactNode, children?: RouteObject[]): RouteObject => ({
   element: <PermissionRoute requiredPermission={permission} />,
   children: [
     { index: true, element },
@@ -115,8 +115,8 @@ export const privateRouteObjects: RouteObject[] = [
       { path: "psicologia-educativa/editar/:id", ...protectedRoute("PERM_PSICOLOGIA_EDUCATIVA_EDITAR", <EditarPsicologiaEducativa />) },
 
       // ── Informes psicopedagógicos ──────────────────────────────────────────
-      { path: "informes",                    ...protectedRoute("PERM_INFORMES", <SelectorPacienteInformes />) },
-      { path: "informes/:pacienteId",        ...protectedRoute("PERM_INFORMES", <ListaInformes />) },
+      { path: "informes",                    ...protectedRoute(["PERM_PACIENTES", "PERM_INFORMES"], <SelectorPacienteInformes />) },
+      { path: "informes/:pacienteId",        ...protectedRoute(["PERM_PACIENTES", "PERM_INFORMES"], <ListaInformes />) },
       { path: "informes/nuevo/:pacienteId",  ...protectedRoute("PERM_INFORMES_CREAR", <NuevoInforme />) },
       { path: "informes/editar/:id",         ...protectedRoute("PERM_INFORMES_EDITAR", <EditarInforme />) },
     ]

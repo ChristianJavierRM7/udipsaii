@@ -30,6 +30,7 @@ interface Paciente {
   id: number;
   nombresApellidos: string;
   cedula: string;
+  sexo: string;
   fechaNacimiento: string;
   fechaApertura: string;
   activo: boolean;
@@ -253,7 +254,16 @@ export default function PacientesAccionesTable() {
         { value: "false", label: "Inactivo" },
       ],
     },
-
+    {
+      type: "select",
+      name: "sexo",
+      label: "Sexo",
+      placeholder: "Todos",
+      options: [
+        { value: "M", label: "Masculino" },
+        { value: "F", label: "Femenino" },
+      ],
+    },
     {
       type: "input",
       name: "edadMin",
@@ -373,7 +383,7 @@ export default function PacientesAccionesTable() {
           sortDirection,
           sedeId: filters.sedeId?.toString(),
           institucionEducativaId: filters.institucionEducativaId?.toString(),
-          
+          sexo: filters.sexo,
           nivelEducativo: filters.nivelEducativo,
           areaAtendida: filters.areaAtendida,
           edadMin: filters.edadMin?.toString(),

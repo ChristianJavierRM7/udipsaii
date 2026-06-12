@@ -26,19 +26,19 @@ public class InformeController {
     private InformeWordService wordService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('PERM_INFORMES')")
+    @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
     public ResponseEntity<List<InformeDTO>> listar() {
         return ResponseEntity.ok(service.listarInformes());
     }
 
     @GetMapping("/paciente/{pacienteId}")
-    @PreAuthorize("hasAuthority('PERM_INFORMES')")
+    @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
     public ResponseEntity<List<InformeDTO>> listarPorPaciente(@PathVariable Integer pacienteId) {
         return ResponseEntity.ok(service.listarInformesPorPaciente(pacienteId));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERM_INFORMES')")
+    @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
     public ResponseEntity<InformeDTO> obtener(@PathVariable Integer id) {
         return ResponseEntity.ok(service.obtenerPorId(id));
     }
@@ -78,7 +78,7 @@ public class InformeController {
     }
 
     @GetMapping("/{id}/pdf")
-    @PreAuthorize("hasAuthority('PERM_INFORMES')")
+    @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
     public ResponseEntity<byte[]> descargarPdf(@PathVariable Integer id) {
         log.info("Generando PDF informe ID={}", id);
 
@@ -96,7 +96,7 @@ public class InformeController {
     }
 
     @GetMapping("/{id}/word")
-    @PreAuthorize("hasAuthority('PERM_INFORMES')")
+    @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
     public ResponseEntity<byte[]> descargarWord(@PathVariable Integer id) {
         log.info("Generando Word informe ID={}", id);
 
