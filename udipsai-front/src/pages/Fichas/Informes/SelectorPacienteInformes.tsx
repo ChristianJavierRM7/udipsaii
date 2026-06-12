@@ -77,9 +77,9 @@ export default function SelectorPacienteInformes() {
       console.error("Error al filtrar:", error);
       console.error("Status:", error?.response?.status);
       console.error("Data:", error?.response?.data);
-      
+
       toast.error("Error al filtrar pacientes");
-} finally {
+    } finally {
       setCargando(false);
     }
   };
@@ -93,31 +93,78 @@ export default function SelectorPacienteInformes() {
     await cargarPacientes();
   };
 
-  const handleDescargarZipGlobal = async () => {
-    if (!fechaDesdeGlobal || !fechaHastaGlobal) return toast.info("Seleccione un rango de fechas");
-    
-    setDescargandoZipGlobal(true);
-    try {
-      const zip = new JSZip();
-      // Lógica de descarga masiva global basada en pacientes actuales filtrados
-      for (const p of filtrados) {
-        const infs = await informesService.listarPorPaciente(p.id);
-        const filtradosFecha = infs.filter(i => {
-          const f = i.fechaElaboracionInforme?.toString().slice(0, 10);
-          return f && f >= fechaDesdeGlobal && f <= fechaHastaGlobal;
-        });
-        
-        for (const inf of filtradosFecha) {
-          const blob = await informesService.obtenerPdfBlob(inf.id);
-          zip.file(`${p.nombresApellidos}/Informe_${inf.id}.pdf`, blob);
-        }
-      }
-      const content = await zip.generateAsync({ type: "blob" });
-      const link = document.createElement("a"); link.href = URL.createObjectURL(content);
-      link.download = `Descarga_Global_${new Date().getTime()}.zip`; link.click();
-    } catch { toast.error("Error en descarga global"); } finally { setDescargandoZipGlobal(false); }
+  const informesEnRangoGlobal = async () => {
+    const todos = await informesService.listar();
+    return todos.filter((inf) => {
+      const fecha = inf.fechaElaboracionInforme?.toString().slice(0, 10);
+      if (!fecha) return false;
+      if (fechaDesdeGlobal && fecha < fechaDesdeGlobal) return false;
+      if (fechaHastaGlobal && fecha > fechaHastaGlobal) return false;
+      return true;
+    });
   };
 
+  const handleDescargarZipGlobal = async () => {
+    setDescargandoZipGlobal(true);
+    toast.info("Buscando informes...");
+
+    try {
+      const enRango = await informesEnRangoGlobal();
+
+      if (enRango.length === 0) {
+        toast.error("No hay informes en el rango de fechas seleccionado");
+        return;
+      }
+
+      toast.info(`Generando ZIP con ${enRango.length} informe(s)...`);
+
+      const zip = new JSZip();
+
+      for (const inf of enRango) {
+        try {
+          const blob = await informesService.obtenerPdfBlob(inf.id);
+          const nombreArchivo = `${inf.numeroFicha || inf.id}_${inf.paciente.nombresApellidos.replace(/\s+/g, "_")}.pdf`;
+          zip.file(nombreArchivo, blob);
+        } catch (err) {
+          console.error(`Error al descargar PDF del informe ${inf.id}:`, err);
+        }
+      }
+
+      const contenidoZip = await zip.generateAsync({ type: "blob" });
+      const url = window.URL.createObjectURL(contenidoZip);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `todos_informes_${fechaDesdeGlobal || "inicio"}_a_${fechaHastaGlobal || "hoy"}.zip`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("ZIP descargado correctamente");
+    } catch (error) {
+      console.error("Error al generar ZIP global:", error);
+      toast.error("Error al generar el archivo ZIP");
+    } finally {
+      setDescargandoZipGlobal(false);
+    }
+  };
+
+  const [conteoInformesGlobal, setConteoInformesGlobal] = useState(0);
+
+  useEffect(() => {
+    const cargarConteo = async () => {
+      try {
+        const enRango = await informesEnRangoGlobal();
+        setConteoInformesGlobal(enRango.length);
+      } catch {
+        setConteoInformesGlobal(0);
+      }
+    };
+    cargarConteo();
+  }, [fechaDesdeGlobal, fechaHastaGlobal]);
   const filtrados = pacientes.filter(
     (p) =>
       p.nombresApellidos.toLowerCase().includes(filtro.toLowerCase()) ||
@@ -143,18 +190,18 @@ export default function SelectorPacienteInformes() {
       <ComponentCard title="Selecciona un paciente">
         <div className="mb-4 flex gap-2">
           <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 p-1 rounded-lg border border-gray-200 dark:border-gray-800">
-            <DatePicker 
+            <DatePicker
               id="fecha-desde-global"
-            placeholder="Desde" onChange={(_, d) => setFechaDesdeGlobal(d)} />
-            <DatePicker 
+              placeholder="Desde" onChange={(_, d) => setFechaDesdeGlobal(d)} />
+            <DatePicker
               id="fecha-hasta-global"
-            placeholder="Hasta" onChange={(_, d) => setFechaHastaGlobal(d)} />
-            <button 
+              placeholder="Hasta" onChange={(_, d) => setFechaHastaGlobal(d)} />
+            <button
               onClick={handleDescargarZipGlobal}
-              disabled={descargandoZipGlobal}
+              disabled={descargandoZipGlobal || conteoInformesGlobal === 0}
               className="px-3 py-2 bg-brand-500 text-white rounded-lg text-xs font-medium hover:bg-brand-600 disabled:opacity-50"
             >
-              {descargandoZipGlobal ? "Procesando..." : "Descargar todos"}
+              {descargandoZipGlobal ? "Generando..." : `Descargar (${conteoInformesGlobal})`}
             </button>
           </div>
 
@@ -167,124 +214,124 @@ export default function SelectorPacienteInformes() {
           />
 
           <FilterDropdown
-  onApply={aplicarFiltros}
-  onClear={limpiarFiltros}
->
-  <div className="space-y-4">
-    <div>
-      <Label className="mb-1.5 text-xs">
-        Edad mínima
-      </Label>
+            onApply={aplicarFiltros}
+            onClear={limpiarFiltros}
+          >
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-1.5 text-xs">
+                  Edad mínima
+                </Label>
 
-      <input
-        type="number"
-        value={edadMin}
-        onChange={(e) => setEdadMin(e.target.value)}
-        className="h-11 w-full rounded-lg border border-gray-300 px-4 dark:border-gray-700 dark:bg-gray-900"
-      />
-    </div>
+                <input
+                  type="number"
+                  value={edadMin}
+                  onChange={(e) => setEdadMin(e.target.value)}
+                  className="h-11 w-full rounded-lg border border-gray-300 px-4 dark:border-gray-700 dark:bg-gray-900"
+                />
+              </div>
 
-    <div>
-      <Label className="mb-1.5 text-xs">
-        Edad máxima
-      </Label>
+              <div>
+                <Label className="mb-1.5 text-xs">
+                  Edad máxima
+                </Label>
 
-      <input
-        type="number"
-        value={edadMax}
-        onChange={(e) => setEdadMax(e.target.value)}
-        className="h-11 w-full rounded-lg border border-gray-300 px-4 dark:border-gray-700 dark:bg-gray-900"
-      />
-    </div>
+                <input
+                  type="number"
+                  value={edadMax}
+                  onChange={(e) => setEdadMax(e.target.value)}
+                  className="h-11 w-full rounded-lg border border-gray-300 px-4 dark:border-gray-700 dark:bg-gray-900"
+                />
+              </div>
 
-    <div>
-      <Label className="mb-1.5 text-xs">
-        Nivel educativo
-      </Label>
+              <div>
+                <Label className="mb-1.5 text-xs">
+                  Nivel educativo
+                </Label>
 
-      <Select
-        value={nivelEducativo}
-        onChange={(value) => setNivelEducativo(value)}
-        placeholder="Seleccione el nivel educativo"
-        options={[
-          {
-            value: "INICIAL",
-            label: "Inicial",
-          },
-          {
-            value: "PREPARATORIA",
-            label: "Preparatoria",
-          },
-          {
-            value: "BASICA_ELEMENTAL",
-            label: "Básica Elemental",
-          },
-          {
-            value: "BASICA_MEDIA",
-            label: "Básica Media",
-          },
-          {
-            value: "BASICA_SUPERIOR",
-            label: "Básica Superior",
-          },
-          {
-            value: "BACHILLERATO",
-            label: "Bachillerato",
-          },
-          {
-            value: "NO_ESCOLARIZADO",
-            label: "No Escolarizado",
-          },
-        ]}
-      />
-    </div>
-    <div>
-      <Label className="mb-1.5 text-xs">
-        Año de apertura de ficha
-      </Label>
+                <Select
+                  value={nivelEducativo}
+                  onChange={(value) => setNivelEducativo(value)}
+                  placeholder="Seleccione el nivel educativo"
+                  options={[
+                    {
+                      value: "INICIAL",
+                      label: "Inicial",
+                    },
+                    {
+                      value: "PREPARATORIA",
+                      label: "Preparatoria",
+                    },
+                    {
+                      value: "BASICA_ELEMENTAL",
+                      label: "Básica Elemental",
+                    },
+                    {
+                      value: "BASICA_MEDIA",
+                      label: "Básica Media",
+                    },
+                    {
+                      value: "BASICA_SUPERIOR",
+                      label: "Básica Superior",
+                    },
+                    {
+                      value: "BACHILLERATO",
+                      label: "Bachillerato",
+                    },
+                    {
+                      value: "NO_ESCOLARIZADO",
+                      label: "No Escolarizado",
+                    },
+                  ]}
+                />
+              </div>
+              <div>
+                <Label className="mb-1.5 text-xs">
+                  Año de apertura de ficha
+                </Label>
 
-      <input
-        type="number"
-        value={anioFicha}
-        onChange={(e) => setAnioFicha(e.target.value)}
-        className="h-11 w-full rounded-lg border border-gray-300 px-4 dark:border-gray-700 dark:bg-gray-900"
-      />
-    </div>
-    <div>
-      <Label className="mb-1.5 text-xs">
-        Área atendida
-      </Label>
+                <input
+                  type="number"
+                  value={anioFicha}
+                  onChange={(e) => setAnioFicha(e.target.value)}
+                  className="h-11 w-full rounded-lg border border-gray-300 px-4 dark:border-gray-700 dark:bg-gray-900"
+                />
+              </div>
+              <div>
+                <Label className="mb-1.5 text-xs">
+                  Área atendida
+                </Label>
 
-      <Select
-        value={areaAtendida}
-        onChange={(value) => setAreaAtendida(value)}
-        placeholder="Seleccione el área atendida"
-        options={[
-          {
-            value: "educativa",
-            label: "Educativa",
-          },
-          {
-            value: "clinica",
-            label: "Clínica",
-          },
-          {
-            value: "fonoaudiologia",
-            label: "Fonoaudiología",
-          },
-          {
-            value: "trabajo_social",
-            label: "Trabajo Social",
-          },
-          {
-            value: "clinica_historia",
-            label: "Historia Clínica",
-          },
-        ]}
-      />
-    </div>
-  </div>
-</FilterDropdown>
+                <Select
+                  value={areaAtendida}
+                  onChange={(value) => setAreaAtendida(value)}
+                  placeholder="Seleccione el área atendida"
+                  options={[
+                    {
+                      value: "educativa",
+                      label: "Educativa",
+                    },
+                    {
+                      value: "clinica",
+                      label: "Clínica",
+                    },
+                    {
+                      value: "fonoaudiologia",
+                      label: "Fonoaudiología",
+                    },
+                    {
+                      value: "trabajo_social",
+                      label: "Trabajo Social",
+                    },
+                    {
+                      value: "clinica_historia",
+                      label: "Historia Clínica",
+                    },
+                  ]}
+                />
+              </div>
+            </div>
+          </FilterDropdown>
         </div>
 
         {cargando ? (

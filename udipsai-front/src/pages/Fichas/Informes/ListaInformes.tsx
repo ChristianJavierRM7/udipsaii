@@ -7,7 +7,7 @@ import Button from "../../../components/ui/button/Button";
 import DatePicker from "../../../components/form/date-picker";
 import { useAuth } from "../../../context/AuthContext";
 import { informesService, InformeDTO } from "../../../services/informes";
-
+import JSZip from "jszip";
 
 type TipoDescarga = "pdf" | "word";
 
@@ -30,7 +30,7 @@ export default function ListaInformes() {
   const [ordenDir, setOrdenDir] = useState<"desc" | "asc">("desc");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
-  const [descargandoZip, setDescargandoZip] = useState(false); // ← ahora es mutable
+  const [descargandoZip, setDescargandoZip] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const canCreate = hasPermission("PERM_INFORMES_CREAR");
@@ -127,15 +127,51 @@ export default function ListaInformes() {
     }
   };
 
-  // ← CORREGIDO: usa informesService.descargarZip en lugar de <a> con token en URL
+  const informesEnRango = informesFiltrados.filter((inf) => {
+    if (!fechaDesde && !fechaHasta) return true;
+    const fecha = inf.fechaElaboracionInforme?.toString().slice(0, 10);
+    if (!fecha) return false;
+    if (fechaDesde && fecha < fechaDesde) return false;
+    if (fechaHasta && fecha > fechaHasta) return false;
+    return true;
+  });
+
   const handleDescargarZip = async () => {
-    if (!pacienteId) return;
+    if (informesEnRango.length === 0) {
+      toast.error("No hay informes en el rango de fechas seleccionado");
+      return;
+    }
+
     setDescargandoZip(true);
+    toast.info(`Generando ZIP con ${informesEnRango.length} informe(s)...`);
+
     try {
-      await informesService.descargarZip(Number(pacienteId), fechaDesde, fechaHasta);
+      const zip = new JSZip();
+
+      for (const inf of informesEnRango) {
+        try {
+          const blob = await informesService.obtenerPdfBlob(inf.id);
+          const nombreArchivo = `${inf.numeroFicha || inf.id}_${inf.paciente.nombresApellidos.replace(/\s+/g, "_")}.pdf`;
+          zip.file(nombreArchivo, blob);
+        } catch (err) {
+          console.error(`Error al descargar PDF del informe ${inf.id}:`, err);
+        }
+      }
+
+      const contenidoZip = await zip.generateAsync({ type: "blob" });
+      const url = window.URL.createObjectURL(contenidoZip);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `informes_${fechaDesde || "inicio"}_a_${fechaHasta || "hoy"}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
       toast.success("ZIP descargado correctamente");
-    } catch {
-      toast.error("No se pudo generar el ZIP");
+    } catch (error) {
+      console.error("Error al generar ZIP:", error);
+      toast.error("Error al generar el archivo ZIP");
     } finally {
       setDescargandoZip(false);
     }
@@ -196,23 +232,22 @@ export default function ListaInformes() {
               />
               <button
                 onClick={handleDescargarZip}
-                disabled={descargandoZip}
+                disabled={descargandoZip || informesEnRango.length === 0}
                 className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                {descargandoZip ? "Generando ZIP..." : "Descargar ZIP"}
+                {descargandoZip ? "Generando..." : `Descargar (${informesEnRango.length})`}
               </button>
             </div>
 
             <button
               onClick={() => setMostrarFiltros(!mostrarFiltros)}
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                hayFiltrosActivos
-                  ? "border-brand-400 bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400"
-                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-400"
-              }`}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${hayFiltrosActivos
+                ? "border-brand-400 bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400"
+                : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-400"
+                }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
