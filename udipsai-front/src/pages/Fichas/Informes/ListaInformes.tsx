@@ -30,7 +30,7 @@ export default function ListaInformes() {
   const [ordenDir, setOrdenDir] = useState<"desc" | "asc">("desc");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
-  const [descargandoZip] = useState(false);
+  const [descargandoZip, setDescargandoZip] = useState(false); // ← ahora es mutable
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const canCreate = hasPermission("PERM_INFORMES_CREAR");
@@ -127,20 +127,18 @@ export default function ListaInformes() {
     }
   };
 
+  // ← CORREGIDO: usa informesService.descargarZip en lugar de <a> con token en URL
   const handleDescargarZip = async () => {
     if (!pacienteId) return;
-    const token = localStorage.getItem("accessToken");
-    const params = new URLSearchParams();
-    if (fechaDesde) params.append("desde", fechaDesde);
-    if (fechaHasta) params.append("hasta", fechaHasta);
-    if (token) params.append("token", token);
-
-    const link = document.createElement("a");
-    link.href = `/api/informes/paciente/${pacienteId}/zip?${params.toString()}`;
-    link.download = `Informes_${pacienteId}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setDescargandoZip(true);
+    try {
+      await informesService.descargarZip(Number(pacienteId), fechaDesde, fechaHasta);
+      toast.success("ZIP descargado correctamente");
+    } catch {
+      toast.error("No se pudo generar el ZIP");
+    } finally {
+      setDescargandoZip(false);
+    }
   };
 
   const handleDescargarWord = async (informe: InformeDTO) => {

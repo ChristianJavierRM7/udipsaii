@@ -142,4 +142,27 @@ export const informesService = {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     );
   },
+
+  descargarZip: async (
+    pacienteId: number,
+    desde?: string,
+    hasta?: string
+  ): Promise<void> => {
+    const params = new URLSearchParams();
+    if (desde) params.append("desde", desde);
+    if (hasta) params.append("hasta", hasta);
+
+    const query = params.toString() ? `?${params.toString()}` : "";
+
+    const response = await api.get(
+      `/informes/paciente/${pacienteId}/zip${query}`,
+      { responseType: "blob" }
+    );
+
+    descargarBlob(
+      response.data,
+      `Informes_paciente_${pacienteId}.zip`,
+      "application/zip"
+    );
+  },
 };
