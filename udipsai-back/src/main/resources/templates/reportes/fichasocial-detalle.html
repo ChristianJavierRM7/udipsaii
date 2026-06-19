@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Ficha Socioeconómica</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 30mm 15mm 22mm 15mm;
+
+      @top-center {
+        content: element(header);
+      }
+
+      @bottom-center {
+        content: element(footer);
+      }
+    }
+
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #222;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .header {
+      position: running(header);
+      text-align: center;
+      border-bottom: 3px solid #fa3340;
+      padding-bottom: 5px;
+      width: 100%;
+    }
+
+    .header h1 {
+      color: #fa3340;
+      font-size: 20px;
+      margin: 5px 0;
+      font-weight: bold;
+    }
+
+    .header p {
+      margin: 2px 0;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .meta-table {
+      width: 100%;
+      margin-bottom: 15px;
+      border-collapse: collapse;
+    }
+
+    .meta-table td {
+      border: none;
+      padding: 4px 0;
+      font-size: 12px;
+    }
+
+    .section {
+      margin-top: 18px;
+      page-break-inside: avoid;
+    }
+
+    .section-title {
+      background: #f5f5f5;
+      padding: 6px 10px;
+      font-weight: bold;
+      font-size: 12px;
+      border-left: 5px solid #fa3340;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #f9f9f9;
+      text-align: left;
+      font-weight: bold;
+      font-size: 10px;
+    }
+
+    th,
+    td {
+      padding: 5px 8px;
+    }
+
+    .grid-table {
+      width: 100%;
+      border: none;
+      margin: 0;
+    }
+
+    .grid-table td {
+      border: none;
+      padding: 4px;
+      vertical-align: top;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #111;
+    }
+
+    .checkbox-container {
+      margin: 3px 0;
+    }
+
+    .signature-section {
+      margin-top: 60px;
+      width: 100%;
+      page-break-inside: avoid;
+    }
+
+    .signature-box {
+      width: 45%;
+      text-align: center;
+      border-top: 1px solid #333;
+      padding-top: 8px;
+      margin-top: 50px;
+    }
+
+    .text-line {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 2px;
+    }
+
+    .footer-info {
+      position: running(footer);
+      text-align: center;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      color: #000;
+      line-height: 1.4;
+      border-top: 1px solid #ddd;
+      padding-top: 5px;
+      width: 100%;
+    }
+
+    .footer-info .label-dir {
+      font-weight: bold;
+    }
+
+    .footer-info a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="footer-info">
+    <span class="label-dir">Dirección:</span> Av. De las Américas y
+    Humboldt<br />
+    Tel: 4134750 ext. 2003<br />
+    <a href="mailto:udipsai@ucacue.edu.ec">udipsai@ucacue.edu.ec</a>
+  </div>
+
+  <div class="header">
+    <img src="../../static/images/logo/logoudipsai.png" th:src="${logoUri}" alt="UDIPSAI Logo"
+      style="height: 60px; margin-bottom: 5px" />
+    <p style="
+          font-weight: bold;
+          font-size: 14px;
+          margin-top: 10px;
+          color: #333;
+        ">
+      FICHA SOCIOECONÓMICA
+    </p>
+  </div>
+
+  <table class="meta-table">
+    <tr>
+      <td style="width: 50%">
+        <span class="label">FECHA DE ELABORACIÓN:</span>
+        <span th:text="${f.fechaElaboracion != null ? #dates.format(f.fechaElaboracion, 'dd/MM/yyyy') : 'N/A'}"></span>
+      </td>
+      <td style="width: 50%; text-align: right">
+        <span class="label">N° DE FICHA:</span>
+        <span th:text="${f.id ?: 'N/A'}"></span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- 1. DATOS DE IDENTIFICACIÓN -->
+  <div class="section">
+    <div class="section-title">1. Datos de Identificación</div>
+    <table style="border: none">
+      <tr style="border: none">
+        <td style="border: none; width: 50%; padding: 4px 0">
+          <span class="label">NOMBRES Y APELLIDOS:</span>
+          <span th:text="${f.paciente?.nombresApellidos ?: 'N/A'}"></span>
+        </td>
+        <td style="border: none; width: 50%; padding: 4px 0">
+          <span class="label">LUGAR Y FECHA DE NACIMIENTO:</span>
+          <span
+            th:text="${(f.paciente?.lugarNacimiento ?: 'N/A') + ' - ' + (f.paciente?.fechaNacimiento != null ? #temporals.format(f.paciente.fechaNacimiento, 'dd/MM/yyyy') : 'N/A')}"></span>
+        </td>
+      </tr>
+      <tr style="border: none">
+        <td style="border: none; padding: 4px 0">
+          <span class="label">EDAD:</span>
+          <span th:text="${f.paciente != null ? f.paciente.getEdad() + ' años' : 'N/A'}"></span>
+        </td>
+        <td style="border: none; padding: 4px 0">
+          <span class="label">INSTRUCCIÓN:</span>
+          <span th:text="${f.pacienteInstruccion ?: 'N/A'}"></span>
+        </td>
+      </tr>
+      <tr style="border: none">
+        <td style="border: none; padding: 4px 0">
+          <span class="label">OCUPACIÓN:</span>
+          <span th:text="${f.pacienteOcupacion ?: 'N/A'}"></span>
+        </td>
+        <td style="border: none; padding: 4px 0">
+          <span class="label">DIRECCIÓN DOMICILIO:</span>
+          <span th:text="${f.paciente?.domicilio ?: 'N/A'}"></span>
+        </td>
+      </tr>
+      <tr style="border: none">
+        <td style="border: none; padding: 4px 0">
+          <span class="label">E-MAIL:</span>
+          <span th:text="${f.pacienteEmail ?: 'N/A'}"></span>
+        </td>
+        <td style="border: none; padding: 4px 0">
+          <span class="label">TELÉFONO/CELULAR:</span>
+          <span th:text="${(f.paciente?.numeroTelefono ?: '') + ' / ' + (f.paciente?.numeroCelular ?: '')}"></span>
+        </td>
+      </tr>
+      <tr style="border: none">
+        <td style="border: none; padding: 4px 0" colspan="2">
+          <span class="label">PRESENTA DISCAPACIDAD:</span>
+          <span th:text="${f.paciente?.tieneDiscapacidad ? 'SI (X) NO ( )' : 'SI ( ) NO (X)'}"></span>
+          &#160;&#160;&#160;&#160;&#160;&#160;
+          <span class="label">TIPO:</span>
+          <span th:text="${f.paciente?.tipoDiscapacidad ?: 'N/A'}"></span>
+          &#160;&#160;&#160;&#160;&#160;&#160;
+          <span class="label">PORCENTAJE:</span>
+          <span
+            th:text="${f.paciente?.porcentajeDiscapacidad != null ? f.paciente.porcentajeDiscapacidad + '%' : 'N/A'}"></span>
+          &#160;&#160;&#160;&#160;&#160;&#160;
+          <span class="label">N° CARNÉ:</span>
+          <span
+            th:text="${f.paciente?.tieneDiscapacidad and f.paciente?.portadorCarnet ? (f.paciente?.cedula ?: 'N/A') : 'N/A'}"></span>
+        </td>
+      </tr>
+      <tr style="border: none">
+        <td style="border: none; padding: 4px 0" colspan="2">
+          <span class="label">PERSONA QUE PROPORCIONA LA INFORMACIÓN (RESPONSABLE):</span>
+          <span th:text="${f.responsable ?: 'N/A'}"></span>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 2. CONFORMACIÓN FAMILIAR -->
+  <div class="section">
+    <div class="section-title">2. Conformación Familiar</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 4%">N°</th>
+          <th style="width: 11%">RELACIÓN</th>
+          <th style="width: 22%">NOMBRES Y APELLIDOS</th>
+          <th style="width: 5%">EDAD</th>
+          <th style="width: 10%">EST. CIVIL</th>
+          <th style="width: 10%">INSTRUCCIÓN</th>
+          <th style="width: 10%">OCUPACIÓN</th>
+          <th style="width: 8%">INGRESO</th>
+          <th style="width: 10%">CÉDULA</th>
+          <th style="width: 10%">TELÉFONO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="fam, iter : ${f.familiares}">
+          <td th:text="${iter.count}"></td>
+          <td th:text="${fam.relacion ?: '-'}"></td>
+          <td th:text="${fam.nombresApellidos ?: '-'}"></td>
+          <td th:text="${fam.edad ?: '-'}"></td>
+          <td th:text="${fam.estadoCivil ?: '-'}"></td>
+          <td th:text="${fam.instruccion ?: '-'}"></td>
+          <td th:text="${fam.ocupacion ?: '-'}"></td>
+          <td th:text="${fam.ingresoMensual != null ? '$' + fam.ingresoMensual : '-'}"></td>
+          <td th:text="${fam.cedula ?: '-'}"></td>
+          <td th:text="${fam.numeroTelefono ?: '-'}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(f.familiares)}">
+          <td colspan="10" style="text-align: center">
+            Sin familiares registrados
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. PROBLEMAS SOCIALES -->
+  <div class="section">
+    <div class="section-title">
+      3. Problemas Sociales que ponen en Riesgo la Estabilidad Familiar
+    </div>
+    <table style="border: none; margin-bottom: 5px">
+      <tr style="border: none">
+        <td style="border: none; width: 50%">
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'violencia') ? '(X)' : '( )'}"></span>
+            Violencia intrafamiliar
+          </div>
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'alcoholismo') ? '(X)' : '( )'}"></span>
+            Alcoholismo
+          </div>
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'drogadiccion') ? '(X)' : '( )'}"></span>
+            Drogadicción
+          </div>
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'desempleo') ? '(X)' : '( )'}"></span>
+            Desempleo
+          </div>
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'delincuencia') ? '(X)' : '( )'}"></span>
+            Delincuencia
+          </div>
+        </td>
+        <td style="border: none; width: 50%">
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'tabaquismo') ? '(X)' : '( )'}"></span>
+            Tabaquismo
+          </div>
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'discapacidad') ? '(X)' : '( )'}"></span>
+            Discapacidad
+          </div>
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'juegosAzar') ? '(X)' : '( )'}"></span>
+            Juegos de Azar
+          </div>
+          <div class="checkbox-container">
+            <span
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'otros') ? '(X)' : '( )'}"></span>
+            Otros:
+            <span class="text-line"
+              th:text="${#strings.contains(f.riesgosSociales?.problemasSociales ?: '', 'otros:') ? #strings.substringAfter(f.riesgosSociales.problemasSociales, 'otros:') : ''}"></span>
+          </div>
+          <div class="checkbox-container">
+            <span th:text="${#lists.isEmpty(f.riesgosSociales?.problemasSociales) ? '(X)' : '( )'}"></span>
+            Ninguno
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div style="margin-top: 10px">
+      <span class="label">¿Algún miembro de la familia migró al exterior?</span>
+      <span th:text="${f.riesgosSociales?.migroExterior ? 'SI (X) NO ( )' : 'SI ( ) NO (X)'}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span class="label">Lugar:</span>
+      <span class="text-line" th:text="${f.riesgosSociales?.lugarMigracion ?: #strings.repeat('_', 19)}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span class="label">Años:</span>
+      <span class="text-line" th:text="${f.riesgosSociales?.tiempoMigracion ?: #strings.repeat('_', 7)}"></span>
+    </div>
+    <div style="margin-top: 5px">
+      <span class="label">Describa brevemente, ¿Cómo afectó a la familia?</span>
+      <div style="
+            margin-top: 3px;
+            border-bottom: 1px solid #ccc;
+            min-height: 20px;
+          " th:text="${f.riesgosSociales?.afectacionFamiliar ?: ''}"></div>
+    </div>
+  </div>
+
+  <!-- 4. SITUACIÓN DE VULNERABILIDAD -->
+  <div class="section">
+    <div class="section-title">4. Situación de Vulnerabilidad</div>
+    <div style="margin-bottom: 5px">
+      <span th:text="${f.vulnerabilidad?.movilidadHumana ? '(X)' : '( )'}"></span>
+      Movilidad humana &#160;&#160;&#160;&#160;
+      <span th:text="${f.vulnerabilidad?.enfermedadCatastrofica ? '(X)' : '( )'}"></span>
+      Enfermedades catastróficas &#160;&#160;&#160;&#160;
+      <span th:text="${f.vulnerabilidad?.embarazoAdolescente ? '(X)' : '( )'}"></span>
+      Embarazo adolescente &#160;&#160;&#160;&#160;
+      <span th:text="${f.vulnerabilidad?.abusoSexual ? '(X)' : '( )'}"></span>
+      Abuso sexual
+    </div>
+    <div style="margin-top: 5px">
+      <span th:text="${f.vulnerabilidad?.agresionFisica ? '(X)' : '( )'}"></span>
+      Agresión física &#160;&#160;&#160;&#160;
+      <span class="label">¿En dónde?</span>
+      <span class="text-line"
+        th:text="${f.vulnerabilidad?.lugarAgresion != null and #strings.contains(f.vulnerabilidad.lugarAgresion, 'fisica:') ? #strings.substringBefore(#strings.substringAfter(f.vulnerabilidad.lugarAgresion, 'fisica:'), ',') : #strings.repeat('_', 11)}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span th:text="${f.vulnerabilidad?.agresionPsicologica ? '(X)' : '( )'}"></span>
+      Agresión psicológica &#160;&#160;&#160;&#160;
+      <span class="label">¿En dónde?</span>
+      <span class="text-line"
+        th:text="${f.vulnerabilidad?.lugarAgresion != null and #strings.contains(f.vulnerabilidad.lugarAgresion, 'psicologica:') ? #strings.substringAfter(f.vulnerabilidad.lugarAgresion, 'psicologica:') : #strings.repeat('_', 11)}"></span>
+    </div>
+  </div>
+
+  <!-- 5. RELACIONES FAMILIARES -->
+  <div class="section">
+    <div class="section-title">5. Relaciones Familiares</div>
+    <ol style="margin: 0; padding-left: 20px">
+      <li>
+        ¿Se respeta la opinión de los miembros de la familia?
+        <span th:text="${f.dinamicaFamiliar?.opinionFamiliar ? 'SI (X) NO ( )' : 'SI ( ) NO (X)'}"></span>
+      </li>
+      <li>
+        ¿La familia es muy unida cuando enfrentan problemas?
+        <span th:text="${f.dinamicaFamiliar?.unionFamiliar ? 'SI (X) NO ( )' : 'SI ( ) NO (X)'}"></span>
+      </li>
+      <li>
+        En caso de conflictos familiares, ¿cómo los resuelven?
+        <div style="border-bottom: 1px solid #ccc; min-height: 15px"
+          th:text="${f.dinamicaFamiliar?.resolucionConflictos}"></div>
+      </li>
+      <li>
+        ¿Los miembros de la familia cumplen con las reglas establecidas en el
+        hogar?
+        <span th:text="${f.dinamicaFamiliar?.cumplenReglas ? 'SI (X) NO ( )' : 'SI ( ) NO (X)'}"></span>
+      </li>
+      <li th:if="${f.dinamicaFamiliar?.cumplenReglas != true}">
+        ¿Quiénes no cumplen con las reglas?
+        <div style="border-bottom: 1px solid #ccc; min-height: 15px"
+          th:text="${f.dinamicaFamiliar?.quienesIncumplenReglas}"></div>
+      </li>
+      <li>
+        ¿La familia comparte actividades del hogar?
+        <span th:text="${f.dinamicaFamiliar?.tieneActividadesFamiliares ? 'SI (X) NO ( )' : 'SI ( ) NO (X)'}"></span>
+        &#160;&#160;&#160;&#160; <span class="label">¿Cuáles?</span>
+        <span class="text-line"
+          th:text="${f.dinamicaFamiliar?.actividadesCompartidas ?: #strings.repeat('_', 11)}"></span>
+      </li>
+      <li>
+        Las relaciones entre los/las hermanos/as es:
+        <span
+          th:text="${f.dinamicaFamiliar?.relacionHermanos == 'muyBuena' ? 'Muy buena (X)' : 'Muy buena ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.relacionHermanos == 'buena' ? 'Buena (X)' : 'Buena ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.relacionHermanos == 'regular' ? 'Regular (X)' : 'Regular ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.relacionHermanos == 'mala' ? 'Mala (X)' : 'Mala ( )'}"></span>
+        &#160;&#160;
+        <span
+          th:text="${f.dinamicaFamiliar?.relacionHermanos == 'hijoUnico' ? 'Hijo único (X)' : 'Hijo único ( )'}"></span>
+      </li>
+      <li>
+        Las relaciones entre padres e hijos/as es:
+        <span
+          th:text="${f.dinamicaFamiliar?.relacionPadresHijos == 'muyBuena' ? 'Muy buena (X)' : 'Muy buena ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.relacionPadresHijos == 'buena' ? 'Buena (X)' : 'Buena ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.relacionPadresHijos == 'regular' ? 'Regular (X)' : 'Regular ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.relacionPadresHijos == 'mala' ? 'Mala (X)' : 'Mala ( )'}"></span>
+      </li>
+      <li>
+        La comunicación entre los miembros de la familia es:
+        <span
+          th:text="${f.dinamicaFamiliar?.comunicacionFamiliar == 'muyBuena' ? 'Muy buena (X)' : 'Muy buena ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.comunicacionFamiliar == 'buena' ? 'Buena (X)' : 'Buena ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.comunicacionFamiliar == 'regular' ? 'Regular (X)' : 'Regular ( )'}"></span>
+        &#160;&#160;
+        <span th:text="${f.dinamicaFamiliar?.comunicacionFamiliar == 'mala' ? 'Mala (X)' : 'Mala ( )'}"></span>
+      </li>
+    </ol>
+  </div>
+
+  <!-- 6. TIPO DE HOGAR -->
+  <div class="section">
+    <div class="section-title">6. Tipo de Hogar</div>
+    <div style="padding: 5px">
+      <span th:text="${f.dinamicaFamiliar?.tipoHogar == 'Completo' ? 'Completo (X)' : 'Completo ( )'}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span th:text="${f.dinamicaFamiliar?.tipoHogar == 'Incompleto' ? 'Incompleto (X)' : 'Incompleto ( )'}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span th:text="${f.dinamicaFamiliar?.tipoHogar == 'Funcional' ? 'Funcional (X)' : 'Funcional ( )'}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.dinamicaFamiliar?.tipoHogar == 'Disfuncional' ? 'Disfuncional (X)' : 'Disfuncional ( )'}"></span>
+    </div>
+  </div>
+
+  <!-- 7. VIVIENDA Y HABITABILIDAD -->
+  <div class="section">
+    <div class="section-title">7. Vivienda y Habitabilidad</div>
+    <table>
+      <thead>
+        <tr>
+          <th colspan="4" style="text-align: center; background-color: #f5f5f5">
+            <span class="label">CONDICIONES DE VIVIENDA</span>
+          </th>
+          <th colspan="8" style="text-align: center; background-color: #f5f5f5">
+            <span class="label">CONDICIONES DE HABITABILIDAD</span>
+          </th>
+        </tr>
+        <tr>
+          <th style="width: 10%">VIVIENDA</th>
+          <th style="width: 10%">MATERIAL</th>
+          <th style="width: 10%">PISO</th>
+          <th style="width: 10%">TECHO</th>
+          <th style="width: 12%">HACINAMIENTO</th>
+          <th style="width: 12%">AGUA</th>
+          <th style="width: 12%">SERVICIO SANITARIO</th>
+          <th style="width: 14%">ENERGÍA ELÉCTRICA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div th:text="${#strings.contains(f.vivienda?.tipoTenencia ?: '', 'propia') ? '(X) Propia' : '( ) Propia'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.tipoTenencia ?: '', 'arrendada') ? '(X) Arrendada' : '( ) Arrendada'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.tipoTenencia ?: '', 'prestada') ? '(X) Prestada' : '( ) Prestada'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.tipoTenencia ?: '', 'servicios') ? '(X) X serv.' : '( ) X serv.'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.tipoTenencia ?: '', 'hipoteca') ? '(X) Hipoteca' : '( ) Hipoteca'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.tipoTenencia ?: '', 'otros') ? '(X) Otros' : '( ) Otros'}">
+            </div>
+          </td>
+          <td>
+            <div th:text="${#strings.contains(f.vivienda?.materialParedes ?: '', 'adobe') ? '(X) Adobe' : '( ) Adobe'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.materialParedes ?: '', 'ladrillo') ? '(X) Ladrillo' : '( ) Ladrillo'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.materialParedes ?: '', 'bloque') ? '(X) Bloque' : '( ) Bloque'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.materialParedes ?: '', 'madera') ? '(X) Madera' : '( ) Madera'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.materialParedes ?: '', 'bahareque') ? '(X) Bahareque' : '( ) Bahareque'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialParedes ?: '', 'otros') ? '(X) Otros' : '( ) Otros'}">
+            </div>
+          </td>
+          <td>
+            <div
+              th:text="${#strings.contains(f.vivienda?.materialPiso ?: '', 'baldosa') ? '(X) Baldosa' : '( ) Baldosa'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.materialPiso ?: '', 'cemento') ? '(X) Cemento' : '( ) Cemento'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialPiso ?: '', 'madera') ? '(X) Madera' : '( ) Madera'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialPiso ?: '', 'tierra') ? '(X) Tierra' : '( ) Tierra'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialPiso ?: '', 'otros') ? '(X) Otros' : '( ) Otros'}">
+            </div>
+          </td>
+          <td>
+            <div th:text="${#strings.contains(f.vivienda?.materialTecho ?: '', 'zinc') ? '(X) Zinc' : '( ) Zinc'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialTecho ?: '', 'teja') ? '(X) Teja' : '( ) Teja'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.materialTecho ?: '', 'eternit') ? '(X) Eternit' : '( ) Eternit'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialTecho ?: '', 'loza') ? '(X) Loza' : '( ) Loza'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialTecho ?: '', 'ardex') ? '(X) Árdex' : '( ) Árdex'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.materialTecho ?: '', 'otros') ? '(X) Otros' : '( ) Otros'}">
+            </div>
+          </td>
+          <td>
+            <div>
+              N° Cuartos:
+              <strong th:text="${f.vivienda?.numeroCuartos ?: 0}"></strong>
+            </div>
+            <div>
+              N° Dorm.:
+              <strong th:text="${f.vivienda?.numeroDormitorios ?: 0}"></strong>
+            </div>
+            <div>
+              N° Camas:
+              <strong th:text="${f.vivienda?.numeroCamas ?: 0}"></strong>
+            </div>
+            <div>
+              N° SS.HH.:
+              <strong th:text="${f.vivienda?.numeroSanitarios ?: 0}"></strong>
+            </div>
+          </td>
+          <td>
+            <div
+              th:text="${#strings.contains(f.vivienda?.procedenciaAgua ?: '', 'potable') ? '(X) Potable' : '( ) Potable'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.procedenciaAgua ?: '', 'entubada') ? '(X) Entubada' : '( ) Entubada'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.procedenciaAgua ?: '', 'acequia') ? '(X) Acequia' : '( ) Acequia'}">
+            </div>
+            <div th:text="${#strings.contains(f.vivienda?.procedenciaAgua ?: '', 'fuera') ? '(X) Fuera' : '( ) Fuera'}">
+            </div>
+          </td>
+          <td>
+            <div th:text="${#strings.contains(f.vivienda?.tipoSanitario ?: '', 'sshh') ? '(X) SS.HH.' : '( ) SS.HH.'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.tipoSanitario ?: '', 'letrina') ? '(X) Letrina' : '( ) Letrina'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.tipoSanitario ?: '', 'airelibre') ? '(X) Aire libre' : '( ) Aire libre'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.vivienda?.tipoSanitario ?: '', 'pozo') ? '(X) P. Séptico' : '( ) P. Séptico'}">
+            </div>
+            <div style="
+                  margin-top: 5px;
+                  border-top: 1px solid #eee;
+                  padding-top: 3px;
+                " th:text="${f.vivienda?.tieneDucha ? '(X) Ducha' : '( ) Ducha'}"></div>
+          </td>
+          <td>
+            <div th:text="${f.vivienda?.tieneElectricidad ? '(X) Electricidad' : '( ) Electricidad'}"></div>
+            <div th:text="${f.vivienda?.tieneInternet ? '(X) Internet' : '( ) Internet'}"></div>
+            <div style="margin-top: 5px">
+              N° Focos:
+              <strong th:text="${f.vivienda?.numeroFocos ?: 0}"></strong>
+            </div>
+            <div style="margin-top: 5px; font-weight: bold">Otros:</div>
+            <div th:text="${f.vivienda?.otrosDetallesElectricidad ?: ''}"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 8. SITUACIÓN DE SALUD -->
+  <div class="section">
+    <div class="section-title">8. Situación de Salud</div>
+    <div style="font-weight: bold; margin-bottom: 5px">
+      Cuando requiere atención médica acude a:
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 50%">INSTITUCIÓN PÚBLICA</th>
+          <th style="width: 50%">INSTITUCIÓN PRIVADA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Subcentro de Salud') ? '(X) Subcentro de Salud' : '( ) Subcentro de Salud'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Hospital') ? '(X) Hospital' : '( ) Hospital'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Seguro Social') ? '(X) Seguro Social' : '( ) Seguro Social'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Seguro Campesino') ? '(X) Seguro Campesino' : '( ) Seguro Campesino'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Institución Pública') ? '(X) Otra Inst. Pública' : '( ) Otra Inst. Pública'}">
+            </div>
+          </td>
+          <td>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Médico naturista') ? '(X) Médico naturista' : '( ) Médico naturista'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Médico particular') ? '(X) Médico particular' : '( ) Médico particular'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Seguro privado') ? '(X) Seguro privado' : '( ) Seguro privado'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Medicina casera') ? '(X) Medicina casera' : '( ) Medicina casera'}">
+            </div>
+            <div
+              th:text="${#strings.contains(f.salud?.lugarAtencionMedica ?: '', 'Se automedica') ? '(X) Se automedica' : '( ) Se automedica'}">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 10px">
+      <span class="label">PROBLEMAS DE SALUD DEL ESTUDIANTE:</span>
+      <span th:text="${#strings.isEmpty(f.salud?.saludEstudiante) ? 'SI ( ) NO (X)' : 'SI (X) NO ( )'}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span class="label">Especifique tipo de enfermedad:</span>
+      <span class="text-line" th:text="${f.salud?.saludEstudiante ?: #strings.repeat('_', 28)}"></span>
+    </div>
+
+    <div style="margin-top: 10px">
+      <span class="label">REQUIERE AYUDAS TÉCNICAS:</span>
+      <span
+        th:text="${#strings.contains(f.salud?.ayudasTecnicas ?: '', 'audifonos') ? 'AUDIFONOS (X)' : 'AUDIFONOS ( )'}"></span>
+      &#160;&#160;
+      <span
+        th:text="${#strings.contains(f.salud?.ayudasTecnicas ?: '', 'lentes') ? 'LENTES (X)' : 'LENTES ( )'}"></span>
+      &#160;&#160;
+      <span th:text="${#strings.contains(f.salud?.ayudasTecnicas ?: '', 'jaws') ? 'JAWS (X)' : 'JAWS ( )'}"></span>
+      &#160;&#160;
+      <span
+        th:text="${#strings.contains(f.salud?.ayudasTecnicas ?: '', 'silla') ? 'SILLA DE RUEDAS (X)' : 'SILLA DE RUEDAS ( )'}"></span>
+      &#160;&#160; <span class="label">OTROS:</span>
+      <span class="text-line"
+        th:text="${#strings.contains(f.salud?.ayudasTecnicas ?: '', 'otros:') ? #strings.substringAfter(f.salud.ayudasTecnicas, 'otros:') : #strings.repeat('_', 17)}"></span>
+    </div>
+
+    <!-- SALUD DE FAMILIARES DENTRO DE LA SECCIÓN 8 -->
+    <div style="margin-top: 15px">
+      <span class="label">PROBLEMAS DE SALUD DE FAMILIAR:</span>
+      <div th:each="fam : ${f.familiares}" th:if="${fam.problemasSalud}">
+        - <span class="label">Parentesco:</span>
+        <span th:text="${fam.relacion}"></span> &#160;&#160;
+        <span class="label">Nombre:</span>
+        <span th:text="${fam.nombresApellidos}"></span> &#160;&#160;
+        <span class="label">Enfermedad:</span>
+        <span th:text="${fam.descripProblemasSalud}"></span>
+      </div>
+      <div th:if="${#lists.isEmpty(f.familiares) or f.familiares.?[problemasSalud].isEmpty()}">
+        SI ( ) NO (X)
+      </div>
+    </div>
+
+    <div style="margin-top: 10px">
+      <span class="label">ENFERMEDAD CATASTRÓFICA DE MIEMBRO DE FAMILIA:</span>
+      <div th:each="fam : ${f.familiares}" th:if="${fam.enfermedadCatastrofica}">
+        - <span class="label">Parentesco:</span>
+        <span th:text="${fam.relacion}"></span> &#160;&#160;
+        <span class="label">Nombre:</span>
+        <span th:text="${fam.nombresApellidos}"></span> &#160;&#160;
+        <span class="label">Enfermedad:</span>
+        <span th:text="${fam.descripEnfermedadCatastrofica}"></span>
+      </div>
+      <div th:if="${#lists.isEmpty(f.familiares) or f.familiares.?[enfermedadCatastrofica].isEmpty()}">
+        SI ( ) NO (X)
+      </div>
+    </div>
+
+    <div style="margin-top: 10px">
+      <span class="label">DISCAPACIDAD MIEMBRO DE LA FAMILIA:</span>
+      <div th:each="fam : ${f.familiares}" th:if="${fam.discapacidad}">
+        - <span class="label">Parentesco:</span>
+        <span th:text="${fam.relacion}"></span> &#160;&#160;
+        <span class="label">Nombre:</span>
+        <span th:text="${fam.nombresApellidos}"></span> &#160;&#160;
+        <span class="label">Tipo:</span>
+        <span
+          th:text="${fam.descripDiscapacidad != null and #strings.contains(fam.descripDiscapacidad, '|') ? #strings.substringBefore(fam.descripDiscapacidad, '|') : ''}"></span>
+        &#160;&#160; <span class="label">Porcentaje:</span>
+        <span
+          th:text="${fam.descripDiscapacidad != null and #strings.contains(fam.descripDiscapacidad, '|') ? #strings.substringBefore(#strings.substringAfter(fam.descripDiscapacidad, '|'), '|') : ''}"></span>
+        &#160;&#160; <span class="label">N° Carné:</span>
+        <span
+          th:text="${fam.descripDiscapacidad != null and #strings.contains(fam.descripDiscapacidad, 'Carnet:') ? #strings.substringAfter(fam.descripDiscapacidad, 'Carnet:') : ''}"></span>
+      </div>
+      <div th:if="${#lists.isEmpty(f.familiares) or f.familiares.?[discapacidad].isEmpty()}">
+        SI ( ) NO (X)
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. USO DEL TIEMPO LIBRE -->
+  <div class="section">
+    <div class="section-title">9. Uso del Tiempo Libre</div>
+    <div style="padding: 5px">
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Deporte') ? 'Deporte (X)' : 'Deporte ( )'}"></span>
+      &#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Música') ? 'Música (X)' : 'Música ( )'}"></span>
+      &#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'TV') ? 'TV (X)' : 'TV ( )'}"></span>
+      &#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Internet') ? 'Internet (X)' : 'Internet ( )'}"></span>
+      &#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Paseos') ? 'Paseos familiares (X)' : 'Paseos familiares ( )'}"></span>
+      &#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Amigos') ? 'Amigos/as (X)' : 'Amigos/as ( )'}"></span>
+    </div>
+    <div style="margin-top: 5px; padding: 5px">
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Trabajo') ? 'Trabajo infantil (X)' : 'Trabajo infantil ( )'}"></span>
+      &#160;&#160; <span class="label">Especifique:</span>
+      <span class="text-line"
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Trabajo infantil:') ? #strings.substringBefore(#strings.substringAfter(f.situacionEconomica.actividadesTiempoLibre, 'Trabajo infantil:'), '&quot;') : #strings.repeat('_', 11)}"></span>
+      &#160;&#160;&#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Otros') ? 'Otros (X)' : 'Otros ( )'}"></span>
+      &#160;&#160;
+      <span class="text-line"
+        th:text="${f.situacionEconomica?.actividadesTiempoLibre != null and #strings.contains(f.situacionEconomica.actividadesTiempoLibre, 'Otros:') ? #strings.substringBefore(#strings.substringAfter(f.situacionEconomica.actividadesTiempoLibre, 'Otros:'), '&quot;') : #strings.repeat('_', 11)}"></span>
+    </div>
+  </div>
+
+  <!-- 10. SITUACIÓN ECONÓMICA -->
+  <div class="section">
+    <div class="section-title">10. Situación Económica</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 33%; background-color: #f5f5f5; text-align: center">
+            <span class="label">INGRESOS MENSUALES</span>
+          </th>
+          <th style="width: 33%; background-color: #f5f5f5; text-align: center">
+            <span class="label">EGRESOS MENSUALES</span>
+          </th>
+          <th style="width: 34%; background-color: #f5f5f5; text-align: center">
+            <span class="label">CONDICIÓN ECONÓMICA</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="vertical-align: top">
+            <div>
+              Padre:
+              <span
+                th:text="${f.desgloseEconomico?.ingresoPadre != null ? '$' + f.desgloseEconomico.ingresoPadre : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Madre:
+              <span
+                th:text="${f.desgloseEconomico?.ingresoMadre != null ? '$' + f.desgloseEconomico.ingresoMadre : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Familiares:
+              <span
+                th:text="${f.desgloseEconomico?.ingresoFamiliares != null ? '$' + f.desgloseEconomico.ingresoFamiliares : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Otros:
+              <span
+                th:text="${f.desgloseEconomico?.ingresoOtros != null ? '$' + f.desgloseEconomico.ingresoOtros : '$0'}"></span>
+            </div>
+            <div style="
+                  margin-top: 15px;
+                  border-top: 1px solid #ddd;
+                  padding-top: 5px;
+                ">
+              <span class="label">Total Ingresos:</span>
+              <strong
+                th:text="${f.situacionEconomica?.totalIngresos != null ? '$' + f.situacionEconomica.totalIngresos : '$0'}"></strong>
+            </div>
+          </td>
+          <td style="vertical-align: top">
+            <div>
+              Alimentación:
+              <span
+                th:text="${f.desgloseEconomico?.egresoAlimentacion != null ? '$' + f.desgloseEconomico.egresoAlimentacion : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Arriendo:
+              <span
+                th:text="${f.desgloseEconomico?.egresoArriendo != null ? '$' + f.desgloseEconomico.egresoArriendo : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Agua/Luz:
+              <span
+                th:text="${f.desgloseEconomico?.egresoServiciosBasicos != null ? '$' + f.desgloseEconomico.egresoServiciosBasicos : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Salud:
+              <span
+                th:text="${f.desgloseEconomico?.egresoSalud != null ? '$' + f.desgloseEconomico.egresoSalud : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Educación:
+              <span
+                th:text="${f.desgloseEconomico?.egresoEducacion != null ? '$' + f.desgloseEconomico.egresoEducacion : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Préstamos:
+              <span
+                th:text="${f.desgloseEconomico?.egresoPrestamos != null ? '$' + f.desgloseEconomico.egresoPrestamos : '$0'}"></span>
+            </div>
+            <div style="margin-top: 3px">
+              Otros:
+              <span
+                th:text="${f.desgloseEconomico?.egresoOtros != null ? '$' + f.desgloseEconomico.egresoOtros : '$0'}"></span>
+            </div>
+            <div style="
+                  margin-top: 5px;
+                  border-top: 1px solid #ddd;
+                  padding-top: 5px;
+                ">
+              <span class="label">Total Egresos:</span>
+              <strong
+                th:text="${f.situacionEconomica?.totalEgresos != null ? '$' + f.situacionEconomica.totalEgresos : '$0'}"></strong>
+            </div>
+          </td>
+          <td style="vertical-align: top">
+            <div
+              th:text="${f.situacionEconomica?.condicionEconomica == 'Muy buena' ? 'Muy buena (X)' : 'Muy buena ( )'}">
+            </div>
+            <div style="margin-top: 3px"
+              th:text="${f.situacionEconomica?.condicionEconomica == 'Buena' ? 'Buena (X)' : 'Buena ( )'}"></div>
+            <div style="margin-top: 3px"
+              th:text="${f.situacionEconomica?.condicionEconomica == 'Regular' ? 'Regular (X)' : 'Regular ( )'}"></div>
+            <div style="margin-top: 3px"
+              th:text="${f.situacionEconomica?.condicionEconomica == 'Mala' ? 'Mala (X)' : 'Mala ( )'}"></div>
+            <div style="margin-top: 12px; border-top: 1px dashed #bbb; padding-top: 8px; font-size: 11px;">
+              <strong>Clasificación Socioeconómica:</strong>
+              <div style="margin-top: 4px;">
+                Ingreso per cápita:
+                <strong
+                  th:text="${f.situacionEconomica?.ingresoPerCapita != null ? '$' + f.situacionEconomica.ingresoPerCapita : 'N/A'}"></strong>
+              </div>
+              <div style="margin-top: 3px;">
+                Grupo:
+                <strong
+                  th:text="${f.situacionEconomica?.grupoSocioeconomico != null ? 'Grupo ' + f.situacionEconomica.grupoSocioeconomico : 'N/A'}"></strong>
+              </div>
+              <div style="margin-top: 3px;">
+                Categoría:
+                <strong
+                  th:text="${f.situacionEconomica?.categoriaSocioeconomica != null ? f.situacionEconomica.categoriaSocioeconomica : 'N/A'}"></strong>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 11. CONCLUSIONES -->
+  <div class="section">
+    <div class="section-title">11. Conclusiones</div>
+    <div style="
+          border: 1px solid #ccc;
+          padding: 10px;
+          min-height: 50px;
+          background-color: #fafafa;
+          text-align: justify;
+          white-space: pre-wrap;
+        " th:text="${f.conclusiones ?: 'N/A'}"></div>
+  </div>
+
+  <!-- 12. RECOMENDACIONES -->
+  <div class="section">
+    <div class="section-title">12. Recomendaciones</div>
+    <div style="
+          border: 1px solid #ccc;
+          padding: 10px;
+          min-height: 50px;
+          background-color: #fafafa;
+          text-align: justify;
+          white-space: pre-wrap;
+        " th:text="${f.recomendaciones ?: 'N/A'}"></div>
+  </div>
+
+  <!-- 13. CAPACIDAD DE GASTO EVALUACIÓN -->
+  <div class="section">
+    <div class="section-title">
+      13. SEGÚN SU SITUACIÓN ECONÓMICA HASTA CUANTO PODRÍA GASTAR EN UNA
+      EVALUACIÓN PSICOPEDAGÓGICA:
+    </div>
+    <div style="padding: 5px">
+      <span
+        th:text="${f.situacionEconomica?.capacidadGastoEvaluacion != null and #strings.contains(f.situacionEconomica.capacidadGastoEvaluacion, '3$') ? '(X)' : '( )'}"></span>
+      3$ por sesión &#160;&#160;&#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.capacidadGastoEvaluacion != null and #strings.contains(f.situacionEconomica.capacidadGastoEvaluacion, '5$') ? '(X)' : '( )'}"></span>
+      5$ por sesión &#160;&#160;&#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.capacidadGastoEvaluacion != null and #strings.contains(f.situacionEconomica.capacidadGastoEvaluacion, '10$') ? '(X)' : '( )'}"></span>
+      10$ por sesión &#160;&#160;&#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.capacidadGastoEvaluacion != null and #strings.contains(f.situacionEconomica.capacidadGastoEvaluacion, '15$') ? '(X)' : '( )'}"></span>
+      15$ por sesión &#160;&#160;&#160;&#160;&#160;&#160;
+      <span
+        th:text="${f.situacionEconomica?.capacidadGastoEvaluacion != null and #strings.contains(f.situacionEconomica.capacidadGastoEvaluacion, 'No puedo') ? '(X)' : '( )'}"></span>
+      No puedo cubrir los gastos
+    </div>
+    <div style="margin-top: 5px; padding: 5px">
+      <span
+        th:text="${f.situacionEconomica?.capacidadGastoEvaluacion != null and #strings.contains(f.situacionEconomica.capacidadGastoEvaluacion, 'OTRO') ? '(X)' : '( )'}"></span>
+      Otros:
+      <span class="text-line"
+        th:text="${f.situacionEconomica?.capacidadGastoEvaluacion != null and #strings.contains(f.situacionEconomica.capacidadGastoEvaluacion, 'OTRO:') ? #strings.substringAfter(f.situacionEconomica.capacidadGastoEvaluacion, 'OTRO:') : ''}"></span>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE FIRMAS -->
+  <table class="signature-section" style="width: 100%; margin-top: 50px; page-break-inside: avoid; border: none;">
+    <tr style="border: none;">
+      <!-- Creado Por (Left Column) -->
+      <td
+        style="border: none; width: 33%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
+        <div style="min-height: 120px; position: relative;">
+          <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">Creado Por</p>
+          <div style="border-top: 1px solid #000; width: 90%; margin: 0 auto; padding-top: 5px;">
+            <span
+              th:text="${f.pasante != null ? f.pasante.nombresApellidos : (f.especialista != null ? f.especialista.nombresApellidos : 'Especialista')}"
+              style="font-weight: bold;"></span>
+            <br />
+            <span th:text="${f.pasante != null ? 'Pasante' : 'Especialista'}"></span>
+          </div>
+        </div>
+      </td>
+
+      <!-- Revisado Por (Center Column) -->
+      <td
+        style="border: none; width: 33%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
+        <div style="min-height: 120px; position: relative;">
+          <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">Revisado Por</p>
+          <div style="border-top: 1px solid #000; width: 90%; margin: 0 auto; padding-top: 5px;">
+            <span th:if="${f.pasante != null}"
+              th:text="${f.pasante.especialista != null ? f.pasante.especialista.nombresApellidos : 'Especialista a cargo'}"
+              style="font-weight: bold;"></span>
+            <span th:if="${f.pasante == null}" style="font-weight: bold;">Lcda. Gabriela Jara S., Mgs.</span>
+            <br />
+            <span th:if="${f.pasante != null}">Especialista a Cargo</span>
+            <span th:if="${f.pasante == null}">Coordinadora de la UDIPSAI</span>
+          </div>
+        </div>
+      </td>
+
+      <!-- Responsable de la Información (Right Column) -->
+      <td
+        style="border: none; width: 33%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
+        <div style="min-height: 120px; position: relative;">
+          <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">Responsable de la Información
+            (Familiar)</p>
+          <div style="border-top: 1px solid #000; width: 90%; margin: 0 auto; padding-top: 5px;">
+            <span th:text="${f.responsable ?: 'Familiar Responsable'}" style="font-weight: bold;"></span>
+            <br />
+            <span>Nombre / Relación del Responsable</span>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

@@ -46,11 +46,14 @@ public class Paciente {
     @Column(length = 100)
     private String ciudad;
 
-    @Column(name = "sexo", length = 1)
+    @Column(name = "sexo", length = 20)
     private String sexo;
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
+
+    @Column(name = "lugar_nacimiento")
+    private String lugarNacimiento;
 
     @Column(columnDefinition = "TEXT")
     private String domicilio;
@@ -87,6 +90,12 @@ public class Paciente {
     @Column(name = "portador_carnet")
     private Boolean portadorCarnet = false;
 
+    @Column(name = "estado_civil", length = 35)
+    private String estadoCivil;
+
+    @Column(name = "nacionalidad", length = 50)
+    private String nacionalidad;
+
     @Builder.Default
     @Column(name = "pertenece_a_proyecto")
     private Boolean perteneceAProyecto = false;
@@ -114,6 +123,12 @@ public class Paciente {
 
     @Column(name = "nivel_educativo")
     private String nivelEducativo;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "ocupacion")
+    private String ocupacion;
 
     @Column(name = "anio_educacion")
     private String anioEducacion;

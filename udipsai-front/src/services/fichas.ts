@@ -336,4 +336,299 @@ export const fichasService = {
       throw error;
     }
   },
+
+  // Socioeconómico
+  listarSocioEconomico: async () => {
+    const res = await api.get("/fichas-socioeconomicas");
+    return res.data;
+  },
+
+  obtenerSocioEconomico: async (id: number | string) => {
+    const res = await api.get(`/fichas-socioeconomicas/paciente/${id}`);
+    return res.data;
+  },
+
+  obtenerSocioEconomicoPorId: async (id: number | string) => {
+    const res = await api.get(`/fichas-socioeconomicas/${id}`);
+    return res.data;
+  },
+
+  crearSocioEconomico: async (data: any) => {
+    const res = await api.post("/fichas-socioeconomicas/crearFicha", data);
+    return res.data;
+  },
+
+  actualizarSocioEconomico: async (id: number | string, data: any) => {
+    const res = await api.put(`/fichas-socioeconomicas/socioeconomicas/${id}`, data);
+    return res.data;
+  },
+
+  eliminarSocioEconomico: async (id: number | string) => {
+    const res = await api.delete(`/fichas-socioeconomicas/socioeconomicas/${id}`);
+    return res.data;
+  },
+
+  obtenerHistorialSocioEconomico: async (pacienteId: number | string) => {
+    const res = await api.get(`/fichas-socioeconomicas/paciente/id/${pacienteId}/historial`);
+    return res.data;
+  },
+
+  exportarPdfSocioEconomicoPorId: async (id: number | string) => {
+    const res = await api.get(`/fichas-socioeconomicas/reporte/pdf/id/${id}`, {
+      responseType: "blob",
+    });
+    return res.data;
+  },
+
+  listarInformeSocial: async () => {
+    const res = await api.get("/informes-sociales");
+    return res.data;
+  },
+
+  obtenerInformeSocial: async (id: number | string) => {
+    const res = await api.get(`/informes-sociales/paciente/id/${id}`);
+    return res.data;
+  },
+
+  obtenerHistorialInformeSocial: async (id: number | string) => {
+    const res = await api.get(`/informes-sociales/paciente/id/${id}/historial`);
+    return res.data;
+  },
+
+  obtenerInformeSocialPorId: async (id: number | string) => {
+    const res = await api.get(`/informes-sociales/${id}`);
+    return res.data;
+  },
+
+  obtenerSiguienteNumeroInforme: async () => {
+    const res = await api.get("/informes-sociales/siguiente-numero");
+    return res.data;
+  },
+
+  crearInformeSocial: async (data: FormData) => {
+    const res = await api.post("/informes-sociales/crear", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  },
+
+  actualizarInformeSocial: async (id: number | string, data: FormData) => {
+    const res = await api.put(`/informes-sociales/${id}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  },
+
+  eliminarInformeSocial: async (id: number | string) => {
+    const res = await api.delete(`/informes-sociales/${id}`);
+    return res.data;
+  },
+
+  exportarExcelSocioEconomico: async (pacienteId?: number | string) => {
+    try {
+      const response = await api.get("/fichas-socioeconomicas/reporte/excel", {
+        params: { pacienteId },
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      const filename = pacienteId
+        ? `ficha_socioeconomica_${pacienteId}.xlsx`
+        : "fichas_socioeconomicas.xlsx";
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error al exportar Excel Socioeconómico:", error);
+      throw error;
+    }
+  },
+
+  exportarPdfSocioEconomico: async (pacienteId: number) => {
+    try {
+      const response = await api.get(
+        "/fichas-socioeconomicas/reporte/pdf",
+        {
+          params: { pacienteId },
+          responseType: "blob",
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al exportar PDF Socioeconómico:", error);
+      throw error;
+    }
+  },
+
+  // Seguimiento Social
+  listarSeguimientoSocial: async () => {
+    try {
+      const response = await api.get("/seguimientos-sociales");
+      return response.data;
+    } catch (error) {
+      console.error("Error al listar seguimiento social:", error);
+      throw error;
+    }
+  },
+
+  exportartExcelInformeSocial: async (pacienteId?: number | string) => {
+    try {
+      const response = await api.get("/informes-sociales/reporte/excel", {
+        params: { pacienteId },
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      const filename = pacienteId
+        ? `informe_social_${pacienteId}.xlsx`
+        : "informes_sociales.xlsx";
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error al exportar Excel Informe Social:", error);
+      throw error;
+    }
+  },
+
+  exportarPdfInformeSocial: async (pacienteId: number) => {
+    try {
+      const response = await api.get("/informes-sociales/reporte/pdf", {
+        params: { pacienteId },
+        responseType: "blob",
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al exportar PDF Informe Social:", error);
+      throw error;
+    }
+  },
+
+  exportarPdfInformeSocialPorId: async (id: number | string) => {
+    try {
+      const response = await api.get(`/informes-sociales/reporte/pdf/id/${id}`, {
+        responseType: "blob",
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al exportar PDF Informe Social por ID:", error);
+      throw error;
+    }
+  },
+
+  obtenerGenogramaInformeSocial: async (pacienteId: number | string) => {
+    try {
+      const response = await api.get(
+        `/informes-sociales/paciente/${pacienteId}/genograma`,
+        {
+          responseType: "blob",
+        }
+      );
+      return URL.createObjectURL(response.data);
+    } catch (error) {
+      console.error("Error al obtener genograma de informe social:", error);
+      throw error;
+    }
+  },
+
+  obtenerEcomapaInformeSocial: async (pacienteId: number | string) => {
+    try {
+      const response = await api.get(
+        `/informes-sociales/paciente/${pacienteId}/ecomapa`,
+        {
+          responseType: "blob",
+        }
+      );
+      return URL.createObjectURL(response.data);
+    } catch (error) {
+      console.error("Error al obtener ecomapa de informe social:", error);
+      throw error;
+    }
+  },
+
+  obtenerSeguimientoSocial: async (id: number | string) => {
+    try {
+      const response = await api.get(`/seguimientos-sociales/paciente/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener seguimiento social:", error);
+      throw error;
+    }
+  },
+
+  crearSeguimientoSocial: async (data: any) => {
+    try {
+      const response = await api.post("/seguimientos-sociales", data);
+      return response.data;
+    } catch (error) {
+      console.error("Error al crear seguimiento social:", error);
+      throw error;
+    }
+  },
+
+  actualizarSeguimientoSocial: async (id: number | string, data: any) => {
+    try {
+      const response = await api.put(`/seguimientos-sociales/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar seguimiento social:", error);
+      throw error;
+    }
+  },
+
+  eliminarSeguimientoSocial: async (id: number | string) => {
+    try {
+      const response = await api.delete(`/seguimientos-sociales/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al eliminar seguimiento social:", error);
+      throw error;
+    }
+  },
+
+  exportarPdfSeguimientoSocial: async (id: number) => {
+    try {
+      const response = await api.get(
+        "/seguimientos-sociales/reporte/pdf",
+        {
+          params: { id },
+          responseType: "blob",
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al exportar PDF Seguimiento Social:", error);
+      throw error;
+    }
+  },
+
+  exportarExcelSeguimientoSocial: async (pacienteId?: number | string) => {
+    try {
+      const response = await api.get("/seguimientos-sociales/reporte/excel", {
+        params: { pacienteId },
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      const filename = pacienteId
+        ? `seguimiento_social_${pacienteId}.xlsx`
+        : "seguimientos_sociales.xlsx";
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error al exportar Excel Seguimiento Social:", error);
+      throw error;
+    }
+  },
 };

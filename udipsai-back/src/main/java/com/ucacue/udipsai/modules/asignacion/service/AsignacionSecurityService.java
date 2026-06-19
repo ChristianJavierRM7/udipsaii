@@ -51,4 +51,31 @@ public class AsignacionSecurityService {
 
         return hasAssignment;
     }
+
+    public java.util.List<Integer> getPasanteAssignedPatientIds() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return java.util.Collections.emptyList();
+        }
+
+        boolean isPasante = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_PASANTE"));
+
+        if (!isPasante) {
+            return null; // indicates not a pasante (no restriction)
+        }
+
+        String cedula = authentication.getName();
+        Optional<Pasante> pasante = pasanteRepository.findByCedula(cedula);
+
+        if (pasante.isEmpty()) {
+            log.warn("Access denied: Pasante not found for cedula {}", cedula);
+            return java.util.Collections.emptyList();
+        }
+
+        return asignacionRepository.findByPasanteIdAndActivoTrue(pasante.get().getId())
+                .stream()
+                .map(a -> a.getPaciente().getId())
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

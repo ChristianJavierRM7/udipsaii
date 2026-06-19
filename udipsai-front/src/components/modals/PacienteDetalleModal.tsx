@@ -11,6 +11,7 @@ interface Paciente {
   nombresApellidos: string;
   cedula: string;
   fechaNacimiento: string;
+  lugarNacimiento: string;
   fechaApertura: string;
   activo: boolean;
   ciudad: string;
@@ -21,6 +22,10 @@ interface Paciente {
   sede: { id: number; nombre: string };
   motivoConsulta: string;
   observaciones: string;
+  email?: string;
+  nacionalidad?: string;
+  estadoCivil?: string;
+  ocupacion?: string;
 }
 
 interface PatientDetailsModalProps {
@@ -94,9 +99,9 @@ export const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
             {paciente.cedula}
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleExportPdf}
           disabled={isExporting}
           className="flex items-center gap-2"
@@ -109,21 +114,19 @@ export const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
       <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
         <button
           onClick={() => setActiveTab('details')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'details'
-              ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'details'
+            ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
         >
           Información General
         </button>
         <button
           onClick={() => setActiveTab('seguimiento')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'seguimiento'
-              ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'seguimiento'
+            ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
         >
           Seguimiento
         </button>
@@ -131,92 +134,132 @@ export const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
 
       {activeTab === 'details' ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="space-y-4">
+          <div className="space-y-4">
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Nombres y Apellidos
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.nombresApellidos}
-                </p>
+              </p>
             </div>
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Cédula
-                </label>
-                <p className="text-gray-900 dark:text-white">{paciente.cedula}</p>
+              </label>
+              <p className="text-gray-900 dark:text-white">{paciente.cedula}</p>
             </div>
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Fecha de Nacimiento
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.fechaNacimiento || "N/A"}
-                </p>
+              </p>
             </div>
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Lugar de Nacimiento
+              </label>
+              <p className="text-gray-900 dark:text-white">
+                {paciente.lugarNacimiento || "N/A"}
+              </p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Edad
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {calcularEdad(paciente.fechaNacimiento)}
-                </p>
+              </p>
             </div>
-            </div>
-
-            <div className="space-y-4">
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Nacionalidad
+              </label>
+              <p className="text-gray-900 dark:text-white">
+                {paciente.nacionalidad || "N/A"}
+              </p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Estado Civil
+              </label>
+              <p className="text-gray-900 dark:text-white">
+                {paciente.estadoCivil || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Teléfono / Celular
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.numeroTelefono} / {paciente.numeroCelular}
-                </p>
+              </p>
             </div>
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Ciudad / Domicilio
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.ciudad} - {paciente.domicilio}
-                </p>
+              </p>
             </div>
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Sede
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.sede?.nombre}
-                </p>
+              </p>
             </div>
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Institución Educativa
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.institucionEducativa?.nombre || "N/A"}
-                </p>
+              </p>
             </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Correo Electrónico
+              </label>
+              <p className="text-gray-900 dark:text-white text-wrap break-all">
+                {paciente.email || "N/A"}
+              </p>
             </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Ocupación
+              </label>
+              <p className="text-gray-900 dark:text-white">
+                {paciente.ocupacion || "N/A"}
+              </p>
+            </div>
+          </div>
 
-            <div className="col-span-1 md:col-span-2 space-y-4">
+          <div className="col-span-1 md:col-span-2 space-y-4">
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Motivo de Consulta
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.motivoConsulta || "N/A"}
-                </p>
+              </p>
             </div>
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Observaciones
-                </label>
-                <p className="text-gray-900 dark:text-white">
+              </label>
+              <p className="text-gray-900 dark:text-white">
                 {paciente.observaciones || "N/A"}
-                </p>
+              </p>
             </div>
-            </div>
+          </div>
         </div>
       ) : (
         <SeguimientoContainer pacienteId={paciente.id} />

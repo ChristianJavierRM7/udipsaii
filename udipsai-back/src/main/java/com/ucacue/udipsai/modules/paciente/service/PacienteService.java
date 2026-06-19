@@ -32,6 +32,9 @@ import com.ucacue.udipsai.modules.historiaclinica.repository.HistoriaClinicaRepo
 import com.ucacue.udipsai.modules.fonoaudiologia.repository.FonoaudiologiaRepository;
 import com.ucacue.udipsai.modules.psicologiaclinica.repository.PsicologiaClinicaRepository;
 import com.ucacue.udipsai.modules.psicologiaeducativa.repository.PsicologiaEducativaRepository;
+import com.ucacue.udipsai.modules.fichasocial.repository.FichaSocioeconomicaRepository;
+import com.ucacue.udipsai.modules.FichaSeguimientoSocial.repository.SeguimientoSocialFichaRepository;
+import com.ucacue.udipsai.modules.informesocial.repository.InformeSocialRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -81,6 +84,15 @@ public class PacienteService {
 
     @Autowired
     private CedulaValidatorService cedulaValidatorService;
+
+    @Autowired
+    private FichaSocioeconomicaRepository fichaSocioeconomicaRepository;
+
+    @Autowired
+    private SeguimientoSocialFichaRepository seguimientoSocialFichaRepository;
+
+    @Autowired
+    private InformeSocialRepository informeSocialRepository;
 
     @Transactional(readOnly = true)
     public Page<PacienteDTO> listarPacientesActivos(Pageable pageable) {
@@ -139,6 +151,12 @@ public class PacienteService {
             predicates.add(cb.or(
                     cb.like(cb.lower(root.get("nombresApellidos")), searchPattern),
                     cb.like(cb.lower(root.get("cedula")), searchPattern)));
+        }
+
+        // Ciudad (filtro de corzo)
+        if (StringUtils.hasText(criteria.getCiudad())) {
+            predicates.add(cb.like(cb.lower(root.get("ciudad")),
+                    "%" + criteria.getCiudad().toLowerCase() + "%"));
         }
 
         // Estado activo (default true)
@@ -352,6 +370,7 @@ public class PacienteService {
         paciente.setNombresApellidos(request.getNombresApellidos());
         paciente.setCiudad(request.getCiudad());
         paciente.setFechaNacimiento(request.getFechaNacimiento());
+        paciente.setLugarNacimiento(request.getLugarNacimiento());
         paciente.setCedula(request.getCedula());
         paciente.setDomicilio(request.getDomicilio());
         paciente.setNumeroTelefono(request.getNumeroTelefono());
@@ -363,6 +382,10 @@ public class PacienteService {
         paciente.setPerteneceInclusion(request.getPerteneceInclusion());
         paciente.setTieneDiscapacidad(request.getTieneDiscapacidad());
         paciente.setPortadorCarnet(request.getPortadorCarnet());
+        paciente.setEstadoCivil(request.getEstadoCivil());
+        paciente.setNacionalidad(request.getNacionalidad());
+        paciente.setEmail(request.getEmail());
+        paciente.setOcupacion(request.getOcupacion());
         paciente.setPerteneceAProyecto(request.getPerteneceAProyecto());
         paciente.setDiagnostico(request.getDiagnostico());
         paciente.setMotivoConsulta(request.getMotivoConsulta());
@@ -393,6 +416,7 @@ public class PacienteService {
                 .nombresApellidos(paciente.getNombresApellidos())
                 .ciudad(paciente.getCiudad())
                 .fechaNacimiento(paciente.getFechaNacimiento())
+                .lugarNacimiento(paciente.getLugarNacimiento())
                 .edad(paciente.getEdad())
                 .cedula(paciente.getCedula())
                 .domicilio(paciente.getDomicilio())
@@ -411,6 +435,10 @@ public class PacienteService {
                 .perteneceInclusion(paciente.getPerteneceInclusion())
                 .tieneDiscapacidad(paciente.getTieneDiscapacidad())
                 .portadorCarnet(paciente.getPortadorCarnet())
+                .estadoCivil(paciente.getEstadoCivil())
+                .nacionalidad(paciente.getNacionalidad())
+                .email(paciente.getEmail())
+                .ocupacion(paciente.getOcupacion())
                 .perteneceAProyecto(paciente.getPerteneceAProyecto())
                 .diagnostico(paciente.getDiagnostico())
                 .motivoConsulta(paciente.getMotivoConsulta())
@@ -444,6 +472,19 @@ public class PacienteService {
 
         var pe = psicologiaEducativaRepository.findByPacienteIdAndActivo(id, true);
         if (pe != null) fichasMap.put("Psicología Educativa", pe.getId());
+
+        var socio = fichaSocioeconomicaRepository.findFirstByPacienteIdAndActivoOrderByIdDesc(id, true);
+        if (socio != null) fichasMap.put("Socioeconómico", socio.getId());
+
+        var segs = seguimientoSocialFichaRepository.findByPacienteIdAndActivoTrue(id);
+        if (segs != null && !segs.isEmpty()) {
+            fichasMap.put("Seguimiento Social", segs.get(segs.size() - 1).getId());
+        }
+
+        var infs = informeSocialRepository.findByPacienteIdAndActivoTrue(id);
+        if (infs != null && !infs.isEmpty()) {
+            fichasMap.put("Informe Social", infs.get(infs.size() - 1).getId());
+        }
 
         List<com.ucacue.udipsai.modules.documentos.domain.Documento> extraDocs = documentoRepository.findByPacienteIdAndActivoTrue(id);
         log.info("Cargando {} documentos desde repositorio para resumen de paciente ID: {}", 

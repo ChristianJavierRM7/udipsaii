@@ -10,6 +10,7 @@ public class PacienteRequest {
     private String sexo;
     private String nombresApellidos;
     private LocalDate fechaNacimiento;
+    private String lugarNacimiento;
     private String ciudad;
     private String domicilio;
     private String numeroTelefono; 
@@ -22,6 +23,10 @@ public class PacienteRequest {
     private Boolean perteneceInclusion;
     private Boolean tieneDiscapacidad;
     private Boolean portadorCarnet;
+    private String estadoCivil;
+    private String nacionalidad;
+    private String email;
+    private String ocupacion;
     private Boolean perteneceAProyecto;
     private String proyecto;
     private String diagnostico;

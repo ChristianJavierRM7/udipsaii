@@ -4,10 +4,10 @@ export const authService = {
   login: async (username: string, password: string) => {
     try {
       const response = await api.post("/auth/login", { username, password });
-      const { accessToken, tokenType, refreshToken } = response.data;
+      const { accessToken, type, refreshToken } = response.data;
       if (accessToken) {
         localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("tokenType", tokenType || "Bearer");
+        localStorage.setItem("tokenType", type || "Bearer");
       }
       if (refreshToken) {
         localStorage.setItem("refreshToken", refreshToken);

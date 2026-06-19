@@ -67,4 +67,24 @@ public class PermisosDTO {
     private Boolean psicologiaEducativaCrear;
     private Boolean psicologiaEducativaEditar;
     private Boolean psicologiaEducativaEliminar;
+
+    private Boolean informes;
+    private Boolean informesCrear;
+    private Boolean informesEditar;
+    private Boolean informesEliminar;
+
+    private Boolean socioeconomica;
+    private Boolean socioeconomicaCrear;
+    private Boolean socioeconomicaEditar;
+    private Boolean socioeconomicaEliminar;
+
+    private Boolean informeSocial;
+    private Boolean informeSocialCrear;
+    private Boolean informeSocialEditar;
+    private Boolean informeSocialEliminar;
+
+    private Boolean seguimientoSocial;
+    private Boolean seguimientoSocialCrear;
+    private Boolean seguimientoSocialEditar;
+    private Boolean seguimientoSocialEliminar;
 }

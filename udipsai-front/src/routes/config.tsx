@@ -35,6 +35,14 @@ const WaisEvaluacion         = lazy(() => import("../pages/Fichas/Wais/Wais"));
 const NuevaHistoriaClinica   = lazy(() => import("../pages/Fichas/HistoriaClinica/NuevaHistoriaClinica"));
 const EditarHistoriaClinica  = lazy(() => import("../pages/Fichas/HistoriaClinica/EditarHistoriaClinica"));
 
+// Trabajo Social (Corzo)
+const NuevaSocioEconomico = lazy(() => import("../pages/Fichas/SocioEconomico/NuevaSocioEconomico"));
+const EditarSocioEconomico = lazy(() => import("../pages/Fichas/SocioEconomico/EditarSocioEconomico"));
+const NuevaSeguimientoSocial = lazy(() => import("../pages/Fichas/SeguimientoSocial/NuevaSeguimientoSocial"));
+const EditarSeguimientoSocial = lazy(() => import("../pages/Fichas/SeguimientoSocial/EditarSeguimientoSocial"));
+const NuevaInformeSocial = lazy(() => import("../pages/Fichas/InformeSocial/NuevaInformeSocial"));
+const EditarInformeSocial = lazy(() => import("../pages/Fichas/InformeSocial/EditarInformeSocial"));
+
 // ── Módulo de informes psicopedagógicos (NUEVO) ───────────────────────────────
 const SelectorPacienteInformes = lazy(() => import("../pages/Fichas/Informes/SelectorPacienteInformes"));
 const ListaInformes            = lazy(() => import("../pages/Fichas/Informes/ListaInformes"));
@@ -113,6 +121,18 @@ export const privateRouteObjects: RouteObject[] = [
 
       { path: "psicologia-educativa/nuevo",      ...protectedRoute("PERM_PSICOLOGIA_EDUCATIVA_CREAR",  <NuevaPsicologiaEducativa />) },
       { path: "psicologia-educativa/editar/:id", ...protectedRoute("PERM_PSICOLOGIA_EDUCATIVA_EDITAR", <EditarPsicologiaEducativa />) },
+
+      // Socioeconómico
+      { path: "socioeconomico/nuevo", ...protectedRoute("PERM_SOCIOECONOMICA_CREAR", <NuevaSocioEconomico />) },
+      { path: "socioeconomico/editar/:id", ...protectedRoute("PERM_SOCIOECONOMICA_EDITAR", <EditarSocioEconomico />) },
+      
+      // Seguimiento Social
+      { path: "seguimiento-social/nuevo", ...protectedRoute("PERM_SEGUIMIENTO_SOCIAL_CREAR", <NuevaSeguimientoSocial />) },
+      { path: "seguimiento-social/editar/:id", ...protectedRoute("PERM_SEGUIMIENTO_SOCIAL_EDITAR", <EditarSeguimientoSocial />) },
+
+      // Informe Social
+      { path: "informe-social/nuevo", ...protectedRoute("PERM_INFORME_SOCIAL_CREAR", <NuevaInformeSocial />) },
+      { path: "informe-social/editar/:id", ...protectedRoute("PERM_INFORME_SOCIAL_EDITAR", <EditarInformeSocial />) },
 
       // ── Informes psicopedagógicos ──────────────────────────────────────────
       { path: "informes",                    ...protectedRoute(["PERM_PACIENTES", "PERM_INFORMES"], <SelectorPacienteInformes />) },

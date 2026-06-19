@@ -25,9 +25,9 @@ export default function FormularioPacientes() {
 
   const [formData, setFormData] = useState({
     cedula: "",
-    sexo: "",
     nombresApellidos: "",
     fechaNacimiento: new Date().toISOString().split("T")[0],
+    lugarNacimiento: "",
     fotoUrl: "",
     ciudad: "",
     domicilio: "",
@@ -49,6 +49,11 @@ export default function FormularioPacientes() {
     tipoDiscapacidad: "",
     detalleDiscapacidad: "",
     porcentajeDiscapacidad: 0,
+    estadoCivil: "",
+    nacionalidad: "",
+    sexo: "",
+    email: "",
+    ocupacion: "",
     activo: true,
   });
 
@@ -88,6 +93,11 @@ export default function FormularioPacientes() {
 
           setFormData({
             ...data,
+            estadoCivil: data.estadoCivil || "",
+            nacionalidad: data.nacionalidad || "",
+            sexo: data.sexo || "",
+            email: data.email || "",
+            ocupacion: data.ocupacion || "",
             institucionEducativaId: data.institucionEducativa?.id || 0,
             sedeId: data.sede?.id || 0,
           });
@@ -279,6 +289,20 @@ export default function FormularioPacientes() {
     }
   };
 
+  const optionsEstadoCivil = [
+    { value: "Soltero/a", label: "Soltero/a" },
+    { value: "Casado/a", label: "Casado/a" },
+    { value: "Divorciado/a", label: "Divorciado/a" },
+    { value: "Viudo/a", label: "Viudo/a" },
+    { value: "Unión de Hecho", label: "Unión de Hecho" },
+  ];
+
+  const optionsSexo = [
+    { value: "Masculino", label: "Masculino" },
+    { value: "Femenino", label: "Femenino" },
+    { value: "Otro", label: "Otro" },
+  ];
+
   const optionsDiscapacidad = [
     { value: "intelectual", label: "Intelectual" },
     { value: "fisica", label: "Física" },
@@ -462,24 +486,21 @@ export default function FormularioPacientes() {
               />
             </div>
             <div>
-              <Label htmlFor="sexo">Sexo</Label>
-              <Select
-                options={[
-                  { value: "M", label: "Masculino" },
-                  { value: "F", label: "Femenino" },
-                ]}
-                placeholder="Seleccione el sexo"
-                onChange={(value) => handleSelectChange("sexo", value)}
-                value={formData.sexo || ""}
-              />
-            </div>
-            <div>
               <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
               <DatePicker
                 id="fechaNacimiento"
                 placeholder="Seleccione la fecha de nacimiento"
                 onChange={(dates) => handleDateChange("fechaNacimiento", dates)}
                 defaultDate={formData.fechaNacimiento}
+              />
+            </div>
+            <div>
+              <Label htmlFor="lugarNacimiento">Lugar de Nacimiento</Label>
+              <Input
+                id="lugarNacimiento"
+                placeholder="Ingrese el lugar de nacimiento"
+                value={formData.lugarNacimiento}
+                onChange={handleChange}
               />
             </div>
             <div>
@@ -533,6 +554,53 @@ export default function FormularioPacientes() {
                 onChange={handleChange}
                 error={!!errors.numeroCelular}
                 hint={errors.numeroCelular}
+              />
+            </div>
+            <div>
+              <Label htmlFor="estadoCivil">Estado Civil</Label>
+              <Select
+                options={optionsEstadoCivil}
+                placeholder="Seleccione el estado civil"
+                onChange={(value) => handleSelectChange("estadoCivil", value)}
+                value={formData.estadoCivil || ""}
+              />
+            </div>
+            <div>
+              <Label htmlFor="nacionalidad">Nacionalidad</Label>
+              <Input
+                id="nacionalidad"
+                placeholder="Ingrese la nacionalidad"
+                value={formData.nacionalidad}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <Label htmlFor="sexo">Sexo</Label>
+              <Select
+                options={optionsSexo}
+                placeholder="Seleccione el sexo"
+                onChange={(value) => handleSelectChange("sexo", value)}
+                value={formData.sexo || ""}
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Ingrese el correo electrónico"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ocupacion">Ocupación</Label>
+              <Input
+                id="ocupacion"
+                type="text"
+                placeholder="Ingrese la ocupación"
+                value={formData.ocupacion}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -749,8 +817,8 @@ export default function FormularioPacientes() {
               <Label>Ficha de Compromiso (PDF)</Label>
               <div
                 className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all h-32 ${fichaCompromisoFile || existingFichas.compromiso
-                    ? "border-green-200 bg-green-50/30 dark:border-green-500/30 dark:bg-green-500/5"
-                    : "border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-500 bg-white dark:bg-gray-900"
+                  ? "border-green-200 bg-green-50/30 dark:border-green-500/30 dark:bg-green-500/5"
+                  : "border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-500 bg-white dark:bg-gray-900"
                   }`}
               >
                 <input
@@ -798,8 +866,8 @@ export default function FormularioPacientes() {
               <Label>Ficha de Detección (PDF)</Label>
               <div
                 className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all h-32 ${fichaDeteccionFile || existingFichas.deteccion
-                    ? "border-green-200 bg-green-50/30 dark:border-green-500/30 dark:bg-green-500/5"
-                    : "border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-500 bg-white dark:bg-gray-900"
+                  ? "border-green-200 bg-green-50/30 dark:border-green-500/30 dark:bg-green-500/5"
+                  : "border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-500 bg-white dark:bg-gray-900"
                   }`}
               >
                 <input

@@ -52,6 +52,9 @@ export default function FormularioPasantes() {
     psicologiaEducativa: false,
     informes: false,
     citas: false,
+    socioEconomica: false,
+    informeSocial: false,
+    seguimientoSocial: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -177,6 +180,21 @@ export default function FormularioPasantes() {
               citasCrear: data.permisos.citasCrear || false,
               citasEditar: data.permisos.citasEditar || false,
               citasEliminar: data.permisos.citasEliminar || false,
+
+              socioEconomica: data.permisos.socioEconomica || false,
+              socioEconomicaCrear: data.permisos.socioEconomicaCrear || false,
+              socioEconomicaEditar: data.permisos.socioEconomicaEditar || false,
+              socioEconomicaEliminar: data.permisos.socioEconomicaEliminar || false,
+
+              informeSocial: data.permisos.informeSocial || false,
+              informeSocialCrear: data.permisos.informeSocialCrear || false,
+              informeSocialEditar: data.permisos.informeSocialEditar || false,
+              informeSocialEliminar: data.permisos.informeSocialEliminar || false,
+
+              seguimientoSocial: data.permisos.seguimientoSocial || false,
+              seguimientoSocialCrear: data.permisos.seguimientoSocialCrear || false,
+              seguimientoSocialEditar: data.permisos.seguimientoSocialEditar || false,
+              seguimientoSocialEliminar: data.permisos.seguimientoSocialEliminar || false,
             });
           }
 

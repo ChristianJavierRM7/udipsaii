@@ -20,6 +20,10 @@ import { HistoriaClinicaViewModal } from "./HistoriaClinicaViewModal";
 import { PsicologiaEducativaViewModal } from "./PsicologiaEducativaViewModal";
 import { PsicologiaClinicaViewModal } from "./PsicologiaClinicaViewModal";
 import { FonoaudiologiaViewModal } from "./FonoaudiologiaViewModal";
+// IMPORTACIÓN DEL NUEVO MODAL DE VISTA
+import { SeguimientoSocialViewModal } from "./SeguimientoSocialViewModal";
+import { SocioEconomicoViewModal } from "./SocioEconomicoViewModal";
+import { InformeSocialViewModal } from "./InformeSocialViewModal";
 
 interface Paciente {
   id: number;
@@ -110,6 +114,42 @@ const FILE_TYPES = [
       view: "PERM_PACIENTES",
     },
   },
+  {
+    id: "socioeconomico",
+    label: "Ficha Socioeconómica",
+    internalName: "Socioeconómico",
+    type: "ficha",
+    permissions: {
+      create: "PERM_SOCIOECONOMICA_CREAR",
+      edit: "PERM_SOCIOECONOMICA_EDITAR",
+      delete: "PERM_SOCIOECONOMICA_ELIMINAR",
+      view: "PERM_SOCIOECONOMICA",
+    },
+  },
+  {
+    id: "seguimiento-social",
+    label: "Seguimiento Social",
+    internalName: "Seguimiento Social",
+    type: "ficha",
+    permissions: {
+      create: "PERM_SEGUIMIENTO_SOCIAL_CREAR",
+      edit: "PERM_SEGUIMIENTO_SOCIAL_EDITAR",
+      delete: "PERM_SEGUIMIENTO_SOCIAL_ELIMINAR",
+      view: "PERM_SEGUIMIENTO_SOCIAL",
+    },
+  },
+  {
+    id: "informe-social",
+    label: "Informe Social",
+    internalName: "Informe Social",
+    type: "ficha",
+    permissions: {
+      create: "PERM_INFORME_SOCIAL_CREAR",
+      edit: "PERM_INFORME_SOCIAL_EDITAR",
+      delete: "PERM_INFORME_SOCIAL_ELIMINAR",
+      view: "PERM_INFORME_SOCIAL",
+    },
+  },
 ];
 
 export const PatientFichasModal: React.FC<PatientFichasModalProps> = ({
@@ -134,6 +174,10 @@ export const PatientFichasModal: React.FC<PatientFichasModalProps> = ({
   const [viewEduModalOpen, setViewEduModalOpen] = useState(false);
   const [viewClinicaModalOpen, setViewClinicaModalOpen] = useState(false);
   const [viewFonoModalOpen, setViewFonoModalOpen] = useState(false);
+  // ESTADO PARA EL NUEVO MODAL DE SEGUIMIENTO
+  const [viewSeguimientoModalOpen, setViewSeguimientoModalOpen] = useState(false);
+  const [viewSocioEconomicoModalOpen, setViewSocioEconomicoModalOpen] = useState(false);
+  const [viewInformeSocialModalOpen, setViewInformeSocialModalOpen] = useState(false);
 
   const fetchResumen = async () => {
     if (!paciente) return;
@@ -185,6 +229,16 @@ export const PatientFichasModal: React.FC<PatientFichasModalProps> = ({
           case "fonoaudiologia":
             await fichasService.eliminarFonoaudiologia(itemToDelete.id);
             break;
+          // CASO PARA ELIMINAR SEGUIMIENTO SOCIAL
+          case "seguimiento-social":
+            await fichasService.eliminarSeguimientoSocial(itemToDelete.id);
+            break;
+          case "socioeconomico":
+            await fichasService.eliminarSocioEconomico(itemToDelete.id);
+            break;
+          case "informe-social":
+            await fichasService.eliminarInformeSocial(itemToDelete.id);
+            break;
           default:
             throw new Error("Tipo de ficha no reconocido");
         }
@@ -234,6 +288,19 @@ export const PatientFichasModal: React.FC<PatientFichasModalProps> = ({
       }
       if (fileType === "fonoaudiologia") {
         setViewFonoModalOpen(true);
+        return;
+      }
+      // ACCIÓN VER PARA SEGUIMIENTO SOCIAL
+      if (fileType === "seguimiento-social") {
+        setViewSeguimientoModalOpen(true);
+        return;
+      }
+      if (fileType === "socioeconomico") {
+        setViewSocioEconomicoModalOpen(true);
+        return;
+      }
+      if (fileType === "informe-social") {
+        setViewInformeSocialModalOpen(true);
         return;
       }
       if (type === "documento") {
@@ -298,6 +365,45 @@ export const PatientFichasModal: React.FC<PatientFichasModalProps> = ({
             }
             return;
         }
+        // SEGUIMIENTO SOCIAL: Exportación (Opcional, si el back lo soporta)
+        if (fileType === "seguimiento-social") {
+            toast.info("Exportación de seguimiento social no disponible por el momento");
+            return;
+        }
+        if (fileType === "socioeconomico") {
+            try {
+                toast.info("Generando reporte PDF...");
+                const blob = await fichasService.exportarPdfSocioEconomico(paciente.id);
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", `ficha_socioeconomica_${paciente.id}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success("PDF descargado correctamente");
+            } catch (error) {
+                toast.error("Error al exportar el PDF");
+            }
+            return;
+        }
+        if (fileType === "informe-social") {
+            try {
+                toast.info("Generando reporte PDF...");
+                const blob = await fichasService.exportarPdfInformeSocial(paciente.id);
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", `informe_social_${paciente.id}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success("PDF descargado correctamente");
+            } catch (error) {
+                toast.error("Error al exportar el PDF");
+            }
+            return;
+        }
     }
 
     if (action === "Eliminar") {
@@ -315,7 +421,12 @@ export const PatientFichasModal: React.FC<PatientFichasModalProps> = ({
              onClose();
              return;
         }
-        navigate(`/fichas/${fileType}/editar/${paciente.id}`);
+        // NAVEGACIÓN A EDICIÓN DE SEGUIMIENTO SOCIAL (y otros)
+        if (["socioeconomico", "seguimiento-social", "informe-social"].includes(fileType)) {
+             navigate(`/fichas/${fileType}/editar/${fichaId}`);
+        } else {
+             navigate(`/fichas/${fileType}/editar/${paciente.id}`);
+        }
         onClose();
       } else {
         toast.error("No se pudo obtener el ID de la ficha");
@@ -530,6 +641,29 @@ export const PatientFichasModal: React.FC<PatientFichasModalProps> = ({
         <FonoaudiologiaViewModal
           isOpen={viewFonoModalOpen}
           onClose={() => setViewFonoModalOpen(false)}
+          pacienteId={paciente.id}
+        />
+      )}
+      {/* RENDERIZADO DEL MODAL DE SEGUIMIENTO SOCIAL */}
+      {viewSeguimientoModalOpen && (
+        <SeguimientoSocialViewModal
+          isOpen={viewSeguimientoModalOpen}
+          onClose={() => setViewSeguimientoModalOpen(false)}
+          pacienteId={paciente.id}
+          modo={"ver"}
+        />
+      )}
+      {viewSocioEconomicoModalOpen && (
+        <SocioEconomicoViewModal
+          isOpen={viewSocioEconomicoModalOpen}
+          onClose={() => setViewSocioEconomicoModalOpen(false)}
+          pacienteId={paciente.id}
+        />
+      )}
+      {viewInformeSocialModalOpen && (
+        <InformeSocialViewModal
+          isOpen={viewInformeSocialModalOpen}
+          onClose={() => setViewInformeSocialModalOpen(false)}
           pacienteId={paciente.id}
         />
       )}

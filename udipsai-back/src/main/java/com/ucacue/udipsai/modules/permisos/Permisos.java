@@ -147,6 +147,33 @@ public class Permisos {
     @Column(name = "citas_eliminar")
     private Boolean citasEliminar = false;
 
+    @Column(name = "socioeconomica")
+    private Boolean socioEconomica = false;
+    @Column(name = "socioeconomica_crear")
+    private Boolean socioEconomicaCrear = false;
+    @Column(name = "socioeconomica_editar")
+    private Boolean socioEconomicaEditar = false;
+    @Column(name = "socioeconomica_eliminar")
+    private Boolean socioEconomicaEliminar = false;
+
+    @Column(name = "informesocial")
+    private Boolean informeSocial = false;
+    @Column(name = "informesocial_crear")
+    private Boolean informeSocialCrear = false;
+    @Column(name = "informesocial_editar")
+    private Boolean informeSocialEditar = false;
+    @Column(name = "informesocial_eliminar")
+    private Boolean informeSocialEliminar = false;
+
+    @Column(name = "seguimiento_social")
+    private Boolean seguimientoSocial = false;
+    @Column(name = "seguimiento_social_crear")
+    private Boolean seguimientoSocialCrear = false;
+    @Column(name = "seguimiento_social_editar")
+    private Boolean seguimientoSocialEditar = false;
+    @Column(name = "seguimiento_social_eliminar")
+    private Boolean seguimientoSocialEliminar = false;
+
     public List<SimpleGrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         
@@ -235,6 +262,24 @@ public class Permisos {
         if (Boolean.TRUE.equals(this.psicologiaEducativaEditar)) authorities.add(new SimpleGrantedAuthority("PERM_PSICOLOGIA_EDUCATIVA_EDITAR"));
         if (Boolean.TRUE.equals(this.psicologiaEducativaEliminar)) authorities.add(new SimpleGrantedAuthority("PERM_PSICOLOGIA_EDUCATIVA_ELIMINAR"));
 
+        // Socioeconomica
+        if (Boolean.TRUE.equals(this.socioEconomica)) authorities.add(new SimpleGrantedAuthority("PERM_SOCIOECONOMICA"));
+        if (Boolean.TRUE.equals(this.socioEconomicaCrear)) authorities.add(new SimpleGrantedAuthority("PERM_SOCIOECONOMICA_CREAR"));
+        if (Boolean.TRUE.equals(this.socioEconomicaEditar)) authorities.add(new SimpleGrantedAuthority("PERM_SOCIOECONOMICA_EDITAR"));
+        if (Boolean.TRUE.equals(this.socioEconomicaEliminar)) authorities.add(new SimpleGrantedAuthority("PERM_SOCIOECONOMICA_ELIMINAR"));
+
+        // Informe Social
+        if (Boolean.TRUE.equals(this.informeSocial)) authorities.add(new SimpleGrantedAuthority("PERM_INFORME_SOCIAL"));
+        if (Boolean.TRUE.equals(this.informeSocialCrear)) authorities.add(new SimpleGrantedAuthority("PERM_INFORME_SOCIAL_CREAR"));
+        if (Boolean.TRUE.equals(this.informeSocialEditar)) authorities.add(new SimpleGrantedAuthority("PERM_INFORME_SOCIAL_EDITAR"));
+        if (Boolean.TRUE.equals(this.informeSocialEliminar)) authorities.add(new SimpleGrantedAuthority("PERM_INFORME_SOCIAL_ELIMINAR"));
+
+        // Seguimiento Social
+        if (Boolean.TRUE.equals(this.seguimientoSocial)) authorities.add(new SimpleGrantedAuthority("PERM_SEGUIMIENTO_SOCIAL"));
+        if (Boolean.TRUE.equals(this.seguimientoSocialCrear)) authorities.add(new SimpleGrantedAuthority("PERM_SEGUIMIENTO_SOCIAL_CREAR"));
+        if (Boolean.TRUE.equals(this.seguimientoSocialEditar)) authorities.add(new SimpleGrantedAuthority("PERM_SEGUIMIENTO_SOCIAL_EDITAR"));
+        if (Boolean.TRUE.equals(this.seguimientoSocialEliminar)) authorities.add(new SimpleGrantedAuthority("PERM_SEGUIMIENTO_SOCIAL_ELIMINAR"));
+
         return authorities;
     }
 
@@ -311,5 +356,20 @@ public class Permisos {
         this.citasCrear = other.citasCrear;
         this.citasEditar = other.citasEditar;
         this.citasEliminar = other.citasEliminar;
+
+        this.socioEconomica = other.socioEconomica;
+        this.socioEconomicaCrear = other.socioEconomicaCrear;
+        this.socioEconomicaEditar = other.socioEconomicaEditar;
+        this.socioEconomicaEliminar = other.socioEconomicaEliminar;
+
+        this.informeSocial = other.informeSocial;
+        this.informeSocialCrear = other.informeSocialCrear;
+        this.informeSocialEditar = other.informeSocialEditar;
+        this.informeSocialEliminar = other.informeSocialEliminar;
+
+        this.seguimientoSocial = other.seguimientoSocial;
+        this.seguimientoSocialCrear = other.seguimientoSocialCrear;
+        this.seguimientoSocialEditar = other.seguimientoSocialEditar;
+        this.seguimientoSocialEliminar = other.seguimientoSocialEliminar;
     }
 }

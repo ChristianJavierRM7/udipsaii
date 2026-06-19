@@ -6,6 +6,7 @@ export { especialidadesService } from './especialidades';
 export { especialistasService } from './especialistas';
 export { evaluacionesService } from './evaluaciones';
 export { fichasService } from './fichas';
+export { informeSocialService } from './informeSocial';
 export { institucionesService } from './instituciones';
 export { pacientesService } from './pacientes';
 export { pasantesService } from './pasantes';

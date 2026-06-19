@@ -58,6 +58,9 @@ export const Modal: React.FC<ModalProps> = ({
   const paddingClasses = className?.match(paddingRegex)?.join(" ") || "p-6";
   const shellClasses = className?.replace(paddingRegex, "").trim() || "";
 
+  const hasZeroRightPadding = paddingClasses.includes("p-0") || paddingClasses.includes("pr-0");
+  const rightPaddingClass = hasZeroRightPadding ? "" : "pr-7 sm:pr-9";
+
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center p-4 modal z-[99999]">
       {!isFullscreen && (
@@ -93,7 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
           </button>
         )}
         <div className="flex-1 overflow-y-auto custom-scrollbar overscroll-contain">
-          <div className={`${paddingClasses} pr-7 sm:pr-9`}>
+          <div className={`${paddingClasses} ${rightPaddingClass}`}>
             {children}
           </div>
         </div>

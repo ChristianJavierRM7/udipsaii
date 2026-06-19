@@ -18,6 +18,9 @@ export interface PermissionsState {
   psicologiaEducativa: boolean;
   informes: boolean;
   citas: boolean;
+  socioEconomica: boolean;
+  informeSocial: boolean;
+  seguimientoSocial: boolean;
 
   // Granular - Pacientes
   pacientesCrear?: boolean;
@@ -88,6 +91,21 @@ export interface PermissionsState {
   citasCrear?: boolean;
   citasEditar?: boolean;
   citasEliminar?: boolean;
+
+  // Granular - Socioeconomica
+  socioEconomicaCrear?: boolean;
+  socioEconomicaEditar?: boolean;
+  socioEconomicaEliminar?: boolean;
+
+  // Granular - Informe Social
+  informeSocialCrear?: boolean;
+  informeSocialEditar?: boolean;
+  informeSocialEliminar?: boolean;
+
+  // Granular - Seguimiento Social
+  seguimientoSocialCrear?: boolean;
+  seguimientoSocialEditar?: boolean;
+  seguimientoSocialEliminar?: boolean;
 }
 
 interface PermisosTableProps {
@@ -107,6 +125,14 @@ const categories = [
       { key: "psicologiaClinica", label: "Psicología Clínica" },
       { key: "psicologiaEducativa", label: "Psicología Educativa" },
       { key: "informes", label: "Informes Psicopedagógicos" },
+    ] as const,
+  },
+  {
+    name: "Trabajo Social",
+    modules: [
+      { key: "socioEconomica", label: "Socioeconómico" },
+      { key: "informeSocial", label: "Informe Social" },
+      { key: "seguimientoSocial", label: "Seguimiento Social" },
     ] as const,
   },
   {

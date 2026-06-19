@@ -123,6 +123,30 @@ public class PermisoService {
         dto.setPsicologiaEducativaEditar(entity.getPsicologiaEducativaEditar());
         dto.setPsicologiaEducativaEliminar(entity.getPsicologiaEducativaEliminar());
         
+        // Informes
+        dto.setInformes(entity.getInformes());
+        dto.setInformesCrear(entity.getInformesCrear());
+        dto.setInformesEditar(entity.getInformesEditar());
+        dto.setInformesEliminar(entity.getInformesEliminar());
+
+        // Socioeconomica
+        dto.setSocioeconomica(entity.getSocioEconomica());
+        dto.setSocioeconomicaCrear(entity.getSocioEconomicaCrear());
+        dto.setSocioeconomicaEditar(entity.getSocioEconomicaEditar());
+        dto.setSocioeconomicaEliminar(entity.getSocioEconomicaEliminar());
+
+        // Informe Social
+        dto.setInformeSocial(entity.getInformeSocial());
+        dto.setInformeSocialCrear(entity.getInformeSocialCrear());
+        dto.setInformeSocialEditar(entity.getInformeSocialEditar());
+        dto.setInformeSocialEliminar(entity.getInformeSocialEliminar());
+
+        // Seguimiento Social
+        dto.setSeguimientoSocial(entity.getSeguimientoSocial());
+        dto.setSeguimientoSocialCrear(entity.getSeguimientoSocialCrear());
+        dto.setSeguimientoSocialEditar(entity.getSeguimientoSocialEditar());
+        dto.setSeguimientoSocialEliminar(entity.getSeguimientoSocialEliminar());
+
         return dto;
     }
 
@@ -186,5 +210,29 @@ public class PermisoService {
         if (dto.getPsicologiaEducativaCrear() != null) entity.setPsicologiaEducativaCrear(dto.getPsicologiaEducativaCrear());
         if (dto.getPsicologiaEducativaEditar() != null) entity.setPsicologiaEducativaEditar(dto.getPsicologiaEducativaEditar());
         if (dto.getPsicologiaEducativaEliminar() != null) entity.setPsicologiaEducativaEliminar(dto.getPsicologiaEducativaEliminar());
+
+        // Informes
+        if (dto.getInformes() != null) entity.setInformes(dto.getInformes());
+        if (dto.getInformesCrear() != null) entity.setInformesCrear(dto.getInformesCrear());
+        if (dto.getInformesEditar() != null) entity.setInformesEditar(dto.getInformesEditar());
+        if (dto.getInformesEliminar() != null) entity.setInformesEliminar(dto.getInformesEliminar());
+
+        // Socioeconomica
+        if (dto.getSocioeconomica() != null) entity.setSocioEconomica(dto.getSocioeconomica());
+        if (dto.getSocioeconomicaCrear() != null) entity.setSocioEconomicaCrear(dto.getSocioeconomicaCrear());
+        if (dto.getSocioeconomicaEditar() != null) entity.setSocioEconomicaEditar(dto.getSocioeconomicaEditar());
+        if (dto.getSocioeconomicaEliminar() != null) entity.setSocioEconomicaEliminar(dto.getSocioeconomicaEliminar());
+
+        // Informe Social
+        if (dto.getInformeSocial() != null) entity.setInformeSocial(dto.getInformeSocial());
+        if (dto.getInformeSocialCrear() != null) entity.setInformeSocialCrear(dto.getInformeSocialCrear());
+        if (dto.getInformeSocialEditar() != null) entity.setInformeSocialEditar(dto.getInformeSocialEditar());
+        if (dto.getInformeSocialEliminar() != null) entity.setInformeSocialEliminar(dto.getInformeSocialEliminar());
+
+        // Seguimiento Social
+        if (dto.getSeguimientoSocial() != null) entity.setSeguimientoSocial(dto.getSeguimientoSocial());
+        if (dto.getSeguimientoSocialCrear() != null) entity.setSeguimientoSocialCrear(dto.getSeguimientoSocialCrear());
+        if (dto.getSeguimientoSocialEditar() != null) entity.setSeguimientoSocialEditar(dto.getSeguimientoSocialEditar());
+        if (dto.getSeguimientoSocialEliminar() != null) entity.setSeguimientoSocialEliminar(dto.getSeguimientoSocialEliminar());
     }
 }

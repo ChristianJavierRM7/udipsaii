@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      @page {
+        size: A4;
+        margin: 30mm 15mm 22mm 15mm;
+        @top-center {
+          content: element(header);
+        }
+        @bottom-center {
+          content: element(footer);
+        }
+      }
+      body {
+        font-family: Arial;
+        margin: 0;
+        font-size: 12px;
+        color: #333;
+      }
+      .header {
+        position: running(header);
+        text-align: center;
+        border-bottom: 2px solid #fa3340;
+        padding-bottom: 5px;
+        width: 100%;
+      }
+      .header h1 {
+        color: #fa3340;
+        margin-bottom: 5px;
+      }
+      .header h2 {
+        color: #555;
+        margin-top: 0;
+      }
+      .header p {
+        margin: 2px 0;
+        font-size: 11px;
+        color: #666;
+      }
+      .section {
+        margin-top: 20px;
+      }
+      .section-title {
+        background: #f5f5f5;
+        padding: 8px;
+        font-weight: bold;
+        border-left: 4px solid #fa3340;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #ddd;
+      }
+      th,
+      td {
+        padding: 6px;
+      }
+      .label {
+        font-weight: bold;
+      }
+      .caja-texto {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-top: 5px;
+        min-height: 50px;
+        text-align: justify;
+        white-space: pre-wrap;
+      }
+      .firmas {
+        margin-top: 50px;
+        text-align: center;
+        width: 100%;
+      }
+      .firma-col {
+        display: inline-block;
+        width: 45%;
+        vertical-align: top;
+      }
+      .linea {
+        border-top: 1px solid #000;
+        width: 80%;
+        margin: 0 auto 5px auto;
+      }
+      .footer-info {
+        position: running(footer);
+        text-align: center;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 10px;
+        color: #000;
+        line-height: 1.4;
+        border-top: 1px solid #ddd;
+        padding-top: 5px;
+        width: 100%;
+      }
+      .footer-info .label-dir {
+        font-weight: bold;
+      }
+      .footer-info a {
+        color: #0000ff;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img
+        src="../../static/images/logo/logoudipsai.png"
+        th:src="${logoUri}"
+        alt="UDIPSAI Logo"
+        style="height: 60px; margin-bottom: 5px"
+      />
+      <p
+        style="
+          font-weight: bold;
+          font-size: 14px;
+          margin-top: 10px;
+          color: #333;
+        "
+      >
+        FICHA SOCIOECONÓMICA
+      </p>
+      <h2 th:text="'Seguimiento N° ' + ${f.numeroSeguimiento ?: '-'}"></h2>
+    </div>
+
+    <div class="section">
+      <div class="section-title">1. Datos Generales</div>
+      <table>
+        <tr>
+          <td width="50%">
+            <span class="label">Paciente:</span>
+            <span th:text="${f.pacienteNombre ?: 'N/A'}"></span>
+          </td>
+          <td width="50%">
+            <span class="label">Cédula:</span>
+            <span th:text="${f.pacienteCedula ?: 'N/A'}"></span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="label">Fecha:</span>
+            <span th:text="${f.fecha ?: 'N/A'}"></span>
+          </td>
+          <td>
+            <span class="label">Área:</span>
+            <span th:text="${f.areaAcompanamiento ?: 'N/A'}"></span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="label">Visitador/a:</span>
+            <span
+              th:text="${f.nombreVisitador + ' ' + f.apellidoVisitador}"
+            ></span>
+          </td>
+          <td>
+            <span class="label">Dirección Visita:</span>
+            <span th:text="${f.direccionVisita ?: 'N/A'}"></span>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">2. Desarrollo del Seguimiento</div>
+
+      <p class="label">Objetivo:</p>
+      <div class="caja-texto" th:text="${f.objetivo ?: 'Sin registro'}"></div>
+
+      <p class="label">Participantes:</p>
+      <div
+        class="caja-texto"
+        th:text="${f.participantes ?: 'Sin registro'}"
+      ></div>
+
+      <p class="label">Actividades Realizadas:</p>
+      <div
+        class="caja-texto"
+        th:text="${f.actividades ?: 'Sin registro'}"
+      ></div>
+
+      <p class="label">Observaciones:</p>
+      <div
+        class="caja-texto"
+        th:text="${f.observaciones ?: 'Sin registro'}"
+      ></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">3. Constancia y Firmas</div>
+      <p>
+        <span class="label">Lugar de Firma:</span>
+        <span th:text="${f.lugarFirma ?: 'N/A'}"></span>
+      </p>
+
+      <div class="firmas">
+        <div class="firma-col">
+          <div class="linea"></div>
+          <span class="label">Representante</span><br />
+          <span th:text="${f.nombreRepresentante ?: 'N/A'}"></span>
+        </div>
+
+        <div
+          class="firma-col"
+          th:if="${f.nombrePersonalEscuela != null and f.nombrePersonalEscuela != ''}"
+        >
+          <div class="linea"></div>
+          <span
+            class="label"
+            th:text="'Personal Institucional (' + ${f.rolEscuela ?: 'N/A'} + ')'"
+          ></span
+          ><br />
+          <span th:text="${f.nombrePersonalEscuela ?: 'N/A'}"></span>
+          <div
+            th:if="${f.especificarOtro != null and f.especificarOtro != ''}"
+            th:text="${f.especificarOtro}"
+          ></div>
+        </div>
+      </div>
+    </div>
+     <div class="footer-info">
+      <span class="label-dir">Dirección:</span> Av. De las Américas y
+      Humboldt<br />
+      Tel: 4134750 ext. 2003<br />
+      <a href="mailto:udipsai@ucacue.edu.ec">udipsai@ucacue.edu.ec</a>
+    </div>
+  </body>
+</html>

@@ -24,10 +24,18 @@ export type Paciente = {
   sedeId: number;
   institucionEducativaId: number;
   activo: boolean;
+  lugarNacimiento?: string;
+  estadoCivil?: string;
+  nacionalidad?: string;
+  sexo?: string;
+  nivelEducativo?: string;
+  email?: string;
+  ocupacion?: string;
 };
 
 export interface PacienteCriteria {
   search?: string;
+  ciudad?: string;
   activo?: boolean;
   sedeId?: number;
   institucionEducativaId?: number;
@@ -188,6 +196,16 @@ export const pacientesService = {
       return response.data;
     } catch (error) {
       console.error("Error al obtener resumen fichas:", error);
+      throw error;
+    }
+  },
+
+  obtenerFamiliares: async (id: number | string) => {
+    try {
+      const response = await api.get(`/pacientes/${id}/familiares`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener familiares del paciente:", error);
       throw error;
     }
   },
