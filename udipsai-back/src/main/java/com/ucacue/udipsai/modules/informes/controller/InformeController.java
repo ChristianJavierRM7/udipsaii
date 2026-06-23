@@ -97,6 +97,24 @@ public class InformeController {
         }
     }
 
+    @GetMapping("/{id}/word")
+    @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
+    public ResponseEntity<byte[]> descargarWord(@PathVariable Integer id) {
+        log.info("Generando Word informe ID={}", id);
+
+        try {
+            byte[] word = wordService.generarWord(id);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe-" + id + ".docx")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                    .body(word);
+        } catch (Exception e) {
+            log.error("Error Word informe {}: {}", id, e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("/paciente/{pacienteId}/zip")
     @PreAuthorize("hasAnyAuthority('PERM_PACIENTES', 'PERM_INFORMES')")
     public ResponseEntity<byte[]> descargarZip(
