@@ -337,7 +337,7 @@ public class InformeSocialService {
             return null;
         }
         List<InformeSocial> informes = informeRepository.findByPacienteIdAndActivoTrue(paciente.getId());
-        InformeSocial informe = !informes.isEmpty() ? informes.get(0) : null;
+        InformeSocial informe = !informes.isEmpty() ? informes.get(informes.size() - 1) : null;
         if (informe != null) {
             FichaSocioeconomica ficha = fichaRepository.findFirstByPacienteIdAndActivoOrderByIdDesc(paciente.getId(), true);
             return convertirADTO(informe, ficha);
@@ -348,7 +348,7 @@ public class InformeSocialService {
     @Transactional(readOnly = true)
     public InformeSocialDTO obtenerPorPacienteId(Integer pacienteId) {
         List<InformeSocial> informes = informeRepository.findByPacienteIdAndActivoTrue(pacienteId);
-        InformeSocial informe = !informes.isEmpty() ? informes.get(0) : null;
+        InformeSocial informe = !informes.isEmpty() ? informes.get(informes.size() - 1) : null;
         if (informe != null) {
             FichaSocioeconomica ficha = fichaRepository.findFirstByPacienteIdAndActivoOrderByIdDesc(pacienteId, true);
             return convertirADTO(informe, ficha);
@@ -612,8 +612,11 @@ public class InformeSocialService {
     @Transactional(readOnly = true)
     public org.springframework.core.io.Resource cargarGenogramaComoRecurso(Integer pacienteId) {
         List<InformeSocial> informes = informeRepository.findByPacienteIdAndActivoTrue(pacienteId);
-        if (!informes.isEmpty() && informes.get(0).getGenogramaUrl() != null) {
-            return storageService.loadAsResource(informes.get(0).getGenogramaUrl());
+        if (!informes.isEmpty()) {
+            InformeSocial latest = informes.get(informes.size() - 1);
+            if (latest.getGenogramaUrl() != null) {
+                return storageService.loadAsResource(latest.getGenogramaUrl());
+            }
         }
         return null;
     }
@@ -621,8 +624,29 @@ public class InformeSocialService {
     @Transactional(readOnly = true)
     public org.springframework.core.io.Resource cargarEcomapaComoRecurso(Integer pacienteId) {
         List<InformeSocial> informes = informeRepository.findByPacienteIdAndActivoTrue(pacienteId);
-        if (!informes.isEmpty() && informes.get(0).getEcomapaUrl() != null) {
-            return storageService.loadAsResource(informes.get(0).getEcomapaUrl());
+        if (!informes.isEmpty()) {
+            InformeSocial latest = informes.get(informes.size() - 1);
+            if (latest.getEcomapaUrl() != null) {
+                return storageService.loadAsResource(latest.getEcomapaUrl());
+            }
+        }
+        return null;
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.core.io.Resource cargarGenogramaPorInformeIdComoRecurso(Integer id) {
+        InformeSocial informe = informeRepository.findById(id).orElse(null);
+        if (informe != null && informe.getGenogramaUrl() != null) {
+            return storageService.loadAsResource(informe.getGenogramaUrl());
+        }
+        return null;
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.core.io.Resource cargarEcomapaPorInformeIdComoRecurso(Integer id) {
+        InformeSocial informe = informeRepository.findById(id).orElse(null);
+        if (informe != null && informe.getEcomapaUrl() != null) {
+            return storageService.loadAsResource(informe.getEcomapaUrl());
         }
         return null;
     }

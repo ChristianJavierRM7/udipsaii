@@ -269,10 +269,48 @@ public class InformeSocialController {
                 .body(file);
     }
 
+    @GetMapping("/id/{id}/genograma")
+    public ResponseEntity<Resource> descargarGenogramaPorInformeId(@PathVariable Integer id) {
+        InformeSocialDTO dto = informeService.obtenerPorId(id);
+        if (dto != null && dto.getPaciente() != null) {
+            if (!asignacionSecurity.checkPasanteAcceso(dto.getPaciente().getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+        Resource file = informeService.cargarGenogramaPorInformeIdComoRecurso(id);
+        if (file == null) {
+            return ResponseEntity.notFound().build();
+        }
+        MediaType mediaType = getMediaTypeForFileName(file.getFilename());
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                .body(file);
+    }
+
     @GetMapping("/paciente/{pacienteId}/ecomapa")
     @PreAuthorize("hasAuthority('PERM_INFORME_SOCIAL') and @asignacionSecurity.checkPasanteAcceso(#pacienteId)")
     public ResponseEntity<Resource> descargarEcomapa(@PathVariable Integer pacienteId) {
         Resource file = informeService.cargarEcomapaComoRecurso(pacienteId);
+        if (file == null) {
+            return ResponseEntity.notFound().build();
+        }
+        MediaType mediaType = getMediaTypeForFileName(file.getFilename());
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                .body(file);
+    }
+
+    @GetMapping("/id/{id}/ecomapa")
+    public ResponseEntity<Resource> descargarEcomapaPorInformeId(@PathVariable Integer id) {
+        InformeSocialDTO dto = informeService.obtenerPorId(id);
+        if (dto != null && dto.getPaciente() != null) {
+            if (!asignacionSecurity.checkPasanteAcceso(dto.getPaciente().getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+        Resource file = informeService.cargarEcomapaPorInformeIdComoRecurso(id);
         if (file == null) {
             return ResponseEntity.notFound().build();
         }
