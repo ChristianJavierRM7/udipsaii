@@ -67,18 +67,18 @@ export const InformeSocialViewModal: React.FC<
         }
       }
 
-      if (inf?.genogramaUrl && inf.paciente?.id) {
+      if (inf?.genogramaUrl && inf.id) {
         try {
-          const gUrl = await fichasService.obtenerGenogramaInformeSocial(inf.paciente.id);
+          const gUrl = await fichasService.obtenerGenogramaInformeSocial(inf.id);
           setGenogramaPreview(gUrl);
         } catch (e) {
           console.error("Error loading genograma:", e);
         }
       }
 
-      if (inf?.ecomapaUrl && inf.paciente?.id) {
+      if (inf?.ecomapaUrl && inf.id) {
         try {
-          const eUrl = await fichasService.obtenerEcomapaInformeSocial(inf.paciente.id);
+          const eUrl = await fichasService.obtenerEcomapaInformeSocial(inf.id);
           setEcomapaPreview(eUrl);
         } catch (e) {
           console.error("Error loading ecomapa:", e);
@@ -527,11 +527,11 @@ export const InformeSocialViewModal: React.FC<
                   <h4 className="font-bold border-b pb-2 text-lg text-gray-800 dark:text-gray-100 uppercase tracking-wider">
                     14. PROFESIONALES RESPONSABLES
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 mt-4 shadow-sm">
-                    {/* CREADO POR */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 mt-4 shadow-sm">
+                    {/* Evaluado Por */}
                     <div className="text-center p-5 border border-dashed border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/50 dark:bg-gray-900">
                       <div className="h-16 flex items-end justify-center mb-3">
-                        <span className="text-xs text-gray-400 italic">Creado por</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Evaluado Por</span>
                       </div>
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
                         <span className="font-bold text-gray-800 dark:text-gray-200 block text-sm">
@@ -543,10 +543,12 @@ export const InformeSocialViewModal: React.FC<
                       </div>
                     </div>
 
-                    {/* REVISADO POR */}
+                    {/* Profesional Responsable (Supervisor tutor for Pasante, or Coordinator for Specialist) */}
                     <div className="text-center p-5 border border-dashed border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/50 dark:bg-gray-900">
                       <div className="h-16 flex items-end justify-center mb-3">
-                        <span className="text-xs text-gray-400 italic">Revisado por</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                          {informeSeleccionado.pasante ? "PROFESIONAL RESPONSABLE:" : "COORDINADORA DE LA UDIPSAI"}
+                        </span>
                       </div>
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
                         <span className="font-bold text-gray-800 dark:text-gray-200 block text-sm">
@@ -555,24 +557,7 @@ export const InformeSocialViewModal: React.FC<
                             : "Lcda. Gabriela Jara S., Mgs."}
                         </span>
                         <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider">
-                          {informeSeleccionado.pasante ? "Especialista a Cargo" : "Coordinadora de la UDIPSAI"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* RESPONSABLE DE LA INFORMACIÓN */}
-                    <div className="text-center p-5 border border-dashed border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/50 dark:bg-gray-900">
-                      <div className="h-16 flex items-end justify-center mb-3">
-                        <span className="text-xs text-gray-400 italic">Responsable de la Información</span>
-                      </div>
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                        <span className="font-bold text-gray-800 dark:text-gray-200 block text-sm">
-                          {informeSeleccionado.informante 
-                            ? `${informeSeleccionado.informante.nombresApellidos}${informeSeleccionado.informante.relacion ? ` (${informeSeleccionado.informante.relacion})` : ""}` 
-                            : "Familiar Responsable"}
-                        </span>
-                        <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider">
-                          Nombre / Relación del Responsable
+                          {informeSeleccionado.pasante ? "Especialista" : "Coordinadora de la UDIPSAI"}
                         </span>
                       </div>
                     </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import Button from "../../ui/button/Button";
-import { useNavigate, useParams, useSearchParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 import { MessageSquare, User, Upload, X } from "lucide-react";
 import { pacientesService, especialistasService, pasantesService } from "../../../services";
@@ -211,7 +211,6 @@ export default function FormularioInformeSocial({ fichaId, onSuccess }: Formular
   const navigate = useNavigate();
   const { id: paramId } = useParams<{ id: string }>();
   const id = fichaId?.toString() || paramId;
-  const [searchParams] = useSearchParams();
 
   const { userIdentity, userRole } = useAuth();
 
@@ -308,7 +307,6 @@ export default function FormularioInformeSocial({ fichaId, onSuccess }: Formular
 
   // Cargar informe si es edición o inicializar número de ficha
   useEffect(() => {
-    const pacienteIdParam = searchParams.get("pacienteId");
     if (isEdit && id) {
       loadInforme(id);
     } else {
@@ -327,20 +325,8 @@ export default function FormularioInformeSocial({ fichaId, onSuccess }: Formular
         }
       };
       loadNextNumero();
-
-      if (pacienteIdParam) {
-        pacientesService.obtenerPorId(pacienteIdParam)
-          .then((paciente) => {
-            if (paciente) {
-              handlePatientSelect(paciente);
-            }
-          })
-          .catch((err) => {
-            console.error("Error al cargar paciente preseleccionado:", err);
-          });
-      }
     }
-  }, [id, isEdit, searchParams]);
+  }, [id, isEdit]);
 
   const loadInforme = async (informeId: string) => {
     try {

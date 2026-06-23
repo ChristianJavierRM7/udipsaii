@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <title>Informe Social</title>
     <style>
         @page {
             size: A4;
             margin: 30mm 15mm 22mm 15mm;
+
             @top-center {
                 content: element(header);
             }
+
             @bottom-center {
                 content: element(footer);
             }
@@ -43,7 +46,7 @@
             font-size: 16px;
             color: #555;
         }
-        
+
         .header p {
             margin: 2px 0;
             font-size: 11px;
@@ -66,7 +69,8 @@
             margin-bottom: 10px;
         }
 
-        td, th {
+        td,
+        th {
             border: 1px solid #ddd;
             padding: 6px 8px;
             text-align: left;
@@ -102,17 +106,18 @@
             padding-top: 5px;
             width: 100%;
         }
-        
+
         .footer-info .label-dir {
             font-weight: bold;
         }
-        
+
         .footer-info a {
             color: #0000ff;
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
 
     <div class="footer-info">
@@ -122,22 +127,16 @@
     </div>
 
     <div class="header">
-      <img
-        src="../../static/images/logo/logoudipsai.png"
-        th:src="${logoUri}"
-        alt="UDIPSAI Logo"
-        style="height: 60px; margin-bottom: 5px"
-      />
-      <p
-        style="
+        <img src="../../static/images/logo/logoudipsai.png" th:src="${logoUri}" alt="UDIPSAI Logo"
+            style="height: 60px; margin-bottom: 5px" />
+        <p style="
           font-weight: bold;
           font-size: 14px;
           margin-top: 10px;
           color: #333;
-        "
-      >
-        INFORME SOCIAL 
-      </p>
+        ">
+            INFORME SOCIAL
+        </p>
     </div>
 
     <div class="section">
@@ -148,7 +147,9 @@
             </tr>
             <tr>
                 <td class="label">LUGAR Y FECHA DE NACIMIENTO</td>
-                <td th:text="${(p.lugarNacimiento != null ? p.lugarNacimiento : '') + (p.fechaNacimiento != null ? ' - ' + p.fechaNacimiento : '')}"></td>
+                <td
+                    th:text="${(p.lugarNacimiento != null ? p.lugarNacimiento : '') + (p.fechaNacimiento != null ? ' - ' + p.fechaNacimiento : '')}">
+                </td>
                 <td class="label">EDAD</td>
                 <td th:text="${p.getEdad() + ' años'}"></td>
             </tr>
@@ -168,7 +169,9 @@
                 <td class="label">TIPO DE DISCAPACIDAD</td>
                 <td th:text="${p.tieneDiscapacidad ? p.tipoDiscapacidad : 'Ninguna'}"></td>
                 <td class="label">PORCENTAJE DE DISCAPACIDAD</td>
-                <td th:text="${p.tieneDiscapacidad && p.porcentajeDiscapacidad != null ? p.porcentajeDiscapacidad + '%' : '—'}"></td>
+                <td
+                    th:text="${p.tieneDiscapacidad && p.porcentajeDiscapacidad != null ? p.porcentajeDiscapacidad + '%' : '—'}">
+                </td>
             </tr>
             <tr>
                 <td class="label">INSTITUCIÓN EDUCATIVA</td>
@@ -186,19 +189,26 @@
             </tr>
             <tr>
                 <td class="label">PERSONA QUE PROPORCIONA LA INFORMACIÓN</td>
-                <td th:text="${i.informante != null && i.informante.nombresApellidos != null ? i.informante.nombresApellidos : '—'}"></td>
+                <td
+                    th:text="${i.informante != null && i.informante.nombresApellidos != null ? i.informante.nombresApellidos : '—'}">
+                </td>
                 <td class="label">PARENTESCO</td>
-                <td th:text="${i.informante != null && i.informante.relacion != null ? i.informante.relacion : '—'}"></td>
+                <td th:text="${i.informante != null && i.informante.relacion != null ? i.informante.relacion : '—'}">
+                </td>
             </tr>
             <tr>
                 <td class="label">CEDULA/PASAPORTE</td>
                 <td th:text="${i.informante != null && i.informante.cedula != null ? i.informante.cedula : '—'}"></td>
                 <td class="label">TELÉFONO</td>
-                <td th:text="${i.informante != null && i.informante.numeroTelefono != null ? i.informante.numeroTelefono : '—'}"></td>
+                <td
+                    th:text="${i.informante != null && i.informante.numeroTelefono != null ? i.informante.numeroTelefono : '—'}">
+                </td>
             </tr>
             <tr>
                 <td class="label">CORREO ELECTRÓNICO</td>
-                <td colspan="3" th:text="${i.informante != null && i.informante.correoElectronico != null ? i.informante.correoElectronico : '—'}"></td>
+                <td colspan="3"
+                    th:text="${i.informante != null && i.informante.correoElectronico != null ? i.informante.correoElectronico : '—'}">
+                </td>
             </tr>
             <tr>
                 <td class="label">N° DE FICHA</td>
@@ -206,7 +216,9 @@
             </tr>
             <tr>
                 <td class="label">FECHA DE ELABORACIÓN DE INFORME</td>
-                <td colspan="3" th:text="${i.fechaElaboracion != null ? #dates.format(i.fechaElaboracion, 'dd/MM/yyyy') : '—'}"></td>
+                <td colspan="3"
+                    th:text="${i.fechaElaboracion != null ? #dates.format(i.fechaElaboracion, 'dd/MM/yyyy') : '—'}">
+                </td>
             </tr>
         </table>
     </div>
@@ -215,35 +227,35 @@
         <div class="section-title">1. DATOS DE IDENTIFICACIÓN:</div>
         <table>
             <thead>
-            <tr>
-                <th>NOMBRES</th>
-                <th>PARENTESCO</th>
-                <th>ESTADO CIVIL</th>
-                <th>EDAD</th>
-                <th>INGRESOS</th>
-                <th>INSTRUCCIÓN</th>
-                <th>OCUPACIÓN</th>
-                <th>CÉDULA</th>
-                <th>TELÉFONO</th>
-                <th>CORREO</th>
-            </tr>
+                <tr>
+                    <th>NOMBRES</th>
+                    <th>PARENTESCO</th>
+                    <th>ESTADO CIVIL</th>
+                    <th>EDAD</th>
+                    <th>INGRESOS</th>
+                    <th>INSTRUCCIÓN</th>
+                    <th>OCUPACIÓN</th>
+                    <th>CÉDULA</th>
+                    <th>TELÉFONO</th>
+                    <th>CORREO</th>
+                </tr>
             </thead>
             <tbody>
-            <tr th:each="f : ${i.familiares}">
-                <td th:text="${f.nombres}"></td>
-                <td th:text="${f.parentesco}"></td>
-                <td th:text="${f.estadoCivil}"></td>
-                <td th:text="${f.edad}"></td>
-                <td th:text="${f.ingresos != null ? '$' + f.ingresos : '—'}"></td>
-                <td th:text="${f.instruccion}"></td>
-                <td th:text="${f.ocupacion}"></td>
-                <td th:text="${f.cedula != null ? f.cedula : '—'}"></td>
-                <td th:text="${f.telefono != null ? f.telefono : '—'}"></td>
-                <td th:text="${f.correo != null ? f.correo : '—'}"></td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(i.familiares)}">
-                <td colspan="10" style="text-align: center;">No hay familiares registrados</td>
-            </tr>
+                <tr th:each="f : ${i.familiares}">
+                    <td th:text="${f.nombres}"></td>
+                    <td th:text="${f.parentesco}"></td>
+                    <td th:text="${f.estadoCivil}"></td>
+                    <td th:text="${f.edad}"></td>
+                    <td th:text="${f.ingresos != null ? '$' + f.ingresos : '—'}"></td>
+                    <td th:text="${f.instruccion}"></td>
+                    <td th:text="${f.ocupacion}"></td>
+                    <td th:text="${f.cedula != null ? f.cedula : '—'}"></td>
+                    <td th:text="${f.telefono != null ? f.telefono : '—'}"></td>
+                    <td th:text="${f.correo != null ? f.correo : '—'}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(i.familiares)}">
+                    <td colspan="10" style="text-align: center;">No hay familiares registrados</td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -252,38 +264,44 @@
         <div class="section-title">2. CONFORMACIÓN FAMILIAR</div>
         <table>
             <thead>
-            <tr>
-                <th colspan="8">TIPO DE FAMILIA</th>
-            </tr>
+                <tr>
+                    <th colspan="8">TIPO DE FAMILIA</th>
+                </tr>
             </thead>
             <tbody>
-            <tr>
-                <td style="font-weight: bold; width: 18%;">Nuclear</td>
-                <td style="text-align: center; width: 7%; font-weight: bold;" th:text="${i.tipoFamilia == 'Nuclear' ? 'X' : ''}"></td>
-                <td style="font-weight: bold; width: 18%;">Extensa</td>
-                <td style="text-align: center; width: 7%; font-weight: bold;" th:text="${i.tipoFamilia == 'Extensa' ? 'X' : ''}"></td>
-                <td style="font-weight: bold; width: 18%;">Monoparental</td>
-                <td style="text-align: center; width: 7%; font-weight: bold;" th:text="${i.tipoFamilia == 'Monoparental' ? 'X' : ''}"></td>
-                <td style="font-weight: bold; width: 18%;">Otros (especificar)</td>
-                <td style="text-align: center; width: 7%; font-weight: bold;" th:text="${i.tipoFamilia == 'Otros' ? 'X' : ''}"></td>
-            </tr>
-            <tr th:if="${i.tipoFamilia == 'Otros' && i.tipoFamiliaEspecificar != null && !i.tipoFamiliaEspecificar.trim().isEmpty()}">
-                <td colspan="2" style="font-weight: bold;">Especificación:</td>
-                <td colspan="6" th:text="${i.tipoFamiliaEspecificar}"></td>
-            </tr>
+                <tr>
+                    <td style="font-weight: bold; width: 18%;">Nuclear</td>
+                    <td style="text-align: center; width: 7%; font-weight: bold;"
+                        th:text="${i.tipoFamilia == 'Nuclear' ? 'X' : ''}"></td>
+                    <td style="font-weight: bold; width: 18%;">Extensa</td>
+                    <td style="text-align: center; width: 7%; font-weight: bold;"
+                        th:text="${i.tipoFamilia == 'Extensa' ? 'X' : ''}"></td>
+                    <td style="font-weight: bold; width: 18%;">Monoparental</td>
+                    <td style="text-align: center; width: 7%; font-weight: bold;"
+                        th:text="${i.tipoFamilia == 'Monoparental' ? 'X' : ''}"></td>
+                    <td style="font-weight: bold; width: 18%;">Otros (especificar)</td>
+                    <td style="text-align: center; width: 7%; font-weight: bold;"
+                        th:text="${i.tipoFamilia == 'Otros' ? 'X' : ''}"></td>
+                </tr>
+                <tr
+                    th:if="${i.tipoFamilia == 'Otros' && i.tipoFamiliaEspecificar != null && !i.tipoFamiliaEspecificar.trim().isEmpty()}">
+                    <td colspan="2" style="font-weight: bold;">Especificación:</td>
+                    <td colspan="6" th:text="${i.tipoFamiliaEspecificar}"></td>
+                </tr>
             </tbody>
         </table>
-        
+
         <div style="margin-top: 15px;">
             <p style="font-weight: bold; margin-bottom: 5px;">DESCRIPCIÓN DE LA DINÁMICA FAMILIAR:</p>
             <p th:text="${i.descripcionDinamicaFamiliar != null ? i.descripcionDinamicaFamiliar : '—'}"></p>
         </div>
     </div>
 
-    <div class="section">
+    <div class="section" style="page-break-inside: avoid;">
         <div class="section-title">3. GENOGRAMA</div>
         <div th:if="${genogramaUri != null}" style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
-            <img th:src="${genogramaUri}" alt="Genograma" style="max-width: 90%; max-height: 350px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"/>
+            <img th:src="${genogramaUri}" alt="Genograma"
+                style="display: block; margin: 0 auto; max-width: 90%; max-height: 280px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
         </div>
         <div th:if="${genogramaIsPdf}" style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
             <p style="font-style: italic; color: #555;">El genograma se adjunta en formato PDF.</p>
@@ -326,10 +344,11 @@
         <p th:text="${i.situacionLegal != null ? i.situacionLegal : '—'}"></p>
     </div>
 
-    <div class="section">
+    <div class="section" style="page-break-inside: avoid;">
         <div class="section-title">11. ECOMAPA</div>
         <div th:if="${ecomapaUri != null}" style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
-            <img th:src="${ecomapaUri}" alt="Ecomapa" style="max-width: 90%; max-height: 350px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"/>
+            <img th:src="${ecomapaUri}" alt="Ecomapa"
+                style="display: block; margin: 0 auto; max-width: 90%; max-height: 280px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
         </div>
         <div th:if="${ecomapaIsPdf}" style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
             <p style="font-style: italic; color: #555;">El ecomapa se adjunta en formato PDF.</p>
@@ -351,50 +370,71 @@
         <div class="section-title">14. PROFESIONALES RESPONSABLES:</div>
         <div style="margin-top: 15px;">
             <p><strong>ÁREA:</strong> Trabajo Social</p>
-            
-            <table style="width: 100%; margin-top: 30px; border-collapse: collapse; border: none; font-size: 11px; line-height: 1.2;">
+
+            <!-- Case A: Authored by a Pasante (side-by-side layout) -->
+            <table th:if="${i.pasante != null}"
+                style="width: 100%; margin-top: 30px; border-collapse: collapse; border: none; font-size: 11px; line-height: 1.2;">
                 <tr style="border: none;">
-                    <!-- Creado Por (Left Column) -->
-                    <td style="border: none; width: 33%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
+                    <!-- Evaluado Por (Left Column) -->
+                    <td
+                        style="border: none; width: 50%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
                         <div style="min-height: 120px; position: relative;">
-                            <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">Creado Por</p>
-                            <div style="border-top: 1px solid #000; width: 90%; margin: 0 auto; padding-top: 5px;">
-                                <span th:text="${i.pasante != null ? i.pasante.nombresApellidos : (i.especialista != null ? i.especialista.nombresApellidos : (i.elaboradoPor != null ? i.elaboradoPor : 'Profesional de Trabajo Social'))}" style="font-weight: bold;"></span>
+                            <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">Evaluado Por
+                            </p>
+                            <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                                <span th:text="${i.pasante.nombresApellidos}" style="font-weight: bold;"></span>
                                 <br />
-                                <span th:text="${i.pasante != null ? 'Pasante' : 'Especialista'}"></span>
+                                <span>Pasante</span>
                             </div>
                         </div>
                     </td>
 
-                    <!-- Revisado Por (Center Column) -->
-                    <td style="border: none; width: 33%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
+                    <!-- Profesional Responsable (Right Column) -->
+                    <td
+                        style="border: none; width: 50%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
                         <div style="min-height: 120px; position: relative;">
-                            <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">Revisado Por</p>
-                            <div style="border-top: 1px solid #000; width: 90%; margin: 0 auto; padding-top: 5px;">
-                                <span th:if="${i.pasante != null}" th:text="${i.pasante.especialista != null ? i.pasante.especialista.nombresApellidos : 'Especialista a cargo'}" style="font-weight: bold;"></span>
-                                <span th:if="${i.pasante == null}" style="font-weight: bold;">Lcda. Gabriela Jara S., Mgs.</span>
+                            <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">PROFESIONAL
+                                RESPONSABLE:</p>
+                            <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                                <span
+                                    th:text="${i.pasante.especialista != null ? i.pasante.especialista.nombresApellidos : 'Especialista a cargo'}"
+                                    style="font-weight: bold;"></span>
                                 <br />
-                                <span th:if="${i.pasante != null}">Especialista a Cargo</span>
-                                <span th:if="${i.pasante == null}">Coordinadora de la UDIPSAI</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <!-- Responsable de la Información (Right Column) -->
-                    <td style="border: none; width: 33%; padding-left: 10px; padding-right: 10px; vertical-align: top; text-align: center;">
-                        <div style="min-height: 120px; position: relative;">
-                            <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">Responsable de la Información (Familiar)</p>
-                            <div style="border-top: 1px solid #000; width: 90%; margin: 0 auto; padding-top: 5px;">
-                                <span th:text="${i.informante != null ? i.informante.nombresApellidos + (i.informante.relacion != null ? ' (' + i.informante.relacion + ')' : '') : 'Familiar Responsable'}" style="font-weight: bold;"></span>
-                                <br />
-                                <span>Nombre / Relación del Responsable</span>
+                                <span>Especialista</span>
                             </div>
                         </div>
                     </td>
                 </tr>
             </table>
+
+            <!-- Case B: Authored by a Specialist (stacked layout) -->
+            <div th:if="${i.pasante == null}"
+                style="text-align: center; margin-top: 30px; font-size: 11px; line-height: 1.2;">
+                <!-- 1. Specialist (Top Signature) -->
+                <div style="width: 50%; margin: 0 auto; min-height: 120px; text-align: center;">
+                    <p style="font-weight: bold; margin-bottom: 50px; text-transform: uppercase;">EVALUADO POR:</p>
+                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                        <span
+                            th:text="${i.especialista != null ? i.especialista.nombresApellidos : (i.elaboradoPor != null ? i.elaboradoPor : 'Profesional de Trabajo Social')}"
+                            style="font-weight: bold;"></span>
+                        <br />
+                        <span>Especialista</span>
+                    </div>
+                </div>
+
+                <!-- 2. Coordinator (Bottom Signature, stacked) -->
+                <div style="width: 50%; margin: 40px auto 0 auto; min-height: 120px; text-align: center;">
+                    <div style="height: 50px;"></div> <!-- Spacing to match alignment offset of others -->
+                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                        <span style="font-weight: bold;">Lcda. Gabriela Jara S., Mgs.</span>
+                        <br />
+                        <span>Coordinadora de la UDIPSAI</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
 </body>
+
 </html>
