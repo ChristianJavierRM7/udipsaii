@@ -42,4 +42,5 @@ Módulo backend que gestiona los informes psicopedagógicos.
 
 ## Referencias
 
-- Ver documentación general en `docs/INFORMES_PSICOPEDAGOGICOS.md`.
+- Ver documentación general en [GUIA_COMPLETA_INFORMES.md](../../../../../../../../../docs/documentacion-tecnica-informes-psicopedagogicos/GUIA_COMPLETA_INFORMES.md).
+

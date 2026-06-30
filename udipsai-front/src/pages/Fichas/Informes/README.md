@@ -40,4 +40,5 @@ Las rutas están configuradas en `udipsai-front/src/routes/config.tsx`:
 
 ## Referencias
 
-- Ver documentación general en `docs/INFORMES_PSICOPEDAGOGICOS.md`.
+- Ver documentación general en [GUIA_COMPLETA_INFORMES.md](../../../../../../docs/documentacion-tecnica-informes-psicopedagogicos/GUIA_COMPLETA_INFORMES.md).
+

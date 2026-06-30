@@ -15,6 +15,8 @@ Puedes encontrar información específica sobre cada componente en los siguiente
 - [Documentación del Backend](./BACKEND.md)
 - [Documentación del Frontend](./FRONTEND.md)
 - [Plan de Mejoras y Escalamiento](./IMPROVEMENTS.md)
+- [Manual Técnico de Informes Psicopedagógicos](./documentacion-tecnica-informes-psicopedagogicos/GUIA_COMPLETA_INFORMES.md)
+
 
 ## Tecnologías Principales
 
