@@ -34,6 +34,13 @@ RUN printf 'server {\n\
         index index.html index.htm;\n\
         try_files $uri $uri/ /index.html;\n\
     }\n\
+    location /api/ {\n\
+        proxy_pass http://backend:8080/api/;\n\
+        proxy_set_header Host $host;\n\
+        proxy_set_header X-Real-IP $remote_addr;\n\
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+        proxy_set_header X-Forwarded-Proto $scheme;\n\
+    }\n\
 }' > /etc/nginx/conf.d/default.conf
 
 # Copiar archivos estáticos desde la etapa builder

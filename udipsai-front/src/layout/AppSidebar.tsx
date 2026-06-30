@@ -121,7 +121,9 @@ const navItems: NavItem[] = [
     name: "Tests",
     icon: <ClipboardList size={20} />,
     subItems: [
+      { name: "Tests WISC / WPPSI", path: "/fichas/wisc/nuevo", pro: false },
       { name: "WAIS", path: "/fichas/wais", pro: false },
+      { name: "Historial de Evaluaciones", path: "/fichas/wisc/historial", pro: false },
     ],
     requiredPermission: "PERM_RECURSOS",
   },
