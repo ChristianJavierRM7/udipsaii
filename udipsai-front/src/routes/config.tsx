@@ -34,6 +34,7 @@ const EditarPsicologiaEducativa= lazy(() => import("../pages/Fichas/PsicologiaEd
 const WaisEvaluacion         = lazy(() => import("../pages/Fichas/Wais/Wais"));
 const NuevaHistoriaClinica   = lazy(() => import("../pages/Fichas/HistoriaClinica/NuevaHistoriaClinica"));
 const EditarHistoriaClinica  = lazy(() => import("../pages/Fichas/HistoriaClinica/EditarHistoriaClinica"));
+const LegacyTestsWrapper     = lazy(() => import("../pages/Fichas/LegacyTestsWrapper"));
 
 // Trabajo Social (Corzo)
 const NuevaSocioEconomico = lazy(() => import("../pages/Fichas/SocioEconomico/NuevaSocioEconomico"));
@@ -109,6 +110,10 @@ export const privateRouteObjects: RouteObject[] = [
       { index: true, element: <ListaFichasUnificadas /> },
 
       { path: "wais", ...protectedRoute("PERM_RECURSOS", <WaisEvaluacion />) },
+      { path: "wisc/nuevo", ...protectedRoute("PERM_RECURSOS", <LegacyTestsWrapper />) },
+      { path: "wisc/historial", ...protectedRoute("PERM_RECURSOS", <LegacyTestsWrapper />) },
+      { path: "wppsi/nuevo", ...protectedRoute("PERM_RECURSOS", <LegacyTestsWrapper />) },
+      { path: "wppsi/historial", ...protectedRoute("PERM_RECURSOS", <LegacyTestsWrapper />) },
 
       { path: "historia-clinica/nuevo",       ...protectedRoute("PERM_HISTORIA_CLINICA_CREAR",  <NuevaHistoriaClinica />) },
       { path: "historia-clinica/editar/:id",  ...protectedRoute("PERM_HISTORIA_CLINICA_EDITAR", <EditarHistoriaClinica />) },

@@ -1,0 +1,181 @@
+<!-- ============================================================
+     MÓDULO modulo_wisc
+     ============================================================ -->
+<div id="modulo_wisc" style="display:none;">
+  <div class="container" style="position:relative; padding:20px;">
+
+    <button class="btn-volver" style="position: static; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px;" onclick="window.regresarAConfiguracion()">
+      <span class="material-symbols-rounded">arrow_back</span> Volver
+    </button>
+
+    <!-- Envolvemos todo el ingreso en el div con el ID esperado por main.js -->
+    <div id="panel_ingreso_wisc" style="width: 100%;">
+      <div class="clinical-dashboard-layout" style="display: grid; grid-template-columns: 350px 1fr; gap: 20px; align-items: start;">
+        
+<!-- PANEL IZQUIERDO: Info y Acciones -->
+      <div class="card clinical-header-card" style="width: 100%; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+        <!-- PRIMERO: Título e Info Paciente -->
+        <div class="clinical-header-title" style="justify-content: center; text-align: center; margin-bottom: 20px;">
+          <span class="material-symbols-rounded" style="font-size: 44px; color: var(--accent-cyan);">psychology</span>
+          <div>
+            <h1>WISC-V</h1>
+            <p>Escala de Inteligencia de Wechsler para Niños-V</p>
+          </div>
+        </div>
+        <!-- Resumen del paciente (inyectado desde main.js) -->
+        <div id="info_resumen_wisc" class="patient-info-bar" style="color: var(--text-main); border: none; background: transparent; padding: 0; justify-content: center; margin-bottom: 20px;"></div>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0;">
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+          <button class="btn-opcionales-modern" style="width: auto; padding: 12px 24px; margin: 0; width: 100%;" onclick="window.toggleOpcionalesWisc()">
+            <span class="material-symbols-rounded">expand_more</span> Mostrar Subpruebas Opcionales
+          </button>
+          <button class="btn-procesar-modern" style="width: auto; padding: 12px 24px; margin: 0; width: 100%; background: var(--accent-cyan);" onclick="window.procesarLoteSubpruebas()">
+            <span class="material-symbols-rounded">analytics</span> Calcular Resultados WISC-V
+          </button>
+        </div>
+      </div>
+
+        <!-- PANEL DERECHO: Puntuaciones Directas -->
+<div id="panel_ingreso_wisc_inner" class="card" style="width: 100%;">
+          <!-- SEGUNDO: Puntuaciones Directas -->
+        <h2 style="display:flex; align-items:center; gap:0.5rem; justify-content:center; margin-top:0;">
+          <span class="material-symbols-rounded" style="color:var(--accent-cyan);">edit_note</span> Puntuaciones Directas
+        </h2>
+        <p style="text-align:center; font-size:0.85em;color:var(--text-muted);margin-bottom:1.5rem;">Subpruebas Principales WISC-V (6:0 a 16:11 años)</p>
+
+        <!-- Edad oculta (sincronizada automáticamente) -->
+        <input type="hidden" id="edad_anos" value="0">
+        <input type="hidden" id="edad_meses" value="0">
+
+        <div class="modern-input-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">category</span><div><strong>Cubos (C)</strong><span>Visoespacial</span></div></div>
+            <input class="modern-input" type="number" id="pd_C" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">compare</span><div><strong>Semejanzas (S)</strong><span>Comprensión Verbal</span></div></div>
+            <input class="modern-input" type="number" id="pd_S" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">grid_view</span><div><strong>Matrices (M)</strong><span>Razonamiento Fluido</span></div></div>
+            <input class="modern-input" type="number" id="pd_M" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">pin</span><div><strong>Dígitos (D)</strong><span>Memoria de Trabajo</span></div></div>
+            <input class="modern-input" type="number" id="pd_D" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">password</span><div><strong>Clave de Números (CL)</strong><span>Velocidad de Procesamiento</span></div></div>
+            <input class="modern-input" type="number" id="pd_CL" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">spellcheck</span><div><strong>Vocabulario (V)</strong><span>Comprensión Verbal</span></div></div>
+            <input class="modern-input" type="number" id="pd_V" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">balance</span><div><strong>Balanzas (B)</strong><span>Razonamiento Fluido</span></div></div>
+            <input class="modern-input" type="number" id="pd_B" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">extension</span><div><strong>Puzles Visuales (PV)</strong><span>Visoespacial</span></div></div>
+            <input class="modern-input" type="number" id="pd_PV" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">imagesmode</span><div><strong>Span de Dibujos (SD)</strong><span>Memoria de Trabajo</span></div></div>
+            <input class="modern-input" type="number" id="pd_SD" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label"><span class="test-icon material-symbols-rounded">find_in_page</span><div><strong>Búsqueda de Símbolos (BS)</strong><span>Velocidad de Procesamiento</span></div></div>
+            <input class="modern-input" type="number" id="pd_BS" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+
+    <!-- Panel de Resultados -->
+<div id="panel_resultados" class="card panel-oculto" style="display: none; width: 100%; max-width: 100%;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h2 style="margin:0;"><span class="material-symbols-rounded" style="color:var(--accent-cyan);">bar_chart</span> Perfil Clínico WISC-V</h2>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn-secondary" style="padding:0.5rem 1rem;font-size:0.88em;" onclick="window.editarDatosWISC()">
+              <span class="material-symbols-rounded">edit</span> Editar Datos
+            </button>
+            <button class="btn-success" style="padding:0.5rem 1rem;font-size:0.88em;" onclick="window.descargarPDFWISC()">
+              <span class="material-symbols-rounded">picture_as_pdf</span> Guardar PDF
+            </button>
+          </div>
+        </div>
+        
+        <div id="info_paciente_wisc" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.88em;"></div>
+
+        <div class="resultados-grid">
+          <!-- Columna Izquierda: Escalares -->
+          <div>
+            <h4 class="titulo-seccion-informe" style="margin-top:0;">1. Puntuaciones Escalares</h4>
+            <div class="table-responsive">
+              <table class="tabla-resultados-clinica">
+                <thead><tr><th>Subprueba</th><th>P. Directa</th><th>P. Escalar</th></tr></thead>
+                <tbody id="tabla-resultados">
+                  <tr><td colspan="3" class="empty-state" style="text-align:center;">Sin datos aún</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Índices y Diagnóstico -->
+          <div style="display:flex; flex-direction:column; gap:1rem; width:100%;">
+            <div id="tabla-wisc"></div>
+            
+            <div id="panel_grafico" style="display: none; width:100%; margin-top:1rem;">
+              <h4 class="titulo-seccion-informe" style="margin-top:0;">3. Perfil de Puntuaciones Compuestas</h4>
+              <div style="height:300px;position:relative;">
+                <canvas id="grafico-perfil"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+
+  </div>
+
+  <!-- MODAL DE SUBPRUEBAS OPCIONALES -->
+<div id="modal_opcionales_wisc" class="opcionales-modal-overlay">
+    <div class="opcionales-modal-card">
+      <!-- Botones movidos al final -->
+      <h2><span class="material-symbols-rounded" style="color:var(--accent-cyan);">tune</span> Subpruebas Opcionales</h2>
+      <p style="font-size:0.85em;color:var(--text-muted);margin-bottom:1.5rem;">Estas subpruebas se utilizan para obtener información clínica adicional o sustituir subpruebas principales invalidadas.</p>
+      
+      <div class="modern-input-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="modern-input-row optional-row">
+          <div class="test-label"><span class="test-icon material-symbols-rounded">menu_book</span><div><strong>Información (I)</strong></div></div>
+          <input class="modern-input" type="number" id="pd_I" min="0" onchange="window.validarNumero(this)" placeholder="0">
+        </div>
+        <div class="modern-input-row optional-row">
+          <div class="test-label"><span class="test-icon material-symbols-rounded">sort_by_alpha</span><div><strong>Letras y Números (LN)</strong></div></div>
+          <input class="modern-input" type="number" id="pd_LN" min="0" onchange="window.validarNumero(this)" placeholder="0">
+        </div>
+        <div class="modern-input-row optional-row">
+          <div class="test-label"><span class="test-icon material-symbols-rounded">cancel</span><div><strong>Cancelación (CA)</strong></div></div>
+          <input class="modern-input" type="number" id="pd_CA" min="0" onchange="window.validarNumero(this)" placeholder="0">
+        </div>
+        <div class="modern-input-row optional-row">
+          <div class="test-label"><span class="test-icon material-symbols-rounded">psychology</span><div><strong>Comprensión (CO)</strong></div></div>
+          <input class="modern-input" type="number" id="pd_CO" min="0" onchange="window.validarNumero(this)" placeholder="0">
+        </div>
+        <div class="modern-input-row optional-row">
+          <div class="test-label"><span class="test-icon material-symbols-rounded">calculate</span><div><strong>Aritmética (A)</strong></div></div>
+          <input class="modern-input" type="number" id="pd_A" min="0" onchange="window.validarNumero(this)" placeholder="0">
+        </div>
+      </div>
+      
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+        <button class="btn-secundario" onclick="window.closeOpcionalesWisc()" style="padding: 10px 24px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(148, 163, 184, 0.15); color: var(--text-main); cursor: pointer; font-weight: 500; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(148, 163, 184, 0.25)'" onmouseout="this.style.background='rgba(148, 163, 184, 0.15)'">Cancelar</button>
+        <button class="btn-primario" onclick="window.closeOpcionalesWisc()" style="padding: 10px 24px; border-radius: 8px; background: var(--accent-cyan); color: white; border: none; cursor: pointer; font-weight: 500; box-shadow: 0 4px 12px rgba(120, 30, 30, 0.2); transition: all 0.2s ease;" onmouseover="this.style.background='var(--accent-cyan-hover)'" onmouseout="this.style.background='var(--accent-cyan)'">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,138 @@
+<!-- ============================================================
+     MÓDULO modulo_wppsi_1
+     ============================================================ -->
+<div id="modulo_wppsi_1" style="display:none;">
+  <div class="container" style="position:relative; padding:20px;">
+
+    <button class="btn-volver" style="position: static; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px;" onclick="window.regresarAConfiguracion()">
+      <span class="material-symbols-rounded">arrow_back</span> Volver
+    </button>
+
+    <!-- Envolvemos todo el ingreso en el div con el ID esperado por main.js -->
+    <div id="panel_ingreso_w1" style="width: 100%;">
+      <div class="clinical-dashboard-layout" style="display: grid; grid-template-columns: 350px 1fr; gap: 20px; align-items: start;">
+        
+<!-- PANEL IZQUIERDO: Info y Acciones -->
+      <div class="card clinical-header-card" style="width: 100%; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+        <!-- PRIMERO: Título e Info Paciente -->
+        <div class="clinical-header-title" style="justify-content: center; text-align: center; margin-bottom: 20px;">
+          <span class="material-symbols-rounded" style="font-size: 44px; color: var(--accent-cyan);">child_care</span>
+          <div>
+            <h1 style="color: var(--accent-cyan);">WPPSI-IV · Etapa 1</h1>
+            <p>Escala de Inteligencia de Wechsler para Preescolar y Primaria-IV</p>
+          </div>
+        </div>
+        
+        <div id="info_resumen_w1" class="patient-info-bar" style="color: var(--text-main); border: none; background: transparent; padding: 0; justify-content: center; margin-bottom: 20px;"></div>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0;">
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+          <button class="btn-opcionales-modern" style="width: auto; padding: 12px 24px; margin: 0; width: 100%;" onclick="window.toggleOpcionalesW1()">
+            <span class="material-symbols-rounded">expand_more</span> Subprueba Opcional
+          </button>
+          <button class="btn-procesar-modern" style="width: auto; padding: 12px 24px; margin: 0; width: 100%; background: var(--accent-cyan);" onclick="window.procesarWPPSI_1()">
+            <span class="material-symbols-rounded">analytics</span> Calcular Perfil Clínico
+          </button>
+        </div>
+      </div>
+
+        <!-- PANEL DERECHO: Puntuaciones Directas -->
+<div id="panel_ingreso_w1_inner" class="card" style="width: 100%;">
+          <!-- SEGUNDO: Puntuaciones Directas -->
+        <h2 style="display:flex; align-items:center; gap:0.5rem; justify-content:center; margin-top:0;">
+          <span class="material-symbols-rounded" style="color:var(--accent-cyan);">edit_note</span> Puntuaciones Directas
+        </h2>
+        <p style="text-align:center; font-size:0.85em;color:var(--text-muted);margin-bottom:1.5rem;">Llene todos los campos obligatorios para calcular el perfil</p>
+
+        <div class="modern-input-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+          <div class="modern-input-row">
+            <div class="test-label">
+              <span class="test-icon material-symbols-rounded">extension</span>
+              <div><strong>Dibujos (D)</strong><span>Rompecabezas de objetos</span></div>
+            </div>
+            <input class="modern-input" type="number" id="pd_D_w1" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label">
+              <span class="test-icon material-symbols-rounded">category</span>
+              <div><strong>Cubos (C)</strong><span>Construcción con bloques</span></div>
+            </div>
+            <input class="modern-input" type="number" id="pd_C_w1" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label">
+              <span class="test-icon material-symbols-rounded">memory</span>
+              <div><strong>Reconocimiento (R)</strong><span>Memoria visual</span></div>
+            </div>
+            <input class="modern-input" type="number" id="pd_R_w1" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label">
+              <span class="test-icon material-symbols-rounded">menu_book</span>
+              <div><strong>Información (I)</strong><span>Conocimiento general</span></div>
+            </div>
+            <input class="modern-input" type="number" id="pd_I_w1" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label">
+              <span class="test-icon material-symbols-rounded">extension</span>
+              <div><strong>Rompecabezas (RO)</strong><span>Ensamblaje visual</span></div>
+            </div>
+            <input class="modern-input" type="number" id="pd_RO_w1" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+          <div class="modern-input-row">
+            <div class="test-label">
+              <span class="test-icon material-symbols-rounded">location_on</span>
+              <div><strong>Localización (L)</strong><span>Memoria espacial</span></div>
+            </div>
+            <input class="modern-input" type="number" id="pd_L_w1" min="0" onchange="window.validarNumero(this)" placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+
+    <!-- Panel de Resultados -->
+<div id="panel_resultados_w1" class="card" style="display:none; width: 100%; max-width: 100%;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="margin:0;"><span class="material-symbols-rounded" style="color:var(--accent-cyan);">bar_chart</span> Perfil Clínico WPPSI-IV</h2>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-secondary" style="padding:10px 18px;font-size:0.88em;" onclick="window.editarDatosW1()">
+              <span class="material-symbols-rounded">edit</span> Editar Datos
+            </button>
+            <button class="btn-success" style="padding:10px 18px;font-size:0.88em;border-radius:8px;" onclick="window.descargarPDFWPPSI_1()">
+              <span class="material-symbols-rounded">picture_as_pdf</span> Generar PDF
+            </button>
+          </div>
+        </div>
+        <div id="info_paciente_reporte_w1" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.88em;"></div>
+        <div id="modal_body_wppsi1"></div>
+      </div>
+
+  </div>
+
+  <!-- MODAL DE SUBPRUEBAS OPCIONALES -->
+<div id="modal_opcionales_w1" class="opcionales-modal-overlay">
+    <div class="opcionales-modal-card">
+      <!-- Botones movidos al final -->
+      <h2><span class="material-symbols-rounded" style="color:var(--accent-cyan);">tune</span> Subprueba Opcional</h2>
+      <p style="font-size:0.85em;color:var(--text-muted);margin-bottom:1.5rem;">Esta subprueba no es obligatoria para los índices principales.</p>
+      
+      <div class="modern-input-grid" style="grid-template-columns: 1fr;">
+        <div class="modern-input-row optional-row">
+          <div class="test-label">
+            <span class="test-icon material-symbols-rounded">numbers</span>
+            <div><strong>Nombres (N)</strong><span>Vocabulario expresivo</span></div>
+          </div>
+          <input class="modern-input" type="number" id="pd_N_w1" min="0" onchange="window.validarNumero(this)" placeholder="0">
+        </div>
+      </div>
+      
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+        <button class="btn-secundario" onclick="window.closeOpcionalesW1()" style="padding: 10px 24px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(148, 163, 184, 0.15); color: var(--text-main); cursor: pointer; font-weight: 500; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(148, 163, 184, 0.25)'" onmouseout="this.style.background='rgba(148, 163, 184, 0.15)'">Cancelar</button>
+        <button class="btn-primario" onclick="window.closeOpcionalesW1()" style="padding: 10px 24px; border-radius: 8px; background: var(--accent-cyan); color: white; border: none; cursor: pointer; font-weight: 500; box-shadow: 0 4px 12px rgba(120, 30, 30, 0.2); transition: all 0.2s ease;" onmouseover="this.style.background='var(--accent-cyan-hover)'" onmouseout="this.style.background='var(--accent-cyan)'">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

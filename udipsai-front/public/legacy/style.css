@@ -1,0 +1,1676 @@
+﻿:root {
+  /* Color Palette - Light Mode Default */
+  --bg-dark: #fbf9f9;
+  --bg-surface: rgba(255, 255, 255, 0.98);
+  --bg-surface-solid: #ffffff;
+  --bg-surface-hover: rgba(245, 240, 240, 0.8);
+  
+  --text-main: #2b2525;
+  --text-muted: #756a6a;
+  
+  --border-color: rgba(255, 42, 95, 0.15);
+  --border-focus: #ff2a5f;
+  
+  /* Accents */
+  --accent-cyan: #ff2a5f;
+  --accent-cyan-hover: #ff003c;
+  --accent-green: #10b981;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.15);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.35);
+  --shadow-glow: 0 0 15px rgba(255, 42, 95, 0.12);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-pill: 9999px;
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --input-bg: rgba(255, 252, 252, 0.92);
+}
+
+/* Theme toggle button specific animation */
+#theme_toggle {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+#theme_toggle:hover {
+  transform: scale(1.1) rotate(15deg) !important;
+  box-shadow: 0 0 16px rgba(255, 42, 95, 0.35) !important;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(255, 42, 95, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(60, 15, 15, 0.1) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
+}
+
+/* =========================================
+   FONDO DINÃMICO E INTERACTIVO (GSAP)
+   ========================================= */
+.dynamic-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+}
+
+.dynamic-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.dynamic-orb {
+  opacity: 0.08;
+  mix-blend-mode: multiply;
+  filter: blur(100px);
+}
+
+/* Orbes predefinidos â€” tonos rojos muy suaves para no saturar */
+.orb-1 {
+  background: radial-gradient(circle, #b91c1c 0%, transparent 70%);
+  width: 50vw;
+  height: 50vw;
+  max-width: 600px;
+  max-height: 600px;
+}
+
+.orb-2 {
+  background: radial-gradient(circle, #7f1d1d 0%, transparent 70%);
+  width: 40vw;
+  height: 40vw;
+  max-width: 500px;
+  max-height: 500px;
+}
+
+.orb-3 {
+  background: radial-gradient(circle, #450a0a 0%, transparent 70%);
+  width: 35vw;
+  height: 35vw;
+  max-width: 400px;
+  max-height: 400px;
+}
+
+/* Micro-interacciones de escala y clics para inputs y botones */
+.modern-input, .btn-primary, .btn-secondary, button {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.015);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+.modern-input:focus {
+  transform: translateY(-1px);
+}
+
+/* Material Symbols fix */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga' !important;
+}
+
+/* =========================================
+   TYPOGRAPHY
+   ========================================= */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.025em;
+}
+
+h1 { font-size: 2.25rem; line-height: 2.5rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.5rem; line-height: 2rem; margin-bottom: 1rem; }
+p { color: var(--text-muted); }
+
+/* =========================================
+   LAYOUT UTILS
+   ========================================= */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  width: 100%;
+}
+
+.grid-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .grid-main {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .layout-centrado {
+    grid-template-columns: minmax(auto, 800px);
+    justify-content: center;
+  }
+  .layout-expandido {
+    grid-template-columns: minmax(auto, 1250px);
+    justify-content: center;
+  }
+}
+
+/* =========================================
+   CARDS (Glassmorphism)
+   ========================================= */
+.card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* =========================================
+   FORMS & INPUTS
+   ========================================= */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+@media (min-width: 640px) {
+  .form-row { grid-template-columns: 1fr 1fr; }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+.modern-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+.modern-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(255, 42, 95, 0.18);
+  background: rgba(20, 5, 5, 0.9);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.7;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* =========================================
+   MODERN TEST INPUT GRID (Puntuaciones)
+   ========================================= */
+.modern-input-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .modern-input-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.modern-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.modern-input-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.test-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.test-icon {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.test-label div {
+  display: flex;
+  flex-direction: column;
+}
+
+.test-label strong {
+  font-size: 1rem;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.test-label span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.modern-input-row .modern-input {
+  width: 70px;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  margin-left: 1rem;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary, .btn-procesar-modern {
+  background: var(--accent-cyan);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+  font-size: 1rem;
+  box-shadow: 0 4px 14px 0 rgba(255, 42, 95, 0.35);
+}
+.btn-primary:hover, .btn-procesar-modern:hover {
+  background: var(--accent-cyan-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 42, 95, 0.4);
+}
+.btn-procesar-modern {
+  width: 100%;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-success {
+  background: var(--accent-green);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
+}
+.btn-success:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-volver {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  font-size: 0.875rem;
+  z-index: 50;
+}
+.btn-volver:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+}
+
+.btn-opcionales-modern {
+  background: transparent;
+  color: var(--accent-cyan);
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+}
+.btn-opcionales-modern:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(255, 42, 95, 0.06);
+}
+
+/* =========================================
+   TABLES
+   ========================================= */
+.tabla-resultados-clinica, .tabla-inline {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 1.5rem;
+  background: var(--bg-surface-solid);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.tabla-resultados-clinica th, .tabla-inline th {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.tabla-resultados-clinica td, .tabla-inline td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.95rem;
+}
+
+.tabla-resultados-clinica tr:last-child td, .tabla-inline tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla-resultados-clinica tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.col-accent-clinica {
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.titulo-seccion-informe {
+  color: var(--accent-cyan);
+  font-size: 1.1rem;
+  margin: 1.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* =========================================
+   ALERTS & TOASTS
+   ========================================= */
+#contenedor_alertas {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.alerta-local {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 500;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  box-shadow: var(--shadow-lg);
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-surface-solid);
+  border-left: 4px solid;
+  max-width: 400px;
+  width: auto;
+  word-wrap: break-word;
+}
+
+.alerta-local span:first-child {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.alerta-error { border-left-color: var(--accent-red); }
+.alerta-success { border-left-color: var(--accent-green); }
+.alerta-warning { border-left-color: var(--accent-orange); }
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* =========================================
+   UTILITIES
+   ========================================= */
+.text-center { text-align: center; }
+.mt-4 { margin-top: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.hidden { display: none !important; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Modals */
+.modal-overlay-clinico {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 5000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content-clinico {
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Print specific styles (if any fall through html2pdf) */
+@media print {
+  body { background: white; color: black; }
+  .card { border: none; box-shadow: none; }
+  button { display: none !important; }
+}
+
+.panel-oculto { display: none !important; }
+.panel-visible { display: block !important; }
+
+
+
+tbody td { color: var(--text-main) !important; }
+
+
+.col-accent-clinica { color: #ff2a5f !important; }
+.titulo-seccion-informe { color: #ff003c !important; }
+body { background-image: radial-gradient(at 0% 0%, rgba(255, 42, 95, 0.04) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(80, 20, 20, 0.04) 0px, transparent 50%); }
+
+
+
+
+input[type="text"], input[type="date"], input[type="number"], .modern-input { background: var(--input-bg) !important; color: var(--text-main) !important; }
+
+
+input[type="date"]::-webkit-calendar-picker-indicator { filter: none !important; }
+
+
+.alerta-local { color: var(--text-main) !important; background: var(--bg-surface-solid) !important; border-left-width: 6px; }
+
+
+.alerta-local, .alerta-local * { color: #1c0a0a !important; }
+
+/* =========================================
+   ANIMATIONS & UX ENHANCEMENTS
+   ========================================= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+button:active {
+  transform: scale(0.96) !important;
+}
+
+input[type="text"]:hover,
+input[type="date"]:hover,
+input[type="number"]:hover,
+.modern-input:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+input[type="text"]:hover,
+input[type="date"]:hover,
+input[type="number"]:hover,
+.modern-input:hover {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.modern-input-row:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#app_modules > div {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* =========================================
+   LOGIN-STYLE MAIN MENU
+   ========================================= */
+.login-wrapper {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 900px;
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.login-card {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+.login-sidebar {
+  background: linear-gradient(135deg, #0d0000 0%, #1a0505 100%);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.login-sidebar {
+  background: linear-gradient(135deg, #fdf0f0 0%, rgba(253, 235, 235, 0.9) 100%);
+}
+
+.login-logo-container {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.login-logo-container img {
+  transition: filter 0.3s ease;
+}
+
+.login-logo-container .logo-light {
+  display: none;
+}
+.login-logo-container .logo-dark {
+  display: block;
+}
+
+.login-logo-container .logo-light {
+  display: block;
+}
+.login-logo-container .logo-dark {
+  display: none;
+}
+
+.login-body {
+  padding: 40px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .login-card {
+    flex-direction: row;
+  }
+  .login-sidebar {
+    width: 45%;
+    border-bottom: none;
+    border-right: 1px solid var(--border-color);
+  }
+}
+
+/* =========================================
+   CLINICAL MODULE HEADER (Patient Bar)
+   ========================================= */
+.clinical-header {
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-md);
+  margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .clinical-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.clinical-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.clinical-header-title h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-main);
+}
+
+.clinical-header-title p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.patient-info-bar {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.25rem 1.25rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.patient-info-bar {
+  background: rgba(255, 250, 250, 0.7);
+  border-color: rgba(120, 30, 30, 0.12);
+  color: #991b1b;
+}
+
+/* =========================================
+   TWO COLUMN RESULTS LAYOUT
+   ========================================= */
+.resultados-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .resultados-grid {
+    grid-template-columns: 1.1fr 1.8fr;
+  }
+}
+
+.resultados-grafico {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* =========================================
+   ANIMACIONES ESTÃ‰TICAS Y TRANSICIONES
+   ========================================= */
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 4px 14px 0 rgba(255, 42, 95, 0.35); }
+  50% { box-shadow: 0 4px 25px 5px rgba(255, 42, 95, 0.5); transform: translateY(-2px) scale(1.02); }
+  100% { box-shadow: 0 4px 14px 0 rgba(255, 42, 95, 0.35); }
+}
+
+/* Aplicar animaciÃ³n de entrada a las cards y paneles principales */
+.card, .panel-visible {
+  animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* AnimaciÃ³n de entrada con retraso escalonado para elementos de los formularios */
+.modern-input-row {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.modern-input-row:hover {
+  transform: translateX(8px);
+  background: rgba(255, 42, 95, 0.06);
+  border-color: rgba(255, 42, 95, 0.35);
+}
+.modern-input-row:focus-within {
+  transform: translateX(8px) scale(1.02);
+  border-color: var(--accent-cyan);
+  background: rgba(255, 42, 95, 0.05);
+}
+.modern-input-row:hover .test-icon {
+  animation: floatIcon 1.5s ease-in-out infinite;
+  color: var(--accent-cyan);
+}
+
+/* Tablas con interacciones mÃ¡s vivas */
+.tabla-resultados-clinica tbody tr {
+  transition: all 0.25s ease;
+}
+.tabla-resultados-clinica tbody tr:hover {
+  transform: scale(1.015) translateX(4px);
+  background: rgba(255, 42, 95, 0.07) !important;
+  box-shadow: -4px 0 0 var(--accent-cyan);
+  border-radius: 4px;
+}
+.tabla-resultados-clinica tbody td {
+  transition: color 0.3s ease;
+}
+
+/* Efectos visuales de botones */
+button {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background 0.3s ease !important;
+}
+button:hover {
+  transform: translateY(-3px) scale(1.03);
+}
+button:active {
+  transform: translateY(1px) scale(0.97);
+}
+.btn-primary:hover, .btn-procesar-modern:hover {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Suavizar la transiciÃ³n de la cuadrÃ­cula al expandirse */
+.grid-main {
+  transition: grid-template-columns 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* =========================================
+   HISTORIAL CLÃNICO â€” BotÃ³n + Modales
+   ========================================= */
+
+/* BotÃ³n fijo en esquina superior izquierda */
+#btn_historial_clinico {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 900;
+  background: rgba(20, 5, 5, 0.88);
+  border: 1px solid rgba(255, 42, 95, 0.35);
+  color: #f4e8e8;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255, 42, 95, 0.1);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease,
+              background 0.2s ease;
+}
+#btn_historial_clinico:hover {
+  background: rgba(255, 42, 95, 0.22);
+  border-color: rgba(255, 42, 95, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px rgba(255, 42, 95, 0.2);
+}
+#btn_historial_clinico:active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+#btn_historial_clinico {
+  background: rgba(255,252,252,0.94);
+  border: 1px solid rgba(255, 42, 95, 0.25);
+  color: #1c0a0a;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+#btn_historial_clinico:hover {
+  background: rgba(255, 42, 95, 0.07);
+  border-color: rgba(255, 42, 95, 0.4);
+}
+
+/* Modal Historial â€” card contenedor */
+.historial-modal-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 28px;
+  max-width: 660px;
+  width: 92%;
+  max-height: 82vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+}
+
+/* Modal RevisiÃ³n â€” card contenedor */
+.revisar-modal-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 32px 40px;
+  max-width: 1550px;
+  width: 96%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  margin: auto;
+}
+
+/* Scrollbar dentro de modales del historial */
+.historial-modal-card::-webkit-scrollbar,
+.revisar-modal-card::-webkit-scrollbar {
+  width: 6px;
+}
+.historial-modal-card::-webkit-scrollbar-thumb,
+.revisar-modal-card::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+.historial-modal-card::-webkit-scrollbar-thumb,
+.revisar-modal-card::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+}
+
+/* Tabla compacta en el modal de revisiÃ³n */
+.revisar-modal-card .tabla-resultados-clinica {
+  font-size: 0.88em;
+  margin-bottom: 0;
+}
+.revisar-modal-card .tabla-resultados-clinica th {
+  font-size: 0.72rem;
+  padding: 6px 6px;
+}
+.revisar-modal-card .tabla-resultados-clinica td {
+  padding: 6px 6px;
+}
+
+/* Responsive: colapsar a columna Ãºnica en pantallas pequeÃ±as */
+@media (max-width: 700px) {
+  #btn_historial_clinico span:not(.material-symbols-rounded) {
+    display: none;
+  }
+  #btn_historial_clinico {
+    padding: 10px 12px;
+    border-radius: 50%;
+  }
+  .revisar-modal-card > div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================================================
+   DASHBOARD LAYOUT (2 Columns)
+   ========================================================= */
+.clinical-dashboard-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Aplicar animaciÃ³n de entrada a las cards y paneles principales */
+.card, .panel-visible {
+  animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* AnimaciÃ³n de entrada con retraso escalonado para elementos de los formularios */
+.modern-input-row {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.modern-input-row:hover {
+  transform: translateX(8px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(14, 165, 233, 0.4);
+}
+.modern-input-row:focus-within {
+  transform: translateX(8px) scale(1.02);
+  border-color: var(--accent-cyan);
+  background: rgba(14, 165, 233, 0.05);
+}
+.modern-input-row:hover .test-icon {
+  animation: floatIcon 1.5s ease-in-out infinite;
+  color: var(--accent-cyan);
+}
+
+/* Tablas con interacciones mÃ¡s vivas */
+.tabla-resultados-clinica tbody tr {
+  transition: all 0.25s ease;
+}
+.tabla-resultados-clinica tbody tr:hover {
+  transform: scale(1.015) translateX(4px);
+  background: rgba(14, 165, 233, 0.08) !important;
+  box-shadow: -4px 0 0 var(--accent-cyan);
+  border-radius: 4px;
+}
+.tabla-resultados-clinica tbody td {
+  transition: color 0.3s ease;
+}
+
+/* Efectos visuales de botones */
+button {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background 0.3s ease !important;
+}
+button:hover {
+  transform: translateY(-3px) scale(1.03);
+}
+button:active {
+  transform: translateY(1px) scale(0.97);
+}
+.btn-primary:hover, .btn-procesar-modern:hover {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Suavizar la transiciÃ³n de la cuadrÃ­cula al expandirse */
+.grid-main {
+  transition: grid-template-columns 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* =========================================
+   HISTORIAL CLÃNICO â€” BotÃ³n + Modales
+   ========================================= */
+
+/* BotÃ³n fijo en esquina superior izquierda */
+#btn_historial_clinico {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 900;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  color: #e2e8f0;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(14, 165, 233,0.1);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease,
+              background 0.2s ease;
+}
+#btn_historial_clinico:hover {
+  background: rgba(14, 165, 233, 0.2);
+  border-color: rgba(14, 165, 233, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px rgba(14, 165, 233,0.2);
+}
+#btn_historial_clinico:active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+#btn_historial_clinico {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(14, 165, 233,0.25);
+  color: #1e293b;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+#btn_historial_clinico:hover {
+  background: rgba(14, 165, 233, 0.08);
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+/* Modal Historial â€” card contenedor */
+.historial-modal-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 28px;
+  max-width: 660px;
+  width: 92%;
+  max-height: 82vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+}
+
+/* Modal RevisiÃ³n â€” card contenedor */
+.revisar-modal-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 32px 40px;
+  max-width: 1550px;
+  width: 96%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  margin: auto;
+}
+
+/* Scrollbar dentro de modales del historial */
+.historial-modal-card::-webkit-scrollbar,
+.revisar-modal-card::-webkit-scrollbar {
+  width: 6px;
+}
+.historial-modal-card::-webkit-scrollbar-thumb,
+.revisar-modal-card::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+.historial-modal-card::-webkit-scrollbar-thumb,
+.revisar-modal-card::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+}
+
+/* Tabla compacta en el modal de revisiÃ³n */
+.revisar-modal-card .tabla-resultados-clinica {
+  font-size: 0.88em;
+  margin-bottom: 0;
+}
+.revisar-modal-card .tabla-resultados-clinica th {
+  font-size: 0.72rem;
+  padding: 6px 6px;
+}
+.revisar-modal-card .tabla-resultados-clinica td {
+  padding: 6px 6px;
+}
+
+/* Responsive: colapsar a columna Ãºnica en pantallas pequeÃ±as */
+@media (max-width: 700px) {
+  #btn_historial_clinico span:not(.material-symbols-rounded) {
+    display: none;
+  }
+  #btn_historial_clinico {
+    padding: 10px 12px;
+    border-radius: 50%;
+  }
+  .revisar-modal-card > div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================================================
+   DASHBOARD LAYOUT (2 Columns)
+   ========================================================= */
+.clinical-dashboard-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.clinical-sidebar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.clinical-sidebar-card .clinical-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 16px;
+  margin-bottom: 8px;
+}
+.clinical-sidebar-card .clinical-header-title h1 {
+  font-size: 1.35rem;
+  margin: 0 0 4px 0;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.clinical-sidebar-card .clinical-header-title p {
+  font-size: 0.8rem;
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+/* Modales Opcionales Flotantes */
+.opcionales-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.opcionales-modal-overlay {
+  background: rgba(255,255,255,0.6);
+}
+
+.opcionales-modal-card {
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 650px;
+  padding: 30px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.opcionales-modal-card h2 {
+  margin: 0 0 20px 0;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.4rem;
+}
+
+.btn-close-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(128,128,128,0.2);
+  border: none;
+  color: var(--text-main);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-close-modal:hover {
+  background: var(--accent-cyan);
+  color: white;
+  transform: rotate(90deg);
+  box-shadow: 0 0 10px rgba(255, 42, 95, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .clinical-dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+  .clinical-sidebar-card {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE GLOBALES (TABLET Y MÃ“VIL)
+   ========================================================= */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px !important;
+  }
+  
+  .card, .clinical-sidebar-card {
+    padding: 16px !important;
+    border-radius: 12px;
+  }
+
+  .clinical-header-title h1 {
+    font-size: 1.25rem !important;
+  }
+
+  .opcionales-modal-card, .historial-modal-card, .revisar-modal-card {
+    width: 95% !important;
+    padding: 15px !important;
+  }
+
+  .btn-volver, .btn-procesar-modern, .btn-opcionales-modern {
+    font-size: 0.9rem !important;
+    padding: 10px 14px !important;
+  }
+  
+  h2 {
+    font-size: 1.2rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-input-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .modern-input-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 0.75rem !important;
+  }
+  
+  .modern-input-row .modern-input {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+  
+  .patient-info-bar {
+    font-size: 0.85rem !important;
+    padding: 1rem !important;
+  }
+}
+
+/* =====================================================================
+   MODO OSCURO PREMIUM — Sistema UDIPSAI
+   Activado via: body[data-theme="dark"]
+   ===================================================================== */
+
+/* --- Variables base del modo oscuro --- */
+[data-theme="dark"] {
+  --bg-dark:         #070c18;
+  --bg-surface:      rgba(13, 20, 38, 0.96);
+  --bg-surface-solid:#0d1426;
+  --bg-surface-hover:rgba(20, 32, 60, 0.9);
+  --text-main:       #e8edf7;
+  --text-muted:      #7b8eac;
+  --border-color:    rgba(255, 42, 95, 0.18);
+  --border-focus:    #ff2a5f;
+  --input-bg:        rgba(5, 10, 24, 0.8);
+  --shadow-sm:       0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:       0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:       0 16px 40px rgba(0,0,0,0.6);
+  --shadow-glow:     0 0 20px rgba(255, 42, 95, 0.25);
+}
+
+/* --- Fondo global con gradiente neón profundo --- */
+[data-theme="dark"] body {
+  background-color: #070c18;
+  background-image:
+    radial-gradient(ellipse at 0% 0%,    rgba(255, 42, 95, 0.12)  0px, transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(80, 20, 120, 0.18) 0px, transparent 55%),
+    radial-gradient(ellipse at 50% 50%,  rgba(10, 40, 100, 0.08)  0px, transparent 70%);
+  background-attachment: fixed;
+}
+
+/* --- Orbes de fondo más vibrantes en oscuro --- */
+[data-theme="dark"] .orb-1 { background: radial-gradient(circle, rgba(255,42,95,0.6) 0%, transparent 70%); opacity: 0.12; mix-blend-mode: screen; }
+[data-theme="dark"] .orb-2 { background: radial-gradient(circle, rgba(120,40,180,0.5) 0%, transparent 70%); opacity: 0.10; mix-blend-mode: screen; }
+[data-theme="dark"] .orb-3 { background: radial-gradient(circle, rgba(30,80,200,0.4) 0%, transparent 70%); opacity: 0.08; mix-blend-mode: screen; }
+
+/* --- Cards con glassmorphism oscuro --- */
+[data-theme="dark"] .card {
+  background: rgba(13, 20, 38, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 42, 95, 0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+[data-theme="dark"] .card:hover {
+  border-color: rgba(255, 42, 95, 0.3);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,42,95,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* --- Login Card (pantalla de configuración) --- */
+[data-theme="dark"] .login-card {
+  background: rgba(10, 16, 32, 0.92);
+  border: 1px solid rgba(255, 42, 95, 0.2);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,42,95,0.1);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+[data-theme="dark"] .login-sidebar {
+  background: linear-gradient(145deg, #0d0518 0%, #140a2a 50%, #0a1020 100%);
+  border-right: 1px solid rgba(255,42,95,0.15) !important;
+}
+[data-theme="dark"] .login-body {
+  background: transparent;
+}
+
+/* --- Inputs en modo oscuro --- */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] .modern-input {
+  background: rgba(5, 10, 24, 0.8) !important;
+  color: #e8edf7 !important;
+  border-color: rgba(255, 42, 95, 0.2) !important;
+}
+[data-theme="dark"] input[type="text"]:focus,
+[data-theme="dark"] input[type="date"]:focus,
+[data-theme="dark"] input[type="number"]:focus,
+[data-theme="dark"] .modern-input:focus {
+  border-color: #ff2a5f !important;
+  background: rgba(5, 10, 24, 0.95) !important;
+  box-shadow: 0 0 0 3px rgba(255, 42, 95, 0.15), 0 0 15px rgba(255, 42, 95, 0.1) !important;
+}
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.7) !important;
+}
+[data-theme="dark"] input::placeholder { color: rgba(123, 142, 172, 0.6); }
+
+/* --- Filas de test (puntuaciones directas) --- */
+[data-theme="dark"] .modern-input-row {
+  background: rgba(13, 20, 38, 0.6);
+  border: 1px solid rgba(255, 42, 95, 0.1);
+  transition: all 0.2s ease;
+}
+[data-theme="dark"] .modern-input-row:hover {
+  background: rgba(20, 32, 60, 0.85);
+  border-color: rgba(255, 42, 95, 0.35);
+  box-shadow: 0 0 12px rgba(255, 42, 95, 0.08);
+}
+[data-theme="dark"] .modern-input-row:focus-within {
+  border-color: rgba(255, 42, 95, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 42, 95, 0.15);
+  background: rgba(20, 32, 60, 0.9);
+}
+[data-theme="dark"] .modern-input-row .modern-input {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 42, 95, 0.2) !important;
+  color: #ff6b8a !important;
+  font-weight: 700;
+}
+
+/* --- Íconos de test --- */
+[data-theme="dark"] .test-icon {
+  background: rgba(255, 42, 95, 0.1);
+  color: #ff6b8a;
+  border: 1px solid rgba(255, 42, 95, 0.15);
+}
+
+/* --- Etiquetas de test --- */
+[data-theme="dark"] .test-label strong { color: #e8edf7; }
+[data-theme="dark"] .test-label span   { color: #7b8eac; }
+
+/* --- Cabecera clínica (info del paciente) --- */
+[data-theme="dark"] .clinical-header {
+  background: rgba(13, 20, 38, 0.85);
+  border: 1px solid rgba(255, 42, 95, 0.15);
+  backdrop-filter: blur(12px);
+}
+[data-theme="dark"] .patient-info-bar {
+  background: rgba(5, 10, 24, 0.7);
+  border-color: rgba(255, 42, 95, 0.12);
+}
+[data-theme="dark"] .patient-badge {
+  background: rgba(255, 42, 95, 0.1);
+  border: 1px solid rgba(255, 42, 95, 0.15);
+  color: #ff8aaa;
+}
+
+/* --- Tablas de resultados --- */
+[data-theme="dark"] .tabla-resultados-clinica,
+[data-theme="dark"] .tabla-inline {
+  background: rgba(10, 16, 30, 0.7);
+  border: 1px solid rgba(255,42,95,0.12);
+}
+[data-theme="dark"] .tabla-resultados-clinica th,
+[data-theme="dark"] .tabla-inline th {
+  background: rgba(0, 0, 0, 0.5);
+  color: #7b8eac;
+  border-bottom: 1px solid rgba(255,42,95,0.12);
+}
+[data-theme="dark"] .tabla-resultados-clinica td,
+[data-theme="dark"] .tabla-inline td {
+  color: #e8edf7 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+[data-theme="dark"] .tabla-resultados-clinica tbody tr:hover {
+  background: rgba(255,42,95,0.04);
+}
+[data-theme="dark"] .col-accent-clinica {
+  color: #ff6b8a !important;
+  text-shadow: 0 0 10px rgba(255,42,95,0.3);
+}
+[data-theme="dark"] .titulo-seccion-informe {
+  color: #ff6b8a !important;
+  border-bottom-color: rgba(255,42,95,0.2) !important;
+}
+
+/* --- Vista previa de edad --- */
+[data-theme="dark"] #vista_previa_edad {
+  background: rgba(5, 10, 24, 0.6);
+  border-color: rgba(255, 42, 95, 0.2);
+  color: #e8edf7;
+}
+
+/* --- Modales --- */
+[data-theme="dark"] .modal-content-clinico {
+  background: rgba(10, 16, 32, 0.98);
+  border: 1px solid rgba(255,42,95,0.2);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+}
+[data-theme="dark"] .historial-modal-card {
+  background: rgba(10, 16, 32, 0.98) !important;
+  border: 1px solid rgba(255,42,95,0.2) !important;
+}
+[data-theme="dark"] .revisar-modal-card {
+  background: rgba(10, 16, 32, 0.98) !important;
+  border: 1px solid rgba(255,42,95,0.2) !important;
+}
+
+/* --- Botón secundario oscuro --- */
+[data-theme="dark"] .btn-secondary {
+  background: rgba(20, 32, 60, 0.6);
+  border-color: rgba(255, 42, 95, 0.2);
+  color: #e8edf7;
+}
+[data-theme="dark"] .btn-secondary:hover {
+  background: rgba(30, 50, 90, 0.8);
+  border-color: rgba(255, 42, 95, 0.4);
+}
+
+/* --- Alertas Toast --- */
+[data-theme="dark"] .alerta-local {
+  background: rgba(10, 16, 30, 0.95) !important;
+  border-left-width: 4px;
+  color: #e8edf7 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+[data-theme="dark"] .alerta-local *, 
+[data-theme="dark"] .alerta-local span { 
+  color: #e8edf7 !important; 
+}
+
+/* --- Scrollbar oscura elegante --- */
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #070c18; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 42, 95, 0.25);
+  border-radius: 4px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 42, 95, 0.45);
+}
+
+/* --- Labels --- */
+[data-theme="dark"] label { color: #7b8eac; }
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3,
+[data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6 { color: #e8edf7; }
+[data-theme="dark"] p { color: #7b8eac; }
+
+/* --- Dropdown opcionales --- */
+[data-theme="dark"] .btn-opcionales-modern {
+  color: #ff8aaa;
+  border-color: rgba(255,42,95,0.2);
+}
+[data-theme="dark"] .btn-opcionales-modern:hover {
+  border-color: rgba(255,42,95,0.5);
+  background: rgba(255,42,95,0.08);
+}
+
+
+
+/* =========================================================
+   RESPONSIVE GRID MODAL REVISIÓN
+   ========================================================= */
+.revisar-modal-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 24px;
+  align-items: start;
+}
+.revisar-modal-grid-layout > div {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+/* Gráfica siempre abajo */
+.revisar-modal-grid-layout > div:nth-child(3) {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  width: 100%;
+}
+
+@media (max-width: 950px) {
+  .revisar-modal-grid-layout {
+    grid-template-columns: 1fr;
+  }
+  .revisar-modal-grid-layout > div:nth-child(3) {
+    grid-column: 1;
+  }
+}
